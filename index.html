@@ -37,7 +37,27 @@
   .card h2{margin:0 0 4px;font-size:15px;font-weight:600}
   .card .sub{color:var(--ink-3);font-size:13px;margin-bottom:16px}
   .kpis{grid-column:span 12;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
-  .flow{grid-column:span 12}
+  .flow,.eff{grid-column:span 12}
+  .insights{grid-column:span 7} .flags{grid-column:span 5}
+  .ins{margin:0;padding:0;list-style:none;counter-reset:i;display:grid;gap:14px}
+  .ins li{counter-increment:i;display:grid;grid-template-columns:28px 1fr;gap:12px;font-size:15px;line-height:1.5}
+  .ins li::before{content:counter(i);width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;margin-top:-1px}
+  .ins li.empty-li{display:block;color:var(--ink-3)} .ins li.empty-li::before{display:none}
+  .ins b{font-weight:700}
+  .flag-list{display:grid;gap:14px}
+  .flag{display:grid;grid-template-columns:12px 1fr;gap:12px;align-items:start}
+  .flag .dot{width:10px;height:10px;border-radius:50%;margin-top:6px;background:var(--ink-3)}
+  .flag.high .dot{background:#b5502e} .flag.mid .dot{background:#d29b2c} .flag.ok-flag .dot{background:var(--up)}
+  .f-title{font-size:15px;line-height:1.45} .f-title b{font-weight:700}
+  .flag.high .f-title b{color:#a8462a}
+  .f-hint{color:var(--ink-3);font-size:13px;line-height:1.4;margin-top:3px}
+  .eff-table tr.sel td{background:var(--accent-soft)}
+  .eff-table tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--accent);padding-left:10px}
+  .bar-col{min-width:200px}
+  .mini-bar{display:flex;align-items:center;gap:10px;justify-content:flex-end}
+  .mini-track{flex:1;max-width:160px;height:8px;background:var(--accent-soft);border-radius:999px;overflow:hidden}
+  .mini-fill{height:100%;background:var(--accent);border-radius:999px}
+  .mini-bar span{min-width:40px;text-align:right}
   .ftable{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
   .ftable th{color:var(--ink-3);font-weight:400;font-size:13px;text-align:right;padding:0 0 10px 16px;white-space:nowrap}
   .ftable th:first-child,.ftable td:first-child{text-align:left;padding-left:0}
@@ -97,13 +117,13 @@
   .post .nums span{color:var(--ink-3);font-size:12px}
   .empty{color:var(--ink-3);padding:24px 0;text-align:center}
   @media (max-width:980px){
-    .chart,.mix,.bars{grid-column:span 12}
+    .chart,.mix,.bars,.insights,.flags{grid-column:span 12}
     .posts{grid-template-columns:1fr 1fr}
   }
   @media (max-width:640px){
     .wrap{padding:20px 16px 40px}
     .grid{gap:12px}
-    .chart,.mix,.bars,.top{grid-column:span 12}
+    .chart,.mix,.bars,.top,.insights,.flags{grid-column:span 12}
     .kpis{grid-template-columns:1fr;gap:12px}
     .posts{grid-template-columns:1fr}
     .card{padding:18px}
@@ -153,10 +173,27 @@
       <section class="card kpi" id="kpi-er"></section>
     </div>
 
+    <section class="card insights" id="insights-card">
+      <h2>Выводы</h2>
+      <div class="sub" id="ins-sub"></div>
+      <ol class="ins" id="insights"></ol>
+    </section>
+    <section class="card flags" id="flags-card">
+      <h2>Тревожные флажки</h2>
+      <div class="sub" id="flags-sub"></div>
+      <div class="flag-list" id="flags"></div>
+    </section>
+
     <section class="card flow" id="flow-card">
       <h2>Подписки, отписки и публикации</h2>
       <div class="sub" id="flow-sub"></div>
       <div id="flow"></div>
+    </section>
+
+    <section class="card eff" id="eff-card">
+      <h2>Эффективность сетей</h2>
+      <div class="sub" id="eff-sub"></div>
+      <div id="eff"></div>
     </section>
 
     <section class="card chart">
@@ -382,6 +419,7 @@ function metricKey(name){
   if (l.indexOf("просмотр")===0) return "views";
   if (l.indexOf("вовлеч")>=0) return (/%|er/.test(l)) ? "erPct" : "engagement";
   if (/лид|заявк/.test(l)) return "leads";
+  if (/переход|нажати/.test(l)) return "clicks";
   if (/истори|stories|сторис/.test(l)) return "stories";
   if (l.indexOf("количество постов")>=0) return "posts";
   if (l.indexOf("количество публикаций")>=0) return "pubs";
@@ -797,6 +835,8 @@ function render(){
   // публикации за период
   var c=DATA.content.filter(function(r){ return state.net==="all" || r.net===state.net; });
   if (s && s.from) c=c.filter(function(r){ return r.date && r.date>=s.from && r.date<s.to; });
+  renderInsights(s, c.length);
+  renderEff(s);
 
   var counts=FORMATS.map(function(f){ return { key:f.key, label:f.label, color:f.color, n:c.filter(function(r){return r.format===f.key;}).length }; });
   var mixNote="по журналу публикаций";
@@ -878,6 +918,196 @@ function renderFlow(s){
 function hasER(){
   var cols=DATA.weekly.concat(DATA.monthly);
   return selNets().some(function(n){ return cols.some(function(p){ var o=p.nets[n]||{}; return ok(o.erPct) || (ok(o.engagement)&&ok(o.views)); }); });
+}
+
+/* ===== Выводы, тревожные флажки, эффективность сетей ===== */
+var MON_PREP=["январе","феврале","марте","апреле","мае","июне","июле","августе","сентябре","октябре","ноябре","декабре"];
+function erNet(cols, n){
+  var a=val(cols,n,"engagement"), b=val(cols,n,"views");
+  return ok(a)&&ok(b)&&b>0 ? a/b*100 : val(cols,n,"erPct");
+}
+function S(cols, n){
+  return { leads:val(cols,n,"leads"), followers:val(cols,n,"followers"), pubs:pubsOf(cols,n).total,
+    reach:val(cols,n,"reachX"), clicks:val(cols,n,"clicks"), subs:val(cols,n,"subs"),
+    unsubs:val(cols,n,"unsubs"), growth:val(cols,n,"growth"), er:erNet(cols,n) };
+}
+function leadsTotal(cols){
+  if (cols.length && cols.every(function(p){ return ok(p.total.leads); })) return sum(cols,function(p){ return p.total.leads; });
+  var v=NET_IDS.map(function(n){ return val(cols,n,"leads"); }).filter(ok);
+  return v.length ? v.reduce(function(a,b){return a+b;},0) : NaN;
+}
+function small(v){ return !ok(v) ? "—" : v>=100 ? fmt(v) : pct(v, v<1?2:1); }
+function leadWord(v){ var r=v>=100?Math.round(v):Math.round(v*10)/10; return r%1 ? "лида" : plural(r,"лид","лида","лидов"); }
+function share(v){ return v>0&&v<0.01 ? "<1%" : Math.round(v*100)+"%"; }
+function b(s){ return "<b>"+s+"</b>"; }
+
+/* Слова для периода */
+function words(s){
+  var P=state.period, c=s.cur[s.cur.length-1], pv=s.prev&&s.prev[0];
+  return {
+    during: P==="week" ? "за неделю" : P==="month" ? "за "+MON_NOM[c.start.getMonth()] : s.since,
+    thanPrev: !pv ? "" : P==="week" ? "чем на прошлой неделе" : "чем в "+MON_PREP[pv.start.getMonth()],
+    streak: function(k){ return P==="week" ? k+"-ю неделю подряд" : k+"-й месяц подряд"; }
+  };
+}
+/* История показателя сети по периодам той же длины — для «N-й месяц подряд» */
+function hist(n, m){
+  var G = state.period==="week" ? DATA.weekly : DATA.monthly;
+  return G.map(function(p){ return val([p],n,m); });
+}
+/* Сколько последних значений подряд снижается (возвращает сами значения) */
+function fallingTail(a){
+  var i=a.length-1; if (!ok(a[i])) return [];
+  while (i>0 && ok(a[i-1]) && a[i]<a[i-1]) i--;
+  return a.slice(i);
+}
+function risingTail(a){
+  var i=a.length-1; if (!ok(a[i])) return [];
+  while (i>0 && ok(a[i-1]) && a[i]>a[i-1]) i--;
+  return a.slice(i);
+}
+/* Сколько последних периодов подряд сеть теряла подписчиков */
+function lossStreak(n){
+  var G = state.period==="week" ? DATA.weekly : DATA.monthly, k=0;
+  for (var i=G.length-1; i>=0; i--){
+    var g=val([G[i]],n,"growth");
+    if (!ok(g) && i>0){ var a=val([G[i]],n,"followers"), c=val([G[i-1]],n,"followers"); if (ok(a)&&ok(c)) g=a-c; }
+    if (ok(g) && g<0) k++; else break;
+  }
+  return k;
+}
+function arrows(a){ return a.map(fmt).join(" → "); }
+
+/* Эффективность: всегда все пять сетей, чтобы было с чем сравнивать */
+function effRows(s){
+  var tl=leadsTotal(s.cur), fl=sum(NET_IDS,function(n){ return val(s.cur,n,"followers"); });
+  return NET_IDS.map(function(n){
+    var x=S(s.cur,n);
+    return { n:n, leads:x.leads, followers:x.followers, pubs:x.pubs,
+      share: ok(x.leads)&&tl>0 ? x.leads/tl : NaN,
+      aud: ok(x.followers)&&fl>0 ? x.followers/fl : NaN,
+      per1000: ok(x.leads)&&x.followers>0 ? x.leads/x.followers*1000 : NaN,
+      perPub: ok(x.leads)&&x.pubs>0 ? x.leads/x.pubs : NaN };
+  });
+}
+function renderEff(s){
+  var card=document.getElementById("eff-card");
+  if (!s){ card.style.display="none"; return; }
+  card.style.display="";
+  var rows=effRows(s).sort(function(a,b){ return (ok(b.per1000)?b.per1000:-1)-(ok(a.per1000)?a.per1000:-1); });
+  var max=Math.max.apply(null, rows.map(function(r){ return ok(r.per1000)?r.per1000:0; }))||1;
+  document.getElementById("eff-sub").textContent=s.title+" · отсортировано по лидам на 1 000 подписчиков";
+  document.getElementById("eff").innerHTML='<div class="table-scroll"><table class="ftable eff-table"><thead><tr><th>Соцсеть</th><th>Лиды</th><th>Доля лидов</th><th>Доля подписчиков</th><th class="bar-col">Лидов на 1 000 подписчиков</th><th>Лидов на публикацию</th></tr></thead><tbody>'+
+    rows.map(function(r){
+      return '<tr'+(state.net===r.n?' class="sel"':"")+'><td>'+NETS[r.n]+'</td><td>'+plain(r.leads)+'</td><td>'+(ok(r.share)?share(r.share):'<span class="na">—</span>')+'</td><td>'+(ok(r.aud)?share(r.aud):'<span class="na">—</span>')+
+        '</td><td class="bar-col"><div class="mini-bar"><div class="mini-track"><div class="mini-fill" style="width:'+(ok(r.per1000)?r.per1000/max*100:0)+'%"></div></div><span>'+(ok(r.per1000)?small(r.per1000):'<span class="na">—</span>')+'</span></div></td><td>'+(ok(r.perPub)?small(r.perPub):'<span class="na">—</span>')+'</td></tr>';
+    }).join("")+'</tbody></table></div><div class="note">Доля лидов — от общей строки «Заявки / лиды». Лиды на публикацию — только где в таблице есть число публикаций (ВКонтакте, Telegram).</div>';
+}
+
+/* Выводы */
+function insights(s){
+  var w=words(s), out=[], rows=effRows(s), tl=leadsTotal(s.cur);
+  function byKey(k){ return rows.filter(function(r){ return ok(r[k]); }); }
+  if (state.net==="all"){
+    var sh=byKey("share").sort(function(a,b){ return b.share-a.share; });
+    if (sh.length && ok(tl)){
+      var t=sh[0];
+      out.push(b(NETS[t.n])+" даёт "+b(share(t.share))+" лидов ("+fmt(t.leads)+" из "+fmt(tl)+")"+
+        (ok(t.aud) ? (t.share>t.aud*2 ? ", хотя там только "+share(t.aud)+" подписчиков." : " при "+share(t.aud)+" подписчиков.") : "."));
+    }
+    var mm=rows.filter(function(r){ return ok(r.aud)&&ok(r.share)&&r.aud-r.share>=0.3; }).sort(function(a,b){ return (b.aud-b.share)-(a.aud-a.share); })[0];
+    if (mm){
+      var ft=fallingTail(hist(mm.n,"leads"));
+      out.push(b(NETS[mm.n])+" — "+share(mm.aud)+" подписчиков, но только "+b(share(mm.share))+" лидов."+
+        (ft.length>=3 ? " Лиды там снижаются "+w.streak(ft.length-1)+": "+arrows(ft)+"." : ""));
+    }
+    var ef=byKey("per1000").filter(function(r){ return r.per1000>0; }).sort(function(a,b){ return b.per1000-a.per1000; });
+    if (ef.length>=2){
+      var r0=ef[0], r1=ef[1], k=r0.per1000/r1.per1000;
+      out.push("Самая «горячая» аудитория — "+b(NETS[r0.n])+": "+b(small(r0.per1000))+" "+leadWord(r0.per1000)+" на 1 000 подписчиков"+
+        (k>=1.5 ? ", в "+pct(k)+" раза больше, чем у "+NETS[r1.n]+" ("+small(r1.per1000)+")." : "."));
+    }
+    var gr=NET_IDS.map(function(n){
+      var c=S(s.cur,n), g=c.growth, base;
+      if (state.period==="all"){ var h=s.cur.map(function(p){ return val([p],n,"followers"); }).filter(ok); if (h.length>1){ g=h[h.length-1]-h[0]; base=h[0]; } else g=NaN; }
+      else if (ok(g) && ok(c.followers)) base=c.followers-g;
+      else if (s.prev){ var pf=val(s.prev,n,"followers"); if (ok(pf)&&ok(c.followers)){ g=c.followers-pf; base=pf; } }
+      return { n:n, g:g, p: ok(g)&&base>0 ? g/base*100 : NaN };
+    }).filter(function(x){ return ok(x.p); }).sort(function(a,b){ return b.p-a.p; });
+    if (gr.length && gr[0].p>0) out.push("Быстрее всего растёт "+b(NETS[gr[0].n])+": "+b("+"+pct(gr[0].p)+"%")+" подписчиков "+w.during+" (+"+fmt(gr[0].g)+").");
+    var pp=byKey("perPub");
+    if (pp.length>=2) out.push("Лидов на одну публикацию: "+pp.sort(function(a,b){ return b.perPub-a.perPub; }).map(function(r){ return NETS[r.n]+" — "+b(small(r.perPub)); }).join(", ")+".");
+    if (ok(tl)){
+      var pl=s.prev?leadsTotal(s.prev):NaN;
+      out.push("Всего лидов "+w.during+" — "+b(fmt(tl))+(ok(pl)&&pl>0 ? ", "+(tl>=pl?"на "+pct((tl-pl)/pl*100)+"% больше":"на "+pct((pl-tl)/pl*100)+"% меньше")+", "+w.thanPrev+"." : "."));
+    }
+  } else {
+    var n=state.net, me=rows.filter(function(r){ return r.n===n; })[0], c=S(s.cur,n), p=s.prev?S(s.prev,n):null;
+    if (ok(me.share) && me.leads===0) out.push(b(NETS[n])+" пока не приносит лидов (0 из "+fmt(tl)+")"+(ok(me.aud)?", это "+share(me.aud)+" подписчиков.":"."));
+    else if (ok(me.share)) out.push(b(NETS[n])+" даёт "+b(share(me.share))+" всех лидов ("+fmt(me.leads)+" из "+fmt(tl)+")"+(ok(me.aud)?" при "+share(me.aud)+" подписчиков.":"."));
+    var rk=rows.filter(function(r){ return ok(r.per1000); }).sort(function(a,b){ return b.per1000-a.per1000; }), pos=rk.indexOf(me);
+    if (pos>=0 && rk.length>1) out.push("По лидам на 1 000 подписчиков — "+b((pos+1)+"-е место из "+rk.length)+" ("+small(me.per1000)+")"+(pos>0?"; лидер — "+NETS[rk[0].n]+" ("+small(rk[0].per1000)+").":"."));
+    if (ok(c.leads) && p && ok(p.leads) && p.leads>0){
+      var d=(c.leads-p.leads)/p.leads*100, tail=d<0?fallingTail(hist(n,"leads")):risingTail(hist(n,"leads"));
+      out.push("Лиды "+w.during+": "+b(fmt(c.leads))+" — "+(d>=0?"на "+pct(d)+"% больше":"на "+pct(-d)+"% меньше")+", "+w.thanPrev+
+        (tail.length>=3 ? " ("+(d<0?"снижаются":"растут")+" "+w.streak(tail.length-1)+": "+arrows(tail)+")." : "."));
+    }
+    var g=c.growth; if (!ok(g) && p && ok(c.followers) && ok(p.followers)) g=c.followers-p.followers;
+    if (ok(g)) out.push("Подписчики "+w.during+": "+b((g>0?"+":g<0?"−":"")+fmt(Math.abs(g)))+(ok(c.followers)&&c.followers-g>0?" ("+(g>=0?"+":"−")+pct(Math.abs(g)/(c.followers-g)*100)+"%)":"")+".");
+    if (ok(c.er) && p && ok(p.er)) out.push("ER: "+b(pct(c.er)+"%")+" — "+(c.er>=p.er?"выше":"ниже")+" на "+pct(Math.abs(c.er-p.er))+" п.п., "+w.thanPrev+".");
+    else if (ok(c.er)) out.push("ER "+w.during+": "+b(pct(c.er)+"%")+".");
+    if (ok(me.perPub)) out.push(b(fmt(c.pubs))+" "+plural(c.pubs,"публикация","публикации","публикаций")+" → "+b(small(me.perPub))+" "+leadWord(me.perPub)+" на публикацию.");
+  }
+  return out.slice(0,5);
+}
+
+/* Тревожные флажки */
+function flags(s, contentCount){
+  var w=words(s), out=[];
+  function add(level, title, hint){ out.push({ level:level, title:title, hint:hint }); }
+  selNets().forEach(function(n){
+    var c=S(s.cur,n), p=s.prev?S(s.prev,n):null, N=b(NETS[n]);
+    var g=c.growth; if (!ok(g) && p && ok(c.followers) && ok(p.followers)) g=c.followers-p.followers;
+    if (state.period!=="all" && ok(g) && g<0){
+      var k=lossStreak(n);
+      add(k>=2?"high":"mid", N+" теряет подписчиков: "+b("−"+fmt(-g))+" "+w.during+(k>=2?", "+w.streak(k):""),
+        "Посмотрите, после каких публикаций растут отписки, и сравните с темами, которые приводят людей.");
+    }
+    if (ok(c.subs) && ok(c.unsubs) && c.subs>0 && c.unsubs/c.subs>=0.8)
+      add("mid", N+": на "+fmt(c.subs)+" новых подписчиков — "+b(fmt(c.unsubs)+" "+plural(c.unsubs,"отписка","отписки","отписок")),
+        "Почти весь приток уходит. Проверьте, откуда приходят люди и что они видят в первые дни после подписки.");
+    if (p && ok(c.leads) && ok(p.leads) && p.leads>=5 && (p.leads-c.leads)/p.leads>=0.3){
+      var dd=(p.leads-c.leads)/p.leads, ft=fallingTail(hist(n,"leads"));
+      add(dd>=0.5?"high":"mid", "Лиды "+N+" упали на "+b(pct(dd*100,0)+"%")+": "+(ft.length>=3?arrows(ft)+" ("+w.streak(ft.length-1)+")":fmt(p.leads)+" → "+fmt(c.leads)),
+        "Сравните контент этого и прошлого периода: что из приводившего заявки перестало выходить.");
+    }
+    if (p && ok(c.er) && ok(p.er) && p.er-c.er>=2)
+      add(p.er-c.er>=5?"high":"mid", "ER "+N+" упал: "+pct(p.er)+"% → "+b(pct(c.er)+"%"), "Аудитория стала меньше реагировать — проверьте форматы и темы последних публикаций.");
+    if (p && ok(c.reach) && ok(p.reach) && p.reach>0 && (p.reach-c.reach)/p.reach>=0.3)
+      add("mid", (n==="vk"?"Охват ":n==="tg"?"Охват ":"Просмотры ")+N+" упали на "+b(pct((p.reach-c.reach)/p.reach*100,0)+"%")+": "+fmt(p.reach)+" → "+fmt(c.reach), "");
+    if (ok(c.clicks) && c.clicks>=20 && ok(c.leads) && c.leads===0)
+      add("high", N+": "+b(fmt(c.clicks)+" "+plural(c.clicks,"переход","перехода","переходов")+" на сайт")+" "+w.during+" — и "+b("0 лидов"),
+        "Люди доходят до сайта, но не оставляют заявку. Проверьте, есть ли на странице понятная форма и призыв.");
+    if (ok(c.pubs) && c.pubs===0) add("mid", N+": нет публикаций "+w.during, "");
+  });
+  if (contentCount<3) add("info", "В журнале «Контент» "+(contentCount?contentCount+" "+plural(contentCount,"публикация","публикации","публикаций"):"нет публикаций")+" "+w.during,
+    "Пока журнал почти пуст, топ публикаций и сравнение форматов мало что говорят. Вносите хотя бы основные посты.");
+  var order={high:0,mid:1,info:2};
+  return out.sort(function(a,b){ return order[a.level]-order[b.level]; });
+}
+function renderInsights(s, contentCount){
+  var ic=document.getElementById("insights-card"), fc=document.getElementById("flags-card");
+  if (!s){ ic.style.display=fc.style.display="none"; return; }
+  ic.style.display=fc.style.display="";
+  var ins=insights(s), fl=flags(s, contentCount);
+  document.getElementById("ins-sub").textContent=s.title+" · считаются автоматически из таблицы";
+  document.getElementById("insights").innerHTML = ins.length ? ins.map(function(t){ return "<li><span>"+t+"</span></li>"; }).join("")
+    : '<li class="empty-li">Пока мало данных для выводов</li>';
+  var high=fl.filter(function(f){ return f.level==="high"; }).length;
+  document.getElementById("flags-sub").textContent=s.title+(fl.length?" · "+fl.length+" "+plural(fl.length,"сигнал","сигнала","сигналов")+(high?", "+high+" важн"+(high===1?"ый":"ых"):""):"");
+  document.getElementById("flags").innerHTML = fl.length ? fl.map(function(f){
+    return '<div class="flag '+f.level+'"><span class="dot"></span><div><div class="f-title">'+f.title+'</div>'+(f.hint?'<div class="f-hint">'+f.hint+'</div>':"")+'</div></div>';
+  }).join("") : '<div class="flag ok-flag"><span class="dot"></span><div><div class="f-title">Тревожных сигналов нет</div></div></div>';
 }
 
 /* ===== Управление ===== */
