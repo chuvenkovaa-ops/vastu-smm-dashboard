@@ -6,9 +6,9 @@
 <title>VASTU · аналитика</title>
 <style>
   :root{
-    --bg:#f7f5f6; --card:#ffffff; --line:#ece7ea; --ink:#1f1a1d; --ink-2:#6b6368; --ink-3:#9a9196;
-    --accent:#a25574; --accent-soft:#f3e7ec; --accent-2:#d7a9bc; --slate:#8a94a3;
-    --up:#2f8a57; --down:#9a9196; --radius:18px;
+    --bg:#faf3df; --card:#fffcf2; --line:#ede3c9; --ink:#2e2617; --ink-2:#6e6250; --ink-3:#9b8e75;
+    --accent:#7a4f2a; --accent-soft:#f3e7cc; --accent-2:#d6b886; --slate:#9c9f78;
+    --up:#3f7a3a; --down:#9b8e75; --radius:18px;
   }
   *{box-sizing:border-box}
   html,body{margin:0}
@@ -36,7 +36,22 @@
   .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px;min-width:0}
   .card h2{margin:0 0 4px;font-size:15px;font-weight:600}
   .card .sub{color:var(--ink-3);font-size:13px;margin-bottom:16px}
-  .kpi{grid-column:span 3}
+  .kpis{grid-column:span 12;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+  .flow{grid-column:span 12}
+  .ftable{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  .ftable th{color:var(--ink-3);font-weight:400;font-size:13px;text-align:right;padding:0 0 10px 16px;white-space:nowrap}
+  .ftable th:first-child,.ftable td:first-child{text-align:left;padding-left:0}
+  .ftable td{text-align:right;padding:11px 0 11px 16px;border-top:1px solid var(--line);font-size:16px;font-weight:600;white-space:nowrap}
+  .ftable td:first-child{font-weight:500}
+  .ftable tr.total td{font-weight:700;border-top:1.5px solid var(--ink-3)}
+  .na{color:var(--ink-3);font-weight:400}
+  .pos{color:var(--up)} .neg{color:var(--down)}
+  .ftable small{color:var(--ink-3);font-weight:400;font-size:13px}
+  .table-scroll{overflow-x:auto}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:18px}
+  .tiles .t-label{color:var(--ink-2);font-size:14px}
+  .tiles .t-val{font-size:32px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin-top:4px}
+  .tiles .t-sub{color:var(--ink-3);font-size:13px}
   .kpi .label{color:var(--ink-2);font-size:14px}
   .kpi .value{font-size:40px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin:8px 0 8px;font-variant-numeric:tabular-nums}
   .kpi .value small{font-size:22px;font-weight:600;color:var(--ink-2)}
@@ -74,7 +89,7 @@
   .badge{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
   .badge.viral{background:var(--accent);color:#fff}
   .badge.strong{background:var(--accent-soft);color:var(--accent)}
-  .badge.normal{background:#f1eff0;color:var(--ink-2)}
+  .badge.normal{background:#f4ecd8;color:var(--ink-2)}
   .post .title{font-weight:600;font-size:16px;line-height:1.3}
   .post .nums{display:flex;gap:22px;margin-top:auto}
   .post .nums div{display:flex;flex-direction:column}
@@ -82,14 +97,14 @@
   .post .nums span{color:var(--ink-3);font-size:12px}
   .empty{color:var(--ink-3);padding:24px 0;text-align:center}
   @media (max-width:980px){
-    .kpi{grid-column:span 6}
     .chart,.mix,.bars{grid-column:span 12}
     .posts{grid-template-columns:1fr 1fr}
   }
   @media (max-width:640px){
     .wrap{padding:20px 16px 40px}
     .grid{gap:12px}
-    .kpi,.chart,.mix,.bars,.top{grid-column:span 12}
+    .chart,.mix,.bars,.top{grid-column:span 12}
+    .kpis{grid-template-columns:1fr;gap:12px}
     .posts{grid-template-columns:1fr}
     .card{padding:18px}
     .kpi .value{font-size:36px}
@@ -111,11 +126,11 @@
   <div class="controls">
     <div class="seg" id="net" role="group" aria-label="Соцсеть">
       <button data-v="all" aria-pressed="true">все</button>
-      <button data-v="ig" aria-pressed="false">инстаграм</button>
-      <button data-v="vk" aria-pressed="false">вконтакте</button>
-      <button data-v="max" aria-pressed="false">макс</button>
-      <button data-v="tg" aria-pressed="false">телеграм</button>
-      <button data-v="pin" aria-pressed="false">пинтерест</button>
+      <button data-v="ig" aria-pressed="false">Instagram</button>
+      <button data-v="tg" aria-pressed="false">Telegram</button>
+      <button data-v="max" aria-pressed="false">MAX</button>
+      <button data-v="pin" aria-pressed="false">Pinterest</button>
+      <button data-v="vk" aria-pressed="false">ВКонтакте</button>
     </div>
     <div class="seg" id="period" role="group" aria-label="Период">
       <button data-v="week" aria-pressed="true">неделя</button>
@@ -131,10 +146,18 @@
   </div>
 
   <main class="grid">
-    <section class="card kpi" id="kpi-followers"></section>
-    <section class="card kpi" id="kpi-leads"></section>
-    <section class="card kpi" id="kpi-reach"></section>
-    <section class="card kpi" id="kpi-er"></section>
+    <div class="kpis">
+      <section class="card kpi" id="kpi-followers"></section>
+      <section class="card kpi" id="kpi-leads"></section>
+      <section class="card kpi" id="kpi-reach"></section>
+      <section class="card kpi" id="kpi-er"></section>
+    </div>
+
+    <section class="card flow" id="flow-card">
+      <h2>Подписки, отписки и публикации</h2>
+      <div class="sub" id="flow-sub"></div>
+      <div id="flow"></div>
+    </section>
 
     <section class="card chart">
       <div class="chart-head"><h2>Подписчики</h2><span class="big" id="ch-f-last"></span></div>
@@ -278,7 +301,7 @@ var SHEET_NAMES = {
 var CACHE_KEY = "vastu-dashboard-cache-v2";
 
 /* ===== Справочники ===== */
-var NETS = { ig:"Инстаграм", vk:"ВКонтакте", max:"Макс", tg:"Телеграм", pin:"Пинтерест" };
+var NETS = { ig:"Instagram", tg:"Telegram", max:"MAX", pin:"Pinterest", vk:"ВКонтакте" };
 var NET_IDS = Object.keys(NETS);
 function netKey(s){
   s = String(s||"").toLowerCase().replace(/[^a-zа-яё]/g,"");
@@ -291,9 +314,9 @@ function netKey(s){
   return null; // другие сети в таблице игнорируем
 }
 var FORMATS = [
-  { key:"reels",   label:"Рилс",    color:"#a25574" },
-  { key:"posts",   label:"Посты",   color:"#d7a9bc" },
-  { key:"stories", label:"Stories", color:"#8a94a3" }
+  { key:"reels",   label:"Рилс",    color:"#7a4f2a" },
+  { key:"posts",   label:"Посты",   color:"#d6b886" },
+  { key:"stories", label:"Stories", color:"#9c9f78" }
 ];
 function fmtKey(s){
   s = String(s||"").toLowerCase();
@@ -352,6 +375,8 @@ function metricKey(name){
   var l=name.toLowerCase();
   if (l.indexOf("прирост")===0) return "growth";
   if (l.indexOf("подписчик")===0) return "followers";
+  if (l.indexOf("подписк")===0) return "subs";
+  if (l.indexOf("отписк")===0) return "unsubs";
   if (l.indexOf("средний охват")>=0) return "avgReach";
   if (l.indexOf("охват")===0) return "reach";
   if (l.indexOf("просмотр")===0) return "views";
@@ -659,15 +684,15 @@ function lineChart(box, pts, name){
   var P=pts.map(function(p,i){ return [X(i),Y(p.v)]; });
   var line=smoothPath(P), id="g"+(++gradId);
   var svg='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none"><defs><linearGradient id="'+id+'" x1="0" y1="0" x2="0" y2="1">'+
-    '<stop offset="0" stop-color="#a25574" stop-opacity=".22"/><stop offset="1" stop-color="#a25574" stop-opacity="0"/></linearGradient></defs>';
+    '<stop offset="0" stop-color="#7a4f2a" stop-opacity=".22"/><stop offset="1" stop-color="#7a4f2a" stop-opacity="0"/></linearGradient></defs>';
   ticks.forEach(function(t){ var y=Y(t); svg+='<line class="gridline" x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'"/><text class="axis" x="'+(L-8)+'" y="'+(y+4)+'" text-anchor="end">'+short(t, ticks[1]-ticks[0])+'</text>'; });
   var every=Math.max(1,Math.ceil(pts.length/(W<420?4:7)));
   pts.forEach(function(p,i){ if ((pts.length-1-i)%every===0) svg+='<text class="axis" x="'+X(i)+'" y="'+(H-6)+'" text-anchor="'+(i===0?"start":i===pts.length-1?"end":"middle")+'">'+esc(p.axis)+'</text>'; });
   svg+='<path d="'+line+" L"+X(pts.length-1)+","+(H-B)+" L"+L+","+(H-B)+' Z" fill="url(#'+id+')"/>';
-  svg+='<path d="'+line+'" fill="none" stroke="#a25574" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
-  P.forEach(function(q,i){ svg+='<circle cx="'+q[0]+'" cy="'+q[1]+'" r="'+(i===P.length-1?4:3)+'" fill="#a25574" stroke="#fff" stroke-width="2"/>'; });
-  svg+='<line class="hover-line" x1="0" x2="0" y1="'+T+'" y2="'+(H-B)+'" stroke="#a25574" stroke-opacity=".35" stroke-dasharray="3 3" style="display:none"/>';
-  svg+='<circle class="hover-dot" r="5" fill="#fff" stroke="#a25574" stroke-width="2.5" style="display:none"/></svg><div class="tip"></div>';
+  svg+='<path d="'+line+'" fill="none" stroke="#7a4f2a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+  P.forEach(function(q,i){ svg+='<circle cx="'+q[0]+'" cy="'+q[1]+'" r="'+(i===P.length-1?4:3)+'" fill="#7a4f2a" stroke="#fffcf2" stroke-width="2"/>'; });
+  svg+='<line class="hover-line" x1="0" x2="0" y1="'+T+'" y2="'+(H-B)+'" stroke="#7a4f2a" stroke-opacity=".35" stroke-dasharray="3 3" style="display:none"/>';
+  svg+='<circle class="hover-dot" r="5" fill="#fffcf2" stroke="#7a4f2a" stroke-width="2.5" style="display:none"/></svg><div class="tip"></div>';
   box.innerHTML=svg;
   var s=box.querySelector("svg"), tip=box.querySelector(".tip"), hl=s.querySelector(".hover-line"), hd=s.querySelector(".hover-dot");
   function move(e){
@@ -705,7 +730,7 @@ function chartSeries(m){
 function donut(counts){
   var total=counts.reduce(function(s,c){return s+c.n;},0), svg="", a=-Math.PI/2, R=86, r=60, cx=100, cy=100;
   var gap=counts.filter(function(c){return c.n;}).length>1?0.025:0;
-  if (!total) svg='<circle cx="100" cy="100" r="73" fill="none" stroke="#ece7ea" stroke-width="26"/>';
+  if (!total) svg='<circle cx="100" cy="100" r="73" fill="none" stroke="#ede3c9" stroke-width="26"/>';
   counts.forEach(function(c){
     if (!c.n) return;
     var ang=c.n/total*Math.PI*2;
@@ -715,8 +740,8 @@ function donut(counts){
     svg+='<path d="M'+pt(R,a0)+" A"+R+","+R+" 0 "+large+" 1 "+pt(R,a1)+" L"+pt(r,a1)+" A"+r+","+r+" 0 "+large+" 0 "+pt(r,a0)+' Z" fill="'+c.color+'"><title>'+c.label+": "+c.n+'</title></path>';
     a+=ang;
   });
-  svg+='<text x="100" y="98" text-anchor="middle" font-size="30" font-weight="700" fill="#1f1a1d">'+total+'</text>'+
-       '<text x="100" y="120" text-anchor="middle" font-size="12" fill="#9a9196">'+plural(total,"публикация","публикации","публикаций")+'</text>';
+  svg+='<text x="100" y="98" text-anchor="middle" font-size="30" font-weight="700" fill="#2e2617">'+total+'</text>'+
+       '<text x="100" y="120" text-anchor="middle" font-size="12" fill="#9b8e75">'+plural(total,"публикация","публикации","публикаций")+'</text>';
   return svg;
 }
 
@@ -748,7 +773,7 @@ function render(){
     document.getElementById("kpi-followers").innerHTML=kpiHTML("Подписчики", fmt(f.v), fDelta);
     document.getElementById("kpi-leads").innerHTML=kpiHTML("Лиды", fmt(l.v), allCtx || deltaHTML(l.c,l.p,s.ctx,false,s.prev?null:s.noPrev));
     document.getElementById("kpi-reach").innerHTML=kpiHTML("Охваты", fmt(r.v), allCtx || deltaHTML(r.c,r.p,s.ctx,false,s.prev?null:s.noPrev),
-      state.net==="all" ? "охват ВК, ≈ охват ТГ, просмотры ИГ, Макс, Пинтерест" : reachKind(state.net));
+      state.net==="all" ? "охват ВКонтакте, ≈ охват Telegram, просмотры Instagram, MAX, Pinterest" : reachKind(state.net));
 
     var e=erStats(s.cur), ep=s.prev?erStats(s.prev):{v:NaN};
     var erNote = !e.used.length ? (state.net==="vk"||state.net==="max" ? "вовлечённости по этой сети в таблице нет" : "")
@@ -756,6 +781,9 @@ function render(){
     document.getElementById("kpi-er").innerHTML=kpiHTML("Вовлечённость (ER)", ok(e.v)?pct(e.v)+"<small>%</small>":"—",
       !ok(e.v) ? "" : state.period==="all" ? '<div class="delta flat"><span class="ctx">'+esc("в среднем "+s.since)+'</span></div>' : deltaHTML(e.v,ep.v,s.ctx,true,s.prev?null:s.noPrev), erNote);
   }
+
+  document.getElementById("kpi-er").style.display = hasER() ? "" : "none";
+  renderFlow(s);
 
   ["followers","reachX"].forEach(function(m){
     var cs=chartSeries(m), id=m==="followers"?"f":"r";
@@ -775,7 +803,7 @@ function render(){
   // телеграм ведёт счётчики постов и историй в статистике — добавляем их, если в журнале записей по нему нет
   if (s && (state.net==="all"||state.net==="tg") && !c.some(function(r){return r.net==="tg";})){
     var tp=val(s.cur,"tg","posts"), ts=val(s.cur,"tg","stories");
-    if (ok(tp)||ok(ts)){ counts[1].n+=ok(tp)?tp:0; counts[2].n+=ok(ts)?ts:0; mixNote = c.length ? "журнал публикаций + счётчики телеграма" : "счётчики постов и историй телеграма"; }
+    if (ok(tp)||ok(ts)){ counts[1].n+=ok(tp)?tp:0; counts[2].n+=ok(ts)?ts:0; mixNote = c.length ? "журнал публикаций + счётчики Telegram" : "счётчики постов и историй Telegram"; }
   }
   var total=counts.reduce(function(a,x){return a+x.n;},0);
   document.getElementById("mix-sub").textContent="доля форматов · "+mixNote;
@@ -804,6 +832,52 @@ function render(){
       (withReach.length>1?'<div><b>×'+pct(ratio)+'</b><span>к среднему</span></div>':"")+'</div>'+
       (p.note?'<div class="post-note">'+esc(p.note)+'</div>':"")+'</article>';
   }).join("") : '<div class="empty">В журнале «Контент» нет публикаций за этот период</div>';
+}
+
+/* ===== Подписки, отписки, прирост, публикации ===== */
+function signed(v){ return !ok(v) ? '<span class="na">—</span>' : '<span class="'+(v>0?"pos":v<0?"neg":"")+'">'+(v>0?"+":v<0?"−":"")+fmt(Math.abs(v))+'</span>'; }
+function plain(v){ return ok(v) ? fmt(v) : '<span class="na">—</span>'; }
+function pubsOf(cols, n){
+  var pubs=val(cols,n,"pubs"), posts=val(cols,n,"posts"), st=val(cols,n,"stories");
+  return { pubs:pubs, posts:posts, stories:st,
+    total: ok(pubs) ? pubs : (ok(posts)||ok(st)) ? (ok(posts)?posts:0)+(ok(st)?st:0) : NaN };
+}
+function pubsSplit(p){
+  if (!ok(p.stories)) return "";
+  var po=ok(p.posts)?p.posts:0;
+  return fmt(po)+" "+plural(po,"пост","поста","постов")+" + "+fmt(p.stories)+" "+plural(p.stories,"история","истории","историй");
+}
+function renderFlow(s){
+  var card=document.getElementById("flow-card"), box=document.getElementById("flow");
+  if (!s){ card.style.display="none"; return; }
+  var rows=selNets().map(function(n){
+    return { n:n, subs:val(s.cur,n,"subs"), unsubs:val(s.cur,n,"unsubs"), growth:val(s.cur,n,"growth"), pubs:pubsOf(s.cur,n) };
+  });
+  document.getElementById("flow-sub").textContent=s.title+(state.period==="all"?" · сумма за все периоды":"");
+  if (state.net!=="all"){                       // одна соцсеть — только те показатели, что есть в таблице
+    var r=rows[0], tiles=[];
+    if (ok(r.subs)) tiles.push(["Подписались", fmt(r.subs), ""]);
+    if (ok(r.unsubs)) tiles.push(["Отписались", fmt(r.unsubs), ""]);
+    if (ok(r.growth)) tiles.push(["Прирост", signed(r.growth), ""]);
+    if (ok(r.pubs.total)) tiles.push(["Публикаций", fmt(r.pubs.total), pubsSplit(r.pubs)]);
+    card.style.display = tiles.length ? "" : "none";
+    box.innerHTML='<div class="tiles">'+tiles.map(function(x){
+      return '<div><div class="t-label">'+x[0]+'</div><div class="t-val">'+x[1]+'</div>'+(x[2]?'<div class="t-sub">'+x[2]+'</div>':"")+'</div>'; }).join("")+'</div>';
+    return;
+  }
+  card.style.display="";
+  function tot(f){ var v=rows.map(f).filter(ok); return v.length ? v.reduce(function(a,b){return a+b;},0) : NaN; }
+  var T={ subs:tot(function(r){return r.subs;}), unsubs:tot(function(r){return r.unsubs;}),
+          growth:tot(function(r){return r.growth;}), pubs:tot(function(r){return r.pubs.total;}) };
+  box.innerHTML='<div class="table-scroll"><table class="ftable"><thead><tr><th>Соцсеть</th><th>Подписались</th><th>Отписались</th><th>Прирост</th><th>Публикаций</th></tr></thead><tbody>'+
+    rows.map(function(r){ var sp=pubsSplit(r.pubs);
+      return '<tr><td>'+NETS[r.n]+'</td><td>'+plain(r.subs)+'</td><td>'+plain(r.unsubs)+'</td><td>'+signed(r.growth)+'</td><td>'+plain(r.pubs.total)+(sp?' <small>('+sp+')</small>':"")+'</td></tr>'; }).join("")+
+    '<tr class="total"><td>Итого</td><td>'+plain(T.subs)+'</td><td>'+plain(T.unsubs)+'</td><td>'+signed(T.growth)+'</td><td>'+plain(T.pubs)+'</td></tr></tbody></table></div>';
+}
+/* Есть ли у выбранных сетей ER хоть в одном периоде таблицы — иначе плашку ER не показываем */
+function hasER(){
+  var cols=DATA.weekly.concat(DATA.monthly);
+  return selNets().some(function(n){ return cols.some(function(p){ var o=p.nets[n]||{}; return ok(o.erPct) || (ok(o.engagement)&&ok(o.views)); }); });
 }
 
 /* ===== Управление ===== */
