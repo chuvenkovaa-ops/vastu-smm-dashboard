@@ -1,0 +1,843 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VASTU · аналитика</title>
+<style>
+  :root{
+    --bg:#f7f5f6; --card:#ffffff; --line:#ece7ea; --ink:#1f1a1d; --ink-2:#6b6368; --ink-3:#9a9196;
+    --accent:#a25574; --accent-soft:#f3e7ec; --accent-2:#d7a9bc; --slate:#8a94a3;
+    --up:#2f8a57; --down:#9a9196; --radius:18px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 24px 56px}
+  header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;margin-bottom:22px}
+  .brand{font-size:30px;font-weight:700;letter-spacing:.06em}
+  .brand span{color:var(--accent)}
+  .updated{color:var(--ink-2);font-size:14px;margin-top:2px}
+  .demo{display:none;margin-left:8px;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:12px;font-weight:600}
+  body.is-demo .demo{display:inline-block}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:22px}
+  .seg{display:inline-flex;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px}
+  .seg button{border:0;background:transparent;color:var(--ink-2);font:inherit;font-size:14px;padding:7px 14px;border-radius:999px;cursor:pointer;white-space:nowrap}
+  .seg button:hover{color:var(--ink)}
+  .seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+  .spacer{flex:1}
+  .refresh{border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:14px;padding:9px 16px;border-radius:999px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+  .refresh:hover{border-color:var(--accent);color:var(--accent)}
+  .refresh svg{width:15px;height:15px}
+  .refresh.busy svg{animation:spin .9s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px;min-width:0}
+  .card h2{margin:0 0 4px;font-size:15px;font-weight:600}
+  .card .sub{color:var(--ink-3);font-size:13px;margin-bottom:16px}
+  .kpi{grid-column:span 3}
+  .kpi .label{color:var(--ink-2);font-size:14px}
+  .kpi .value{font-size:40px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin:8px 0 8px;font-variant-numeric:tabular-nums}
+  .kpi .value small{font-size:22px;font-weight:600;color:var(--ink-2)}
+  .delta{font-size:14px;font-variant-numeric:tabular-nums}
+  .delta.up{color:var(--up)} .delta.down{color:var(--down)} .delta.flat{color:var(--ink-3)}
+  .delta .ctx{color:var(--ink-3)}
+  .chart{grid-column:span 6}
+  .mix{grid-column:span 5}
+  .bars{grid-column:span 7}
+  .top{grid-column:span 12}
+  .chart-box{position:relative;height:230px}
+  .chart-box svg{display:block;width:100%;height:100%;overflow:visible}
+  .chart-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+  .chart-head .big{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+  .tip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;font-size:12px;padding:6px 9px;border-radius:8px;white-space:nowrap;transform:translate(-50%,-120%);opacity:0;transition:opacity .12s}
+  .axis{fill:var(--ink-3);font-size:11px}
+  .gridline{stroke:var(--line);stroke-width:1}
+  .donut-row{display:flex;align-items:center;gap:28px;flex-wrap:wrap}
+  .donut{width:190px;height:190px;flex:none}
+  .legend{display:grid;gap:12px;flex:1;min-width:170px}
+  .legend .row{display:grid;grid-template-columns:12px 1fr auto;gap:10px;align-items:center}
+  .legend .sw{width:12px;height:12px;border-radius:4px}
+  .legend .pct{font-weight:700;font-variant-numeric:tabular-nums}
+  .legend .n{color:var(--ink-3);font-size:13px;grid-column:2}
+  .bar-list{display:grid;gap:18px}
+  .bar-row .top-line{display:flex;justify-content:space-between;margin-bottom:7px}
+  .bar-row .val{font-weight:700;font-variant-numeric:tabular-nums}
+  .bar-row .muted{color:var(--ink-3);font-weight:400;font-size:13px;margin-left:6px}
+  .track{height:12px;background:var(--accent-soft);border-radius:999px;overflow:hidden}
+  .fill{height:100%;border-radius:999px;background:var(--accent);transition:width .4s ease}
+  .posts{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .post{border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px}
+  .post .meta{display:flex;justify-content:space-between;gap:8px;color:var(--ink-3);font-size:13px}
+  .badge{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .badge.viral{background:var(--accent);color:#fff}
+  .badge.strong{background:var(--accent-soft);color:var(--accent)}
+  .badge.normal{background:#f1eff0;color:var(--ink-2)}
+  .post .title{font-weight:600;font-size:16px;line-height:1.3}
+  .post .nums{display:flex;gap:22px;margin-top:auto}
+  .post .nums div{display:flex;flex-direction:column}
+  .post .nums b{font-size:22px;font-variant-numeric:tabular-nums}
+  .post .nums span{color:var(--ink-3);font-size:12px}
+  .empty{color:var(--ink-3);padding:24px 0;text-align:center}
+  @media (max-width:980px){
+    .kpi{grid-column:span 6}
+    .chart,.mix,.bars{grid-column:span 12}
+    .posts{grid-template-columns:1fr 1fr}
+  }
+  @media (max-width:640px){
+    .wrap{padding:20px 16px 40px}
+    .grid{gap:12px}
+    .kpi,.chart,.mix,.bars,.top{grid-column:span 12}
+    .posts{grid-template-columns:1fr}
+    .card{padding:18px}
+    .kpi .value{font-size:36px}
+    .spacer{display:none}
+    .seg{max-width:100%}
+    .donut-row{justify-content:center}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="brand"><span>[</span>VASTU<span>]</span></div>
+      <div class="updated"><span id="updated">обновлено сегодня</span><span class="demo" title="Таблица пока не прочитана — нажмите «обновить»">демо-данные</span></div>
+    </div>
+  </header>
+
+  <div class="controls">
+    <div class="seg" id="net" role="group" aria-label="Соцсеть">
+      <button data-v="all" aria-pressed="true">все</button>
+      <button data-v="ig" aria-pressed="false">инстаграм</button>
+      <button data-v="vk" aria-pressed="false">вконтакте</button>
+      <button data-v="max" aria-pressed="false">макс</button>
+      <button data-v="tg" aria-pressed="false">телеграм</button>
+      <button data-v="pin" aria-pressed="false">пинтерест</button>
+    </div>
+    <div class="seg" id="period" role="group" aria-label="Период">
+      <button data-v="week" aria-pressed="true">неделя</button>
+      <button data-v="month" aria-pressed="false">месяц</button>
+      <button data-v="all" aria-pressed="false">все время</button>
+    </div>
+    <div class="spacer"></div>
+    <button class="refresh" id="refresh" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
+      обновить
+    </button>
+  </div>
+
+  <main class="grid">
+    <section class="card kpi" id="kpi-followers"></section>
+    <section class="card kpi" id="kpi-leads"></section>
+    <section class="card kpi" id="kpi-reach"></section>
+    <section class="card kpi" id="kpi-er"></section>
+
+    <section class="card chart">
+      <div class="chart-head"><h2>Подписчики</h2><span class="big" id="ch-f-last"></span></div>
+      <div class="sub" id="ch-f-sub">по неделям</div>
+      <div class="chart-box" id="ch-followers"></div>
+    </section>
+    <section class="card chart">
+      <div class="chart-head"><h2>Охваты</h2><span class="big" id="ch-r-last"></span></div>
+      <div class="sub" id="ch-r-sub">по неделям</div>
+      <div class="chart-box" id="ch-reach"></div>
+    </section>
+
+    <section class="card mix">
+      <h2>Микс контента</h2>
+      <div class="sub">доля форматов среди публикаций</div>
+      <div class="donut-row"><svg class="donut" id="donut" viewBox="0 0 200 200"></svg><div class="legend" id="legend"></div></div>
+    </section>
+    <section class="card bars">
+      <h2>Сравнение форматов</h2>
+      <div class="sub">средний охват на одну публикацию</div>
+      <div class="bar-list" id="bars"></div>
+    </section>
+
+    <section class="card top">
+      <h2>Топ публикаций</h2>
+      <div class="sub">три лучшие по охвату за период</div>
+      <div class="posts" id="posts"></div>
+    </section>
+  </main>
+</div>
+
+<!--
+  ВШИТЫЕ ДАННЫЕ. Это копии листов таблицы в формате CSV (первая строка — заголовки).
+  Чтобы обновить вшитые цифры, замените содержимое блоков на CSV из листов.
+  data-snapshot — дата снимка, data-demo="1" — пометка «демо-данные».
+-->
+<script type="text/csv" id="csv-weekly" data-snapshot="2026-10-12" data-demo="1">
+Неделя,Соцсеть,Подписчики,Охват,Лиды,Просмотры,Лайки,Комментарии,Сохранения
+20.07.2026,Инстаграм,4252,7946,7,11124,357,75,116
+27.07.2026,Инстаграм,4275,9906,3,13868,596,48,88
+03.08.2026,Инстаграм,4339,11744,3,16441,603,121,315
+10.08.2026,Инстаграм,4421,9713,9,13598,426,122,127
+17.08.2026,Инстаграм,4455,8405,5,11767,641,50,161
+24.08.2026,Инстаграм,4546,9947,6,13925,443,47,112
+31.08.2026,Инстаграм,4644,10434,5,14607,694,90,138
+07.09.2026,Инстаграм,4758,12152,4,17012,803,113,308
+14.09.2026,Инстаграм,4867,10005,9,14007,469,83,229
+21.09.2026,Инстаграм,4905,11352,3,15892,795,132,216
+28.09.2026,Инстаграм,5036,10503,7,14704,703,103,174
+05.10.2026,Инстаграм,5166,14488,6,20283,1012,69,314
+20.07.2026,ВКонтакте,2654,7000,5,9800,377,55,147
+27.07.2026,ВКонтакте,2666,5590,2,7825,262,26,129
+03.08.2026,ВКонтакте,2685,5062,3,7086,397,25,83
+10.08.2026,ВКонтакте,2734,7087,5,9921,554,49,111
+17.08.2026,ВКонтакте,2770,7223,6,10112,349,42,85
+24.08.2026,ВКонтакте,2797,6101,4,8541,323,25,96
+31.08.2026,ВКонтакте,2835,6473,6,9062,459,59,129
+07.09.2026,ВКонтакте,2896,4918,5,6885,367,62,116
+14.09.2026,ВКонтакте,2937,6149,2,8608,422,29,51
+21.09.2026,ВКонтакте,2964,5456,3,7638,241,22,55
+28.09.2026,ВКонтакте,2983,6239,2,8734,491,63,63
+05.10.2026,ВКонтакте,3014,6287,3,8801,296,78,175
+20.07.2026,Макс,609,1599,1,2238,74,12,20
+27.07.2026,Макс,624,1359,1,1902,111,12,13
+03.08.2026,Макс,635,1271,2,1779,105,16,27
+10.08.2026,Макс,641,1592,1,2228,118,14,37
+17.08.2026,Макс,649,1494,2,2091,124,18,35
+24.08.2026,Макс,665,1991,1,2787,126,15,15
+31.08.2026,Макс,668,1602,1,2242,113,21,26
+07.09.2026,Макс,686,2297,3,3215,131,14,27
+14.09.2026,Макс,692,1587,2,2221,126,19,27
+21.09.2026,Макс,706,2194,1,3071,152,28,51
+28.09.2026,Макс,722,1913,1,2678,143,14,45
+05.10.2026,Макс,743,1862,1,2606,152,21,19
+20.07.2026,Телеграм,1813,3620,7,5068,274,20,88
+27.07.2026,Телеграм,1866,4857,4,6799,315,26,35
+03.08.2026,Телеграм,1920,4934,5,6907,400,41,124
+10.08.2026,Телеграм,1968,3981,3,5573,216,26,76
+17.08.2026,Телеграм,1989,4562,3,6386,365,34,75
+24.08.2026,Телеграм,2027,5851,4,8191,471,53,106
+31.08.2026,Телеграм,2062,3720,4,5208,184,15,88
+07.09.2026,Телеграм,2079,4956,6,6938,323,36,88
+14.09.2026,Телеграм,2117,5856,3,8198,383,38,75
+21.09.2026,Телеграм,2167,5221,5,7309,385,68,85
+28.09.2026,Телеграм,2210,5304,5,7425,377,45,96
+05.10.2026,Телеграм,2246,6591,6,9227,519,88,82
+20.07.2026,Пинтерест,916,9231,1,12923,440,49,150
+27.07.2026,Пинтерест,921,6656,0,9318,466,79,171
+03.08.2026,Пинтерест,928,8691,1,12167,417,111,237
+10.08.2026,Пинтерест,937,9823,0,13752,613,136,240
+17.08.2026,Пинтерест,944,7842,1,10978,441,47,107
+24.08.2026,Пинтерест,965,6242,1,8738,377,27,87
+31.08.2026,Пинтерест,984,8480,0,11872,707,101,232
+07.09.2026,Пинтерест,990,7549,0,10568,564,51,73
+14.09.2026,Пинтерест,1004,10566,1,14792,558,59,277
+21.09.2026,Пинтерест,1022,9789,0,13704,434,107,155
+28.09.2026,Пинтерест,1028,11055,1,15476,836,55,276
+05.10.2026,Пинтерест,1033,10884,0,15237,612,104,287
+</script>
+<script type="text/csv" id="csv-monthly">
+Месяц,Соцсеть,Подписчики,Охват,Лиды
+01.07.2026,Инстаграм,4275,17852,10
+01.07.2026,ВКонтакте,2666,12590,7
+01.07.2026,Макс,624,2958,2
+01.07.2026,Телеграм,1866,8477,11
+01.07.2026,Пинтерест,921,15887,1
+01.08.2026,Инстаграм,4644,50243,28
+01.08.2026,ВКонтакте,2835,31946,24
+01.08.2026,Макс,668,7950,7
+01.08.2026,Телеграм,2062,23048,19
+01.08.2026,Пинтерест,984,41078,3
+01.09.2026,Инстаграм,5036,44012,23
+01.09.2026,ВКонтакте,2983,22762,12
+01.09.2026,Макс,722,7991,7
+01.09.2026,Телеграм,2210,21337,19
+01.09.2026,Пинтерест,1028,38959,2
+01.10.2026,Инстаграм,5166,14488,6
+01.10.2026,ВКонтакте,3014,6287,3
+01.10.2026,Макс,743,1862,1
+01.10.2026,Телеграм,2246,6591,6
+01.10.2026,Пинтерест,1033,10884,0
+</script>
+<script type="text/csv" id="csv-content">
+Дата,Соцсеть,Формат,Тема,Охват,Просмотры,Лайки,Комментарии,Сохранения
+20.07.2026,Макс,Пост,Вход в дом по васту,540,702,28,3,5
+20.07.2026,Макс,Пост,Ошибки в планировке кухни,642,834,41,9,13
+22.07.2026,Инстаграм,Рилс,Вастунашастра для спальни,4161,5409,332,44,117
+23.07.2026,Макс,Пост,Зона денег: где она,333,432,32,4,3
+23.07.2026,Пинтерест,Пост,Вастунашастра для спальни,1522,1978,62,6,41
+24.07.2026,ВКонтакте,Stories,Вастунашастра для спальни,556,722,24,8,20
+25.07.2026,Инстаграм,Stories,Разбор квартиры подписчицы,2648,3442,259,32,64
+25.07.2026,Инстаграм,Stories,Цвета по сторонам света,596,774,26,8,20
+25.07.2026,Пинтерест,Пост,Чек-лист перед покупкой квартиры,1891,2458,189,7,22
+26.07.2026,Инстаграм,Пост,Кейс: загородный дом,1728,2246,102,21,54
+26.07.2026,Инстаграм,Рилс,Вастунашастра для спальни,8285,10770,368,112,286
+26.07.2026,Пинтерест,Пост,Чек-лист перед покупкой квартиры,1536,1996,139,7,33
+26.07.2026,Телеграм,Видео,Кейс: загородный дом,2968,3858,227,41,25
+27.07.2026,ВКонтакте,Stories,Детская по васту,327,425,29,4,2
+27.07.2026,Макс,Пост,Вход в дом по васту,426,553,43,4,5
+30.07.2026,Пинтерест,Видео,Ошибки в планировке кухни,5468,7108,436,39,102
+30.07.2026,Телеграм,Stories,Вастунашастра для спальни,268,348,15,2,4
+31.07.2026,Пинтерест,Пост,Вастунашастра для спальни,2356,3062,172,14,71
+02.08.2026,ВКонтакте,Stories,Эфир: ответы на вопросы,1329,1727,87,14,49
+02.08.2026,Пинтерест,Пост,Рабочее место дома,4108,5340,233,16,147
+02.08.2026,Телеграм,Видео,Чек-лист перед покупкой квартиры,925,1202,92,5,6
+03.08.2026,Пинтерест,Пост,Детская по васту,3380,4394,270,29,32
+04.08.2026,ВКонтакте,Клип,Зона денег: где она,1394,1812,128,11,9
+04.08.2026,Инстаграм,Рилс,Эфир: ответы на вопросы,4222,5488,169,36,138
+04.08.2026,Макс,Пост,Вход в дом по васту,259,336,14,1,5
+05.08.2026,Телеграм,Пост,Чек-лист перед покупкой квартиры,1647,2141,118,5,36
+07.08.2026,ВКонтакте,Stories,Чек-лист перед покупкой квартиры,664,863,28,5,23
+07.08.2026,Инстаграм,Пост,Зона денег: где она,1073,1394,85,4,23
+08.08.2026,Инстаграм,Stories,Эфир: ответы на вопросы,2102,2732,102,25,56
+09.08.2026,Макс,Пост,Ошибки в планировке кухни,1249,1623,95,18,37
+10.08.2026,ВКонтакте,Stories,Зона денег: где она,533,692,46,8,7
+10.08.2026,Макс,Пост,Разбор квартиры подписчицы,325,422,32,1,7
+10.08.2026,Телеграм,Пост,Зона денег: где она,611,794,30,8,8
+11.08.2026,Макс,Пост,Детская по васту,221,287,11,2,6
+12.08.2026,Макс,Пост,Зеркала в интерьере,282,366,14,0,3
+12.08.2026,Телеграм,Stories,Разбор квартиры подписчицы,1737,2258,157,10,54
+13.08.2026,ВКонтакте,Клип,Ошибки в планировке кухни,1286,1671,76,9,41
+13.08.2026,Инстаграм,Stories,Детская по васту,709,921,65,5,15
+13.08.2026,Макс,Пост,Вход в дом по васту,559,726,26,5,13
+13.08.2026,Макс,Пост,Эфир: ответы на вопросы,179,232,13,2,4
+14.08.2026,ВКонтакте,Пост,Рабочее место дома,1805,2346,157,9,25
+14.08.2026,Макс,Пост,Вастунашастра для спальни,762,990,59,8,6
+15.08.2026,Макс,Пост,Вход в дом по васту,568,738,28,3,6
+18.08.2026,ВКонтакте,Stories,Рабочее место дома,339,440,21,2,1
+19.08.2026,Телеграм,Пост,Вход в дом по васту,336,436,26,2,11
+20.08.2026,ВКонтакте,Stories,Зона денег: где она,508,660,47,7,3
+20.08.2026,Макс,Stories,Ошибки в планировке кухни,178,231,14,2,1
+20.08.2026,Телеграм,Пост,Цвета по сторонам света,1067,1387,52,15,9
+22.08.2026,ВКонтакте,Клип,Цвета по сторонам света,1619,2104,113,9,21
+22.08.2026,Инстаграм,Пост,Чек-лист перед покупкой квартиры,2388,3104,149,21,83
+23.08.2026,Инстаграм,Рилс,Зона денег: где она,3954,5140,315,37,48
+23.08.2026,Телеграм,Stories,Зеркала в интерьере,974,1266,66,14,29
+24.08.2026,Пинтерест,Пост,Вастунашастра для спальни,3047,3961,197,39,87
+25.08.2026,Инстаграм,Рилс,Разбор квартиры подписчицы,5784,7519,284,48,81
+26.08.2026,ВКонтакте,Пост,Цвета по сторонам света,579,752,40,3,20
+26.08.2026,Инстаграм,Пост,Зеркала в интерьере,1912,2485,84,27,58
+29.08.2026,ВКонтакте,Пост,Кейс: загородный дом,1105,1436,96,3,30
+29.08.2026,Макс,Пост,Зеркала в интерьере,213,276,20,2,7
+30.08.2026,Пинтерест,Пост,Вход в дом по васту,1786,2321,180,10,66
+31.08.2026,Инстаграм,Пост,Вастунашастра для спальни,1790,2327,108,6,26
+31.08.2026,Инстаграм,Рилс,Рабочее место дома,4033,5242,188,59,118
+02.09.2026,Пинтерест,Пост,Чек-лист перед покупкой квартиры,1414,1838,76,6,52
+04.09.2026,Макс,Stories,Разбор квартиры подписчицы,112,145,6,0,0
+05.09.2026,Пинтерест,Видео,Эфир: ответы на вопросы,4425,5752,417,47,27
+06.09.2026,ВКонтакте,Пост,Ошибки в планировке кухни,2544,3307,99,15,43
+06.09.2026,Инстаграм,Рилс,Вастунашастра для спальни,4702,6112,371,51,36
+06.09.2026,Телеграм,Пост,Ошибки в планировке кухни,1365,1774,70,20,29
+08.09.2026,Инстаграм,Пост,Чек-лист перед покупкой квартиры,1090,1417,94,4,42
+08.09.2026,Инстаграм,Рилс,Чек-лист перед покупкой квартиры,6266,8145,301,44,99
+08.09.2026,Пинтерест,Пост,Детская по васту,1752,2277,94,15,40
+10.09.2026,ВКонтакте,Stories,Зона денег: где она,648,842,45,9,15
+10.09.2026,ВКонтакте,Пост,Ошибки в планировке кухни,3017,3922,168,34,110
+10.09.2026,Пинтерест,Пост,Вход в дом по васту,1409,1831,97,4,34
+12.09.2026,ВКонтакте,Пост,Кейс: загородный дом,2496,3244,186,29,17
+12.09.2026,Пинтерест,Видео,Рабочее место дома,2395,3113,174,26,83
+14.09.2026,Пинтерест,Пост,Разбор квартиры подписчицы,2889,3755,175,31,83
+14.09.2026,Телеграм,Пост,Зеркала в интерьере,1014,1318,90,8,11
+15.09.2026,Инстаграм,Пост,Цвета по сторонам света,789,1025,34,2,24
+15.09.2026,Инстаграм,Рилс,Зона денег: где она,2007,2609,83,5,44
+16.09.2026,Телеграм,Пост,Зеркала в интерьере,987,1283,70,6,6
+18.09.2026,ВКонтакте,Клип,Цвета по сторонам света,613,796,36,7,13
+18.09.2026,Инстаграм,Пост,Цвета по сторонам света,970,1261,84,14,21
+18.09.2026,Макс,Пост,Кейс: загородный дом,395,513,19,2,4
+18.09.2026,Макс,Пост,Ошибки в планировке кухни,226,293,9,2,7
+18.09.2026,Телеграм,Stories,Эфир: ответы на вопросы,434,564,31,4,2
+18.09.2026,Телеграм,Пост,Ошибки в планировке кухни,812,1055,35,3,22
+20.09.2026,Инстаграм,Пост,Кейс: загородный дом,3308,4300,148,31,100
+20.09.2026,Инстаграм,Пост,Чек-лист перед покупкой квартиры,1468,1908,106,12,30
+21.09.2026,Макс,Stories,Рабочее место дома,165,214,13,0,3
+21.09.2026,Макс,Пост,Разбор квартиры подписчицы,229,297,17,1,3
+22.09.2026,ВКонтакте,Stories,Вход в дом по васту,628,816,65,5,6
+22.09.2026,Пинтерест,Пост,Вастунашастра для спальни,855,1111,74,12,16
+22.09.2026,Пинтерест,Пост,Зеркала в интерьере,841,1093,41,3,11
+23.09.2026,Телеграм,Видео,Вастунашастра для спальни,837,1088,35,8,12
+24.09.2026,Телеграм,Видео,Зона денег: где она,1608,2090,124,8,42
+25.09.2026,ВКонтакте,Stories,Кейс: загородный дом,409,531,41,1,13
+26.09.2026,Телеграм,Stories,Вастунашастра для спальни,440,572,41,3,13
+26.09.2026,Телеграм,Stories,Рабочее место дома,617,802,63,6,10
+26.09.2026,Телеграм,Пост,Эфир: ответы на вопросы,863,1121,38,9,9
+28.09.2026,Макс,Stories,Ошибки в планировке кухни,138,179,9,2,5
+30.09.2026,Макс,Пост,Вход в дом по васту,350,455,28,2,6
+01.10.2026,Пинтерест,Видео,Зеркала в интерьере,3788,4924,166,54,38
+01.10.2026,Пинтерест,Пост,Цвета по сторонам света,2439,3170,200,27,85
+02.10.2026,Телеграм,Видео,Цвета по сторонам света,3131,4070,152,33,62
+05.10.2026,Пинтерест,Пост,Эфир: ответы на вопросы,1987,2583,163,24,21
+06.10.2026,Телеграм,Пост,Детская по васту,1032,1341,43,14,32
+06.10.2026,Телеграм,Пост,Зеркала в интерьере,725,942,58,7,13
+07.10.2026,Макс,Stories,Цвета по сторонам света,227,295,18,2,2
+08.10.2026,ВКонтакте,Stories,Рабочее место дома,348,452,14,1,2
+08.10.2026,Пинтерест,Пост,Рабочее место дома,1025,1332,87,11,13
+08.10.2026,Телеграм,Видео,Цвета по сторонам света,1815,2359,120,20,36
+09.10.2026,ВКонтакте,Stories,Ошибки в планировке кухни,695,903,40,10,8
+09.10.2026,Телеграм,Stories,Цвета по сторонам света,773,1004,34,7,8
+10.10.2026,ВКонтакте,Stories,Чек-лист перед покупкой квартиры,618,803,36,2,8
+10.10.2026,Пинтерест,Пост,Зона денег: где она,1377,1790,55,8,20
+10.10.2026,Пинтерест,Пост,Разбор квартиры подписчицы,1903,2473,153,16,30
+11.10.2026,ВКонтакте,Клип,Рабочее место дома,1469,1909,68,16,11
+11.10.2026,Инстаграм,Рилс,Ошибки в планировке кухни,2076,2698,116,7,38
+11.10.2026,Макс,Пост,Зона денег: где она,336,436,27,2,2
+11.10.2026,Пинтерест,Видео,Эфир: ответы на вопросы,3729,4847,365,14,51
+</script>
+
+<script>
+(function(){
+"use strict";
+
+/* ===== Источник данных =====
+   SHEET_ID — ваша таблица (открыта на просмотр по ссылке): кнопка «обновить» читает её напрямую.
+   PUBLISHED — сюда можно вставить ссылки «Файл → Поделиться → Опубликовать в интернете → CSV»
+   для каждого листа; если они заданы, читаются в первую очередь. */
+var SHEET_ID = "13g6C4C53GXcmBibUeaEqvL4i7CsjDA1SVy1S2GwhfnE";
+var PUBLISHED = { weekly: "", monthly: "", content: "" };
+var SHEET_NAMES = {
+  weekly:  ["еженедельная статистика", "Еженедельная статистика"],
+  monthly: ["ежемесячная статистика", "Ежемесячная статистика"],
+  content: ["контент", "Контент"]
+};
+var CACHE_KEY = "vastu-dashboard-cache-v1";
+
+/* ===== Справочники ===== */
+var NETS = { ig:"Инстаграм", vk:"ВКонтакте", max:"Макс", tg:"Телеграм", pin:"Пинтерест" };
+function netKey(s){
+  s = String(s||"").toLowerCase().replace(/[^a-zа-яё]/g,"");
+  if (!s) return null;
+  if (/^(inst|инст|ig$|иг$)/.test(s)) return "ig";
+  if (/^(vk|вк|вконт|vkontakte)/.test(s)) return "vk";
+  if (/^(max|макс)/.test(s)) return "max";
+  if (/^(tg|тг|telegr|телегр)/.test(s)) return "tg";
+  if (/^(pin|пин)/.test(s)) return "pin";
+  return null; // другие сети в таблице игнорируем
+}
+var FORMATS = [
+  { key:"reels",   label:"Рилс",    color:"#a25574" },
+  { key:"posts",   label:"Посты",   color:"#d7a9bc" },
+  { key:"stories", label:"Stories", color:"#8a94a3" }
+];
+function fmtKey(s){
+  s = String(s||"").toLowerCase();
+  if (/(рилс|reel|клип|clip|видео|video|шортс|short)/.test(s)) return "reels";
+  if (/(stor|стор|истори)/.test(s)) return "stories";
+  if (/(пост|post|карусел|carousel|фото|photo|статья|текст|пин|лонгрид)/.test(s)) return "posts";
+  return s ? "posts" : null;
+}
+
+/* ===== CSV ===== */
+function parseCSV(text){
+  text = String(text||"").replace(/^﻿/,"");
+  var first=text.split("\n")[0], delim=(first.split(";").length>first.split(",").length)?";":",";
+  var rows=[], row=[], cell="", q=false, i, c;
+  for (i=0;i<text.length;i++){
+    c=text[i];
+    if (q){
+      if (c==='"'){ if (text[i+1]==='"'){ cell+='"'; i++; } else q=false; }
+      else cell+=c;
+    } else if (c==='"') q=true;
+    else if (c===delim) { row.push(cell); cell=""; }
+    else if (c==="\n"||c==="\r"){ if (c==="\r"&&text[i+1]==="\n") i++; row.push(cell); rows.push(row); row=[]; cell=""; }
+    else cell+=c;
+  }
+  if (cell!==""||row.length){ row.push(cell); rows.push(row); }
+  return rows.map(function(r){ return r.map(function(x){ return x.trim(); }); })
+             .filter(function(r){ return r.some(function(x){ return x!==""; }); });
+}
+function num(v){
+  if (v==null) return NaN;
+  var s=String(v).replace(/[\s  %₽]/g,"").replace(/,(?=\d{1,2}$)/,".").replace(/,/g,"");
+  var m=s.match(/^(-?\d+(?:\.\d+)?)(к|k|тыс)?/i);
+  if (!m) return NaN;
+  return parseFloat(m[1])*(m[2]?1000:1);
+}
+var MONTHS={янв:0,фев:1,мар:2,апр:3,ма:4,июн:5,июл:6,авг:7,сен:8,окт:9,ноя:10,дек:11};
+function parseDate(v){
+  var s=String(v||"").trim().toLowerCase(), m;
+  if ((m=s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/))) return new Date(+m[1],m[2]-1,+m[3]);
+  if ((m=s.match(/(\d{1,2})[.\/](\d{1,2})[.\/](\d{2,4})/))) return new Date(m[3].length===2?2000+ +m[3]:+m[3],m[2]-1,+m[1]);
+  if ((m=s.match(/^(\d{1,2})[.\/](\d{4})$/))) return new Date(+m[2],m[1]-1,1);
+  if ((m=s.match(/date\((\d+),(\d+),(\d+)/))) return new Date(+m[1],+m[2],+m[3]);
+  if ((m=s.match(/(\d{1,2})?\s*([а-яё]{3,})\.?\s*(\d{4})?/))){
+    var k=Object.keys(MONTHS).filter(function(x){ return m[2].indexOf(x)===0; })[0];
+    if (k!=null){ var y=m[3]?+m[3]:new Date().getFullYear(); return new Date(y,MONTHS[k],m[1]?+m[1]:1); }
+  }
+  return null;
+}
+
+/* Ищем колонку по ключевым словам в заголовке. */
+function findCol(head, include, exclude){
+  for (var i=0;i<head.length;i++){
+    var h=head[i].toLowerCase();
+    if (include.some(function(w){ return h.indexOf(w)>=0; }) &&
+        !(exclude||[]).some(function(w){ return h.indexOf(w)>=0; })) return i;
+  }
+  return -1;
+}
+function headerRow(rows, mustHave){
+  for (var i=0;i<Math.min(rows.length,10);i++){
+    var low=rows[i].join("|").toLowerCase();
+    if (mustHave.every(function(w){ return w.some(function(x){ return low.indexOf(x)>=0; }); })) return i;
+  }
+  return 0;
+}
+var K = {
+  date:["недел","дата","период","месяц","week","date"],
+  net:["соцсет","сеть","платформ","площадк","канал","network"],
+  followers:["подписчик","followers"],
+  reach:["охват","reach"],
+  leads:["лид","заявк","lead"],
+  views:["просмотр","view","показ"],
+  likes:["лайк","like","нрав"],
+  comments:["коммент","comment"],
+  saves:["сохран","save","закладк"],
+  reactions:["реакц","reaction","вовлеч"],
+  format:["формат","тип","format"],
+  topic:["тема","заголов","название","topic","описан"]
+};
+function table(text, kind){
+  var rows=parseCSV(text); if (!rows.length) return [];
+  var h=headerRow(rows, kind==="content"?[K.net,K.reach]:[K.net]);
+  var head=rows[h], c={};
+  Object.keys(K).forEach(function(k){ c[k]=findCol(head,K[k], k==="followers"?["прирост","новые","+"]:k==="date"&&kind!=="content"?["публикац"]:null); });
+  if (c.followers<0) c.followers=findCol(head,K.followers);
+  var out=[];
+  rows.slice(h+1).forEach(function(r, idx){
+    var net=netKey(r[c.net]); if (!net) return;
+    function g(k){ return c[k]>=0 ? num(r[c[k]]) : NaN; }
+    var o={ net:net, order:idx, dateRaw:r[c.date]||"", date:parseDate(r[c.date]),
+      followers:g("followers"), reach:g("reach"), leads:g("leads"), views:g("views"),
+      likes:g("likes"), comments:g("comments"), saves:g("saves"), reactions:g("reactions") };
+    if (kind==="content"){ o.format=fmtKey(r[c.format]); o.formatRaw=r[c.format]||""; o.topic=c.topic>=0?r[c.topic]:""; }
+    out.push(o);
+  });
+  return out;
+}
+
+/* ===== Состояние ===== */
+var DATA = { weekly:[], monthly:[], content:[] };
+var state = { net:"all", period:"week", demo:false, stamp:null, live:false };
+
+function loadEmbedded(){
+  DATA.weekly  = table(document.getElementById("csv-weekly").textContent, "weekly");
+  DATA.monthly = table(document.getElementById("csv-monthly").textContent, "monthly");
+  DATA.content = table(document.getElementById("csv-content").textContent, "content");
+  var el=document.getElementById("csv-weekly");
+  state.demo = el.getAttribute("data-demo")==="1";
+  state.stamp = parseDate(el.getAttribute("data-snapshot"));
+  try {
+    var cached=JSON.parse(localStorage.getItem(CACHE_KEY)||"null");
+    if (cached && cached.weekly){ applyCSV(cached, new Date(cached.at), false); }
+  } catch(e){}
+}
+function applyCSV(csv, at, live){
+  var w=table(csv.weekly,"weekly"), m=table(csv.monthly||"","monthly"), ct=table(csv.content||"","content");
+  if (!w.length && !ct.length) return false;
+  if (w.length) DATA.weekly=w;
+  DATA.monthly=m;
+  if (ct.length) DATA.content=ct;
+  state.demo=false; state.stamp=at; state.live=live;
+  return true;
+}
+
+/* ===== Загрузка из таблицы ===== */
+function fetchText(url){
+  var ctrl = window.AbortController ? new AbortController() : null;
+  var t = ctrl ? setTimeout(function(){ ctrl.abort(); }, 12000) : null;
+  return fetch(url, { cache:"no-store", signal: ctrl?ctrl.signal:undefined }).then(function(r){
+    if (t) clearTimeout(t);
+    if (!r.ok) throw new Error(r.status);
+    return r.text();
+  }).then(function(s){ if (/^\s*</.test(s)) throw new Error("not csv"); return s; });
+}
+function fetchSheet(kind){
+  var urls=[];
+  if (PUBLISHED[kind]) urls.push(PUBLISHED[kind]);
+  SHEET_NAMES[kind].forEach(function(n){
+    urls.push("https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:csv&headers=1&sheet="+encodeURIComponent(n));
+  });
+  var i=0;
+  function next(){ if (i>=urls.length) return Promise.resolve(""); return fetchText(urls[i++]).catch(next); }
+  return next();
+}
+function refresh(){
+  var btn=document.getElementById("refresh");
+  if (btn.classList.contains("busy")) return;
+  btn.classList.add("busy");
+  Promise.all([fetchSheet("weekly"), fetchSheet("monthly"), fetchSheet("content")]).then(function(res){
+    var csv={ weekly:res[0], monthly:res[1], content:res[2], at:Date.now() };
+    if (applyCSV(csv, new Date(), true)){
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(csv)); } catch(e){}
+      render();
+    }
+  }).catch(function(){ /* тихо остаёмся на текущих цифрах */ })
+    .then(function(){ btn.classList.remove("busy"); });
+}
+
+/* ===== Расчёты ===== */
+function ok(x){ return typeof x==="number" && isFinite(x); }
+function sum(a,f){ return a.reduce(function(s,x){ var v=f(x); return s+(ok(v)?v:0); },0); }
+function byNet(rows){ return state.net==="all" ? rows : rows.filter(function(r){ return r.net===state.net; }); }
+function key(r){ return r.date ? r.date.getTime() : "o"+r.order; }
+
+/* Ряд по датам: подписчики (уровень) суммируем по сетям, охват/лиды — тоже. */
+function series(rows){
+  var map={}, keys=[];
+  rows.forEach(function(r){
+    var k=r.date ? r.date.getTime() : r.dateRaw;
+    if (!map[k]){ map[k]={ date:r.date, label:r.dateRaw, order:r.order, rows:[] }; keys.push(k); }
+    map[k].rows.push(r);
+  });
+  var pts=keys.map(function(k){ var p=map[k];
+    return { date:p.date, label:p.label, order:p.order,
+      followers:sum(p.rows,function(r){return r.followers;}), reach:sum(p.rows,function(r){return r.reach;}),
+      leads:sum(p.rows,function(r){return r.leads;}), hasF:p.rows.some(function(r){return ok(r.followers);}),
+      hasL:p.rows.some(function(r){return ok(r.leads);}) }; });
+  var dated=pts.every(function(p){ return p.date; });
+  pts.sort(function(a,b){ return dated ? a.date-b.date : a.order-b.order; });
+  return pts;
+}
+function engagement(rows){
+  var num_=0, den=0;
+  rows.forEach(function(r){
+    var inter = ok(r.likes)||ok(r.comments)||ok(r.saves)
+      ? (ok(r.likes)?r.likes:0)+(ok(r.comments)?r.comments:0)+(ok(r.saves)?r.saves:0)
+      : r.reactions;
+    var base = ok(r.views)&&r.views>0 ? r.views : r.reach;
+    if (ok(inter) && ok(base) && base>0){ num_+=inter; den+=base; }
+  });
+  return den>0 ? num_/den*100 : NaN;
+}
+function periodWindows(){
+  var days = state.period==="week" ? 7 : state.period==="month" ? 30 : null;
+  return days;
+}
+function contentIn(rows, from, to){
+  return rows.filter(function(r){ return r.date && r.date>=from && r.date<to; });
+}
+
+function computeKPI(){
+  var pts=series(byNet(DATA.weekly)), n=pts.length, P=state.period, k={};
+  var last=pts[n-1];
+  if (!last){ return null; }
+  if (P==="week"){
+    var prev=pts[n-2];
+    k.f=[last.followers, prev&&prev.followers]; k.r=[last.reach, prev&&prev.reach]; k.l=[last.leads, prev&&prev.leads];
+    k.ctx="к прошлой неделе";
+  } else if (P==="month"){
+    // скользящие 4 недели против предыдущих 4 — сравнение всегда честное, даже в середине месяца;
+    // лист «ежемесячная статистика» используется, только если недельных данных нет
+    var mon=series(byNet(DATA.monthly));
+    if (n<2 && mon.length>=2){
+      var a=mon[mon.length-1], b=mon[mon.length-2];
+      k.f=[a.followers, b.followers]; k.r=[a.reach, b.reach]; k.l=[a.leads, b.leads];
+    } else {
+      var cur=pts.slice(-4), pre=pts.slice(-8,-4);
+      k.f=[last.followers, pre.length?pre[pre.length-1].followers:undefined];
+      k.r=[sum(cur,function(p){return p.reach;}), pre.length?sum(pre,function(p){return p.reach;}):undefined];
+      k.l=[sum(cur,function(p){return p.leads;}), pre.length?sum(pre,function(p){return p.leads;}):undefined];
+    }
+    k.ctx="к прошлым 4 неделям";
+  } else {
+    k.f=[last.followers, pts[0].followers]; k.fctx="с начала учёта";
+    k.r=[sum(pts,function(p){return p.reach;})]; k.l=[sum(pts,function(p){return p.leads;})];
+    k.ctx="за "+n+" "+plural(n,"неделю","недели","недель");
+  }
+  // ER по журналу публикаций
+  var c=byNet(DATA.content), dates=c.filter(function(r){return r.date;}).map(function(r){return r.date.getTime();});
+  var end = dates.length ? new Date(Math.max.apply(null,dates)+86400000) : null, days=periodWindows();
+  if (end && days){
+    var s=new Date(end-days*86400000), s0=new Date(end-2*days*86400000);
+    k.er=[engagement(contentIn(c,s,end)), engagement(contentIn(c,s0,s))];
+  } else k.er=[engagement(c)];
+  return k;
+}
+
+/* ===== Формат ===== */
+function fmt(n){
+  if (!ok(n)) return "—";
+  var a=Math.abs(n);
+  if (a>=1e6) return (n/1e6).toLocaleString("ru-RU",{maximumFractionDigits:1})+" млн";
+  if (a>=1e5) return Math.round(n/1e3).toLocaleString("ru-RU")+" тыс.";
+  return Math.round(n).toLocaleString("ru-RU");
+}
+function short(n, step){
+  var a=Math.abs(n), d=function(u){ return step ? Math.max(0,Math.min(2,Math.ceil(-Math.log10(step/u)))) : 1; };
+  if (a>=1e6) return (n/1e6).toLocaleString("ru-RU",{maximumFractionDigits:d(1e6)})+"M";
+  if (a>=1e3) return (n/1e3).toLocaleString("ru-RU",{maximumFractionDigits:d(1e3)})+"K";
+  return Math.round(n).toLocaleString("ru-RU");
+}
+function pct(n,d){ return n.toLocaleString("ru-RU",{maximumFractionDigits:d==null?1:d}); }
+function plural(n,a,b,c){ n=Math.abs(n)%100; var m=n%10; return n>10&&n<20?c:m===1?a:m>=2&&m<=4?b:c; }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function dm(d){ return d ? String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0") : ""; }
+
+function deltaHTML(cur, prev, ctx, isPct){
+  if (!ok(cur) || !ok(prev)) return '<div class="delta flat"><span class="ctx">'+esc(ctx||"")+'</span></div>';
+  var d, txt;
+  if (isPct){ d=cur-prev; txt=pct(Math.abs(d))+" п.п."; }
+  else { d=cur-prev; txt = prev ? pct(Math.abs(d/prev*100))+"%" : fmt(Math.abs(d)); }
+  var cls = d>0?"up":d<0?"down":"flat", arrow = d>0?"↑":d<0?"↓":"→";
+  var extra = (!isPct && prev) ? " ("+(d>0?"+":d<0?"−":"")+fmt(Math.abs(d))+")" : "";
+  return '<div class="delta '+cls+'">'+arrow+" "+txt+extra+' <span class="ctx">'+esc(ctx)+'</span></div>';
+}
+function kpiHTML(label, val, delta){
+  return '<div class="label">'+label+'</div><div class="value">'+val+'</div>'+delta;
+}
+
+/* ===== График ===== */
+function smoothPath(p){
+  if (p.length<2) return p.length?"M"+p[0][0]+","+p[0][1]:"";
+  var d="M"+p[0][0]+","+p[0][1];
+  for (var i=0;i<p.length-1;i++){
+    var p0=p[i-1]||p[i], p1=p[i], p2=p[i+1], p3=p[i+2]||p2, t=0.18;
+    var c1x=p1[0]+(p2[0]-p0[0])*t, c1y=p1[1]+(p2[1]-p0[1])*t;
+    var c2x=p2[0]-(p3[0]-p1[0])*t, c2y=p2[1]-(p3[1]-p1[1])*t;
+    var lo=Math.min(p1[1],p2[1]), hi=Math.max(p1[1],p2[1]);
+    c1y=Math.max(lo,Math.min(hi,c1y)); c2y=Math.max(lo,Math.min(hi,c2y)); // без «выбросов» за точки
+    d+=" C"+c1x+","+c1y+" "+c2x+","+c2y+" "+p2[0]+","+p2[1];
+  }
+  return d;
+}
+function niceTicks(min,max,count){
+  if (min===max){ max=min+1; }
+  var step=Math.pow(10,Math.floor(Math.log10((max-min)/count))), err=(max-min)/count/step;
+  step*= err>=7.5?10:err>=3.5?5:err>=1.5?2:1;
+  var lo=Math.floor(min/step)*step, hi=Math.ceil(max/step)*step, t=[];
+  for (var v=lo; v<=hi+step/2; v+=step) t.push(v);
+  return t;
+}
+var gradId=0;
+function lineChart(box, pts, field, name){
+  box.innerHTML="";
+  var vals=pts.map(function(p){ return p[field]; });
+  if (pts.length<2){ box.innerHTML='<div class="empty">Недостаточно данных</div>'; return; }
+  var W=box.clientWidth||600, H=box.clientHeight||230, L=44, R=10, T=10, B=26;
+  var mn=Math.min.apply(null,vals), mx=Math.max.apply(null,vals), pad=(mx-mn)*0.15||mx*0.05||1;
+  var ticks=niceTicks(Math.max(0,mn-pad), mx+pad, 3), y0=ticks[0], y1=ticks[ticks.length-1];
+  function X(i){ return L+(W-L-R)*i/(pts.length-1); }
+  function Y(v){ return T+(H-T-B)*(1-(v-y0)/(y1-y0)); }
+  var P=pts.map(function(p,i){ return [X(i),Y(p[field])]; });
+  var line=smoothPath(P), id="g"+(++gradId);
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none"><defs><linearGradient id="'+id+'" x1="0" y1="0" x2="0" y2="1">'+
+    '<stop offset="0" stop-color="#a25574" stop-opacity=".22"/><stop offset="1" stop-color="#a25574" stop-opacity="0"/></linearGradient></defs>';
+  ticks.forEach(function(t){ var y=Y(t); svg+='<line class="gridline" x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'"/><text class="axis" x="'+(L-8)+'" y="'+(y+4)+'" text-anchor="end">'+short(t, ticks[1]-ticks[0])+'</text>'; });
+  var every=Math.max(1,Math.ceil(pts.length/(W<420?4:7)));
+  pts.forEach(function(p,i){ if ((pts.length-1-i)%every===0) svg+='<text class="axis" x="'+X(i)+'" y="'+(H-6)+'" text-anchor="middle">'+esc(p.date?dm(p.date):p.label)+'</text>'; });
+  svg+='<path d="'+line+" L"+X(pts.length-1)+","+(H-B)+" L"+L+","+(H-B)+' Z" fill="url(#'+id+')"/>';
+  svg+='<path d="'+line+'" fill="none" stroke="#a25574" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+  svg+='<circle cx="'+P[P.length-1][0]+'" cy="'+P[P.length-1][1]+'" r="4" fill="#a25574" stroke="#fff" stroke-width="2"/>';
+  svg+='<line class="hover-line" x1="0" x2="0" y1="'+T+'" y2="'+(H-B)+'" stroke="#a25574" stroke-opacity=".35" stroke-dasharray="3 3" style="display:none"/>';
+  svg+='<circle class="hover-dot" r="5" fill="#fff" stroke="#a25574" stroke-width="2.5" style="display:none"/></svg><div class="tip"></div>';
+  box.innerHTML=svg;
+  var s=box.querySelector("svg"), tip=box.querySelector(".tip"), hl=s.querySelector(".hover-line"), hd=s.querySelector(".hover-dot");
+  function move(e){
+    var rect=s.getBoundingClientRect(), x=(e.clientX-rect.left)*W/rect.width;
+    var i=Math.round((x-L)/((W-L-R)/(pts.length-1))); i=Math.max(0,Math.min(pts.length-1,i));
+    hl.setAttribute("x1",P[i][0]); hl.setAttribute("x2",P[i][0]); hl.style.display="";
+    hd.setAttribute("cx",P[i][0]); hd.setAttribute("cy",P[i][1]); hd.style.display="";
+    tip.innerHTML=(pts[i].date?"неделя с "+dm(pts[i].date):esc(pts[i].label))+" · <b>"+fmt(vals[i])+"</b> "+name;
+    tip.style.left=(P[i][0]/W*rect.width)+"px"; tip.style.top=(P[i][1]/H*rect.height)+"px"; tip.style.opacity=1;
+  }
+  function leave(){ hl.style.display="none"; hd.style.display="none"; tip.style.opacity=0; }
+  s.addEventListener("pointermove",move); s.addEventListener("pointerleave",leave);
+}
+
+/* ===== Кольцо ===== */
+function donut(counts){
+  var total=counts.reduce(function(s,c){return s+c.n;},0), svg="", a=-Math.PI/2, R=86, r=60, cx=100, cy=100, gap=total&&counts.filter(function(c){return c.n;}).length>1?0.025:0;
+  if (!total){
+    svg='<circle cx="100" cy="100" r="73" fill="none" stroke="#ece7ea" stroke-width="26"/>';
+  }
+  counts.forEach(function(c){
+    if (!c.n) return;
+    var ang=c.n/total*Math.PI*2;
+    if (ang>=Math.PI*2-1e-6){ svg+='<circle cx="100" cy="100" r="73" fill="none" stroke="'+c.color+'" stroke-width="26"/>'; return; }
+    var a0=a+gap/2, a1=a+ang-gap/2, large=a1-a0>Math.PI?1:0;
+    function pt(rad,an){ return (cx+rad*Math.cos(an))+","+(cy+rad*Math.sin(an)); }
+    svg+='<path d="M'+pt(R,a0)+" A"+R+","+R+" 0 "+large+" 1 "+pt(R,a1)+" L"+pt(r,a1)+" A"+r+","+r+" 0 "+large+" 0 "+pt(r,a0)+' Z" fill="'+c.color+'"><title>'+c.label+": "+c.n+'</title></path>';
+    a+=ang;
+  });
+  svg+='<text x="100" y="98" text-anchor="middle" font-size="30" font-weight="700" fill="#1f1a1d">'+total+'</text>'+
+       '<text x="100" y="120" text-anchor="middle" font-size="12" fill="#9a9196">'+plural(total,"публикация","публикации","публикаций")+'</text>';
+  return svg;
+}
+
+/* ===== Рендер ===== */
+function render(){
+  document.body.classList.toggle("is-demo", state.demo);
+  var up=document.getElementById("updated"), now=new Date();
+  if (state.stamp && state.stamp.toDateString()===now.toDateString())
+    up.textContent="обновлено сегодня"+(state.live?" в "+String(state.stamp.getHours()).padStart(2,"0")+":"+String(state.stamp.getMinutes()).padStart(2,"0"):"");
+  else up.textContent = state.stamp ? "обновлено "+state.stamp.toLocaleDateString("ru-RU",{day:"numeric",month:"long"}) : "обновлено сегодня";
+
+  var k=computeKPI();
+  if (!k){
+    ["followers","leads","reach","er"].forEach(function(id){ document.getElementById("kpi-"+id).innerHTML=kpiHTML("—","—",""); });
+  } else {
+    document.getElementById("kpi-followers").innerHTML=kpiHTML("Подписчики", fmt(k.f[0]), deltaHTML(k.f[0],k.f[1],k.fctx||k.ctx));
+    document.getElementById("kpi-leads").innerHTML=kpiHTML("Лиды", fmt(k.l[0]), deltaHTML(k.l[0],k.l[1],k.ctx));
+    document.getElementById("kpi-reach").innerHTML=kpiHTML("Охваты", fmt(k.r[0]), deltaHTML(k.r[0],k.r[1],k.ctx));
+    document.getElementById("kpi-er").innerHTML=kpiHTML("Вовлечённость (ER)", ok(k.er[0])?pct(k.er[0])+"<small>%</small>":"—",
+      deltaHTML(k.er[0],k.er[1], state.period==="all"?"(лайки + комм. + сохр.) / просмотры":state.period==="week"?"к прошлым 7 дням":"к прошлым 30 дням", true));
+  }
+
+  var pts=series(byNet(DATA.weekly)), N=state.period==="week"?8:state.period==="month"?12:pts.length;
+  var shown=pts.slice(-N), sub="последние "+shown.length+" "+plural(shown.length,"неделя","недели","недель");
+  document.getElementById("ch-f-sub").textContent=sub; document.getElementById("ch-r-sub").textContent=sub;
+  document.getElementById("ch-f-last").textContent=shown.length?fmt(shown[shown.length-1].followers):"";
+  document.getElementById("ch-r-last").textContent=shown.length?fmt(shown[shown.length-1].reach):"";
+  lineChart(document.getElementById("ch-followers"), shown, "followers", "подписчиков");
+  lineChart(document.getElementById("ch-reach"), shown, "reach", "охват");
+
+  // контент за период
+  var c=byNet(DATA.content), days=periodWindows();
+  var dates=c.filter(function(r){return r.date;}).map(function(r){return r.date.getTime();});
+  if (days && dates.length){ var end=new Date(Math.max.apply(null,dates)+86400000); c=contentIn(c,new Date(end-days*86400000),end); }
+
+  var counts=FORMATS.map(function(f){ var rows=c.filter(function(r){return r.format===f.key;});
+    return { key:f.key, label:f.label, color:f.color, n:rows.length, rows:rows }; });
+  var total=counts.reduce(function(s,x){return s+x.n;},0);
+  document.getElementById("donut").innerHTML=donut(counts);
+  document.getElementById("legend").innerHTML=counts.map(function(x){
+    return '<div class="row"><span class="sw" style="background:'+x.color+'"></span><span>'+x.label+'</span><span class="pct">'+(total?Math.round(x.n/total*100):0)+'%</span>'+
+           '<span class="n">'+x.n+" "+plural(x.n,"публикация","публикации","публикаций")+'</span></div>'; }).join("");
+
+  var avgs=counts.map(function(x){ var rr=x.rows.filter(function(r){return ok(r.reach);});
+    return { label:x.label, n:rr.length, avg: rr.length?sum(rr,function(r){return r.reach;})/rr.length:0, er:engagement(x.rows) }; });
+  var maxAvg=Math.max.apply(null,avgs.map(function(a){return a.avg;}))||1;
+  avgs.sort(function(a,b){return b.avg-a.avg;});
+  document.getElementById("bars").innerHTML = total ? avgs.map(function(a){
+    return '<div class="bar-row"><div class="top-line"><span>'+a.label+'</span><span class="val">'+(a.n?fmt(a.avg):"—")+
+      '<span class="muted">'+(ok(a.er)?"ER "+pct(a.er)+"%":"нет публикаций")+'</span></span></div>'+
+      '<div class="track"><div class="fill" style="width:'+(a.avg/maxAvg*100)+'%"></div></div></div>'; }).join("")
+    : '<div class="empty">Нет публикаций за период</div>';
+
+  // топ-3
+  var withReach=c.filter(function(r){return ok(r.reach);}), avgAll=withReach.length?sum(withReach,function(r){return r.reach;})/withReach.length:0;
+  var top=withReach.slice().sort(function(a,b){return b.reach-a.reach;}).slice(0,3);
+  document.getElementById("posts").innerHTML = top.length ? top.map(function(p){
+    var ratio=avgAll?p.reach/avgAll:1, b=ratio>=2?["viral","вирусный"]:ratio>=1.3?["strong","сильный"]:["normal","обычный"], er=engagement([p]);
+    var f=FORMATS.filter(function(x){return x.key===p.format;})[0];
+    return '<article class="post"><div class="meta"><span>'+esc(NETS[p.net])+" · "+esc(p.formatRaw||(f?f.label:""))+(p.date?" · "+dm(p.date):"")+'</span><span class="badge '+b[0]+'">'+b[1]+'</span></div>'+
+      '<div class="title">'+esc(p.topic||"Без темы")+'</div>'+
+      '<div class="nums"><div><b>'+fmt(p.reach)+'</b><span>охват</span></div><div><b>'+(ok(er)?pct(er)+"%":"—")+'</b><span>ER</span></div><div><b>×'+pct(ratio)+'</b><span>к среднему</span></div></div></article>';
+  }).join("") : '<div class="empty">Нет публикаций за период</div>';
+}
+
+/* ===== Управление ===== */
+function seg(id, field){
+  var el=document.getElementById(id);
+  el.addEventListener("click", function(e){
+    var b=e.target.closest("button"); if (!b) return;
+    state[field]=b.getAttribute("data-v");
+    Array.prototype.forEach.call(el.querySelectorAll("button"), function(x){ x.setAttribute("aria-pressed", x===b?"true":"false"); });
+    render();
+  });
+}
+seg("net","net"); seg("period","period");
+document.getElementById("refresh").addEventListener("click", refresh);
+var rt; window.addEventListener("resize", function(){ clearTimeout(rt); rt=setTimeout(render,120); });
+
+loadEmbedded();
+render();
+refresh(); // при открытии тихо пробуем подтянуть свежие цифры из таблицы
+})();
+</script>
+</body>
+</html>
