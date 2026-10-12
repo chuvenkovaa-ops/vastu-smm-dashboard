@@ -231,7 +231,7 @@ PINTEREST,,ъ
 Подписчики,12033,13864,17254
 Прирост подписчиков,1200,1831,3390
 Просмотры,25000000,23000000,34000000
-Охват,735900,710600,11000000
+Охват,735900,710600,1000100
 Посещения профиля,6900,6700,10500
 Лиды,183,344,458
 Количество публикаций,115,92,142
@@ -597,7 +597,7 @@ function dayRange(a, bExcl){
 function fmt(n){
   if (!ok(n)) return "—";
   var a=Math.abs(n);
-  if (a>=1e6) return (n/1e6).toLocaleString("ru-RU",{maximumFractionDigits:a>=1e7?1:2})+" млн";
+  if (a>=1e7) return (n/1e6).toLocaleString("ru-RU",{maximumFractionDigits:1})+" млн";
   return Math.round(n).toLocaleString("ru-RU");
 }
 function short(n, step){
