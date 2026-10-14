@@ -295,6 +295,7 @@ code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13p
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div id="modal-root"></div>
 
+<script src="utm-data.js"></script>
 <script>
 (function(){
 "use strict";
@@ -507,6 +508,7 @@ var I = {
   report:'<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
   road:'<path d="M4 6h10M4 12h16M4 18h7"/><circle cx="18" cy="6" r="2"/><circle cx="15" cy="18" r="2"/>',
   voice:'<path d="M4 5h16v11H9l-5 4z"/>',
+  link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
   tools:'<path d="M14 7a4 4 0 0 0 5 5l-8 8a2.8 2.8 0 0 1-4-4z"/>',
   plus:'<path d="M12 5v14M5 12h14"/>',
   left:'<path d="M15 6l-6 6 6 6"/>', right:'<path d="M9 6l6 6-6 6"/>',
@@ -532,7 +534,7 @@ function meter(p){ return '<div class="meter"><div class="track"><div class="fil
 var ROUTES = [
   ["home","Обзор","home"],["dashboard","Дашборд","dash"],["strategy","Стратегия","strat"],["plan","Контент-план","plan"],
   ["repack","Переупаковка","repack"],["funnel","Воронка","funnel"],["reports","Отчёты","report"],["roadmap","План внедрения","road"],
-  ["voice","Голос бренда","voice"],["tools","Инструменты","tools"]
+  ["voice","Голос бренда","voice"],["utm","UTM-метки","link"],["tools","Инструменты","tools"]
 ];
 function renderNav(cur){
   document.getElementById("nav").innerHTML = ROUTES.map(function(r){
@@ -585,7 +587,7 @@ VIEWS.home = function(){
   '<div class="grid g3">'+
     quick("plan","Контент-план","Неделя по дням, ритм площадок и функции каждой публикации")+
     quick("voice","Проверить текст","Вставьте текст поста — платформа подсветит обещания и запугивание")+
-    quick("tools","UTM-метки","Соберите ссылку с меткой SMM за 10 секунд")+
+    quick("utm","UTM-метки","Ссылка с метками по методике школы: лендинг, источник, канал, тип контента")+
   '</div>';
 };
 function statCard(l,v,s){ return '<section class="card stat"><small>'+l+'</small><b>'+v+'</b><em>'+s+'</em></section>'; }
@@ -985,17 +987,95 @@ function runChecker(){
 }
 AFTER.voice = function(){ runChecker(); document.getElementById("tc-in").addEventListener("input",runChecker); };
 
+/* ---------- UTM-метки (методика таблицы «Генератор UTM VASTU HOME») ----------
+   ссылка лендинга ?utm_source=источник &utm_medium=канал &utm_campaign=тип контента
+   &utm_content=уникальное поле &utm_term=ID лендинга                                  */
+var UD = window.UTM_DATA || {sources:[],channels:[],types:[],landings:[]};
+var SMM_CHANNELS = [["Instagram","Инстаграм"],["Telegram","ТГ канал основной"],["VK","ВК сообщество"],["MAX","Канал Макс"],["Pinterest","Пинтерест"],["ТГ-бот","ТГ бот"],["Дзен","Дзен"],["RuTube","RuTube"]];
+var U = {page:"", src:"SMM", ch:"ТГ канал основной", type:"Пост", uniq:"", comment:""};
+function ddmmyyyy(d){ return String(d.getDate()).padStart(2,"0")+String(d.getMonth()+1).padStart(2,"0")+d.getFullYear(); }
+function allLandings(){ return (S.landingsCustom||[]).concat(UD.landings); }
+function landingByName(n){ var l=allLandings(); for(var i=0;i<l.length;i++) if(l[i][0]===n) return l[i]; return null; }
+function idByUrl(url){ var l=allLandings(); for(var i=0;i<l.length;i++) if(l[i][1]===url) return l[i][2]; return ""; } /* как VLOOKUP по ссылке: первое совпадение */
+function lookup(list,name){ for(var i=0;i<list.length;i++) if(list[i][0]===name) return list[i][1]; return null; }
+function buildUtm(u){
+  var L=landingByName(u.page); if(!L) return {err:"Выберите страницу из списка лендингов"};
+  var src=lookup(UD.sources,u.src), ch=lookup(UD.channels,u.ch), tp=lookup(UD.types,u.type);
+  if(!src||!ch||!tp) return {err:"Выберите источник, канал и тип контента"};
+  var url=L[1];
+  return {url:url, id:idByUrl(url), link: url+(url.indexOf("?")>-1?"&":"?")+"utm_source="+src+"&utm_medium="+ch+"&utm_campaign="+tp+"&utm_content="+encodeURIComponent(u.uniq.trim())+"&utm_term="+idByUrl(url)};
+}
+function nextGkId(){ var max=0; allLandings().forEach(function(l){ var m=/^GK(\d+)$/.exec(l[2]); if(m) max=Math.max(max,+m[1]); }); return "GK"+(max+1); }
+VIEWS.utm = function(){
+  if(!U.uniq) U.uniq=ddmmyyyy(new Date());
+  var log=S.utmLog||[];
+  var opts=function(list,cur){ return list.map(function(x){return '<option'+(x[0]===cur?' selected':'')+'>'+esc(x[0])+'</option>';}).join(""); };
+  return head("Аналитика · атрибуция","UTM-метки","По методике таблицы-генератора школы: каждая ссылка несёт источник, канал, тип контента, уникальное поле и ID лендинга. Так лиды в GetCourse видны по площадке и публикации.",
+    '<a class="btn" href="https://clck.ru" target="_blank" rel="noopener">'+ico("ext")+'Сократить в clck.ru</a>')+
+  '<div class="grid g2"><section class="card"><h2>Новая ссылка</h2><div class="sub">'+allLandings().length+' лендингов · справочник: '+UD.sources.length+' источников, '+UD.channels.length+' каналов, '+UD.types.length+' типов контента</div>'+
+   '<div class="form-grid">'+
+    '<div class="field full"><label for="ug-page">Страница</label><input id="ug-page" list="ug-pages" value="'+esc(U.page)+'" placeholder="Начните вводить: вебинар, чек-лист, марафон…"><datalist id="ug-pages">'+allLandings().map(function(l){return '<option value="'+esc(l[0])+'"></option>';}).join("")+'</datalist><span class="hint" id="ug-page-info"></span></div>'+
+    '<div class="field"><label for="ug-src">Источник трафика</label><select id="ug-src">'+opts(UD.sources,U.src)+'</select></div>'+
+    '<div class="field"><label for="ug-type">Тип контента</label><select id="ug-type">'+opts(UD.types,U.type)+'</select></div>'+
+    '<div class="field full"><label for="ug-ch">Канал привлечения</label><select id="ug-ch">'+opts(UD.channels,U.ch)+'</select><div class="tagline" style="margin-top:4px">'+SMM_CHANNELS.map(function(c){return '<button type="button" class="chip" style="cursor:pointer;border:1px solid '+(c[1]===U.ch?'var(--green)':'transparent')+'" data-uch="'+esc(c[1])+'">'+c[0]+'</button>';}).join("")+'</div></div>'+
+    '<div class="field"><label for="ug-uniq">Уникальное поле</label><input id="ug-uniq" value="'+esc(U.uniq)+'"><span class="hint">дата публикации ДДММГГГГ или номер поста, например post_20440 · <button type="button" class="btn ghost" style="padding:0 6px;font-size:12px" id="ug-today">сегодня</button></span></div>'+
+    '<div class="field"><label for="ug-comment">Комментарий</label><input id="ug-comment" value="'+esc(U.comment)+'" placeholder="где стоит ссылка"></div>'+
+   '</div>'+
+   '<div class="out" id="ug-out" style="margin-top:14px"></div>'+
+   '<div class="row" style="margin-top:10px"><button class="btn primary" type="button" id="ug-copy">'+ico("copy")+'Скопировать ссылку</button><button class="btn" type="button" id="ug-save">'+ico("plus")+'Сохранить в журнал</button></div>'+
+  '</section>'+
+  '<section class="card"><h2>Как устроена метка</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Параметр</th><th>Что в нём</th><th>Сейчас</th></tr></thead><tbody id="ug-parts"></tbody></table></div>'+
+   '<p class="small muted" style="margin:12px 0 0">Для SMM источник всегда «SMM». Новый источник, канал или тип контента сначала добавляется на лист «справочник» таблицы-генератора, затем справочник платформы пересобирается скриптом <code>tools/update_utm_data.py</code>.</p></section></div>'+
+  '<section class="card"><div class="card-head"><h2>Журнал ссылок</h2><div class="row"><button class="btn" type="button" id="ug-tsv">'+ico("copy")+'Строки для таблицы-генератора</button>'+(log.length?'<button class="btn danger" type="button" id="ug-clear">Очистить журнал</button>':'')+'</div></div>'+
+   '<div class="sub">столбцы как на листе GENERATOR: страница, начальная ссылка, источник, канал, тип контента, уникальное поле, ссылка, комментарий. Скопируйте и вставьте в таблицу, чтобы ссылки были у всей команды</div>'+
+   (log.length?'<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Дата</th><th>Страница</th><th>Источник · канал · тип</th><th>Ссылка</th><th></th></tr></thead><tbody>'+log.slice().reverse().map(function(r){
+     return '<tr><td class="small" style="white-space:nowrap">'+esc(r.at)+'</td><td class="small"><b>'+esc(r.page)+'</b>'+(r.comment?'<div class="muted">'+esc(r.comment)+'</div>':'')+'</td><td class="small">'+esc(r.src)+' · '+esc(r.ch)+' · '+esc(r.type)+'<div class="muted">'+esc(r.uniq||"—")+'</div></td><td class="small mono" style="overflow-wrap:anywhere;min-width:220px">'+esc(r.link)+'</td><td><div class="row" style="flex-wrap:nowrap"><button class="btn" type="button" data-ulcopy="'+r.id+'" aria-label="Скопировать">'+ico("copy")+'</button><button class="btn danger" type="button" data-uldel="'+r.id+'">Удалить</button></div></td></tr>';
+   }).join("")+'</tbody></table></div>':'<p class="muted small" style="margin:0">Журнал пуст. Соберите ссылку и нажмите «Сохранить в журнал».</p>')+
+  '</section>'+
+  '<section class="card"><h2>Новый лендинг</h2><div class="sub">если страницы нет в списке. Потом добавьте её и на листы «Сайты» и «ID лендингов» таблицы-генератора</div><div class="form-grid">'+
+   '<div class="field full"><label for="ul-name">Уникальное название</label><input id="ul-name" placeholder="Регистрация на вебинар «Цели» 22.10.2026"></div>'+
+   '<div class="field"><label for="ul-url">Ссылка</label><input id="ul-url" placeholder="https://kursi.vastuhome8.ru/..."></div>'+
+   '<div class="field"><label for="ul-id">ID лендинга</label><input id="ul-id" value="'+nextGkId()+'"><span class="hint">следующий свободный номер GK</span></div>'+
+  '</div><div class="row" style="margin-top:10px"><button class="btn primary" type="button" id="ul-add">'+ico("plus")+'Добавить лендинг</button></div>'+
+  ((S.landingsCustom||[]).length?'<p class="small muted" style="margin:12px 0 0">Добавлено здесь: '+S.landingsCustom.map(function(l){return esc(l[0])+' ('+esc(l[2])+')';}).join(" · ")+'</p>':'')+
+  '</section>';
+};
+function utmRender(){
+  var r=buildUtm(U), L=landingByName(U.page);
+  document.getElementById("ug-out").textContent = r.err || r.link;
+  document.getElementById("ug-page-info").textContent = L ? L[1]+" · ID "+(idByUrl(L[1])||"нет") : (U.page?"Такой страницы нет в списке. Добавьте её ниже как новый лендинг":"");
+  var parts=[["utm_source","Источник трафика",lookup(UD.sources,U.src)],["utm_medium","Канал привлечения",lookup(UD.channels,U.ch)],["utm_campaign","Тип контента",lookup(UD.types,U.type)],["utm_content","Уникальное поле",U.uniq.trim()],["utm_term","ID лендинга",L?idByUrl(L[1]):""]];
+  document.getElementById("ug-parts").innerHTML=parts.map(function(p){return '<tr><td class="mono">'+p[0]+'</td><td class="small">'+p[1]+'</td><td class="mono"><b>'+esc(p[2]||"—")+'</b></td></tr>';}).join("");
+  return r;
+}
+function utmTsv(rows){
+  return rows.map(function(r){ return [r.page,r.url,r.src,r.ch,r.type,r.uniq,r.link,r.comment].map(function(v){return String(v||"").replace(/[\t\n]/g," ");}).join("\t"); }).join("\n");
+}
+AFTER.utm = function(){
+  var bind={"ug-page":"page","ug-src":"src","ug-ch":"ch","ug-type":"type","ug-uniq":"uniq","ug-comment":"comment"};
+  Object.keys(bind).forEach(function(id){ var el=document.getElementById(id); ["input","change"].forEach(function(ev){ el.addEventListener(ev,function(){ U[bind[id]]=el.value; utmRender(); }); }); });
+  utmRender();
+  document.getElementById("ug-today").addEventListener("click",function(){ U.uniq=ddmmyyyy(new Date()); document.getElementById("ug-uniq").value=U.uniq; utmRender(); });
+  document.getElementById("ug-copy").addEventListener("click",function(){ var r=utmRender(); if(r.err) toast(r.err); else copy(r.link,"Ссылка скопирована"); });
+  document.getElementById("ug-save").addEventListener("click",function(){
+    var r=utmRender(); if(r.err){ toast(r.err); return; }
+    S.utmLog=S.utmLog||[]; S.utmLog.push({id:uid(),at:new Date().toLocaleDateString("ru-RU"),page:U.page,url:r.url,src:U.src,ch:U.ch,type:U.type,uniq:U.uniq.trim(),link:r.link,comment:U.comment.trim()});
+    save(); copy(r.link,"Сохранено в журнал и скопировано"); route();
+  });
+  document.getElementById("ug-tsv").addEventListener("click",function(){ var l=S.utmLog||[]; if(!l.length){ toast("Журнал пуст"); return; } copy(utmTsv(l),"Строки скопированы — вставьте в лист GENERATOR"); });
+  if(document.getElementById("ug-clear")) armBtn("ug-clear","Точно очистить?",function(){ S.utmLog=[]; save(); route(); toast("Журнал очищен"); });
+  document.getElementById("ul-add").addEventListener("click",function(){
+    var n=document.getElementById("ul-name").value.trim(), u=document.getElementById("ul-url").value.trim(), id=document.getElementById("ul-id").value.trim();
+    if(!n||!/^https?:\/\//.test(u)||!id){ toast("Заполните название, ссылку (с https://) и ID"); return; }
+    if(landingByName(n)){ toast("Лендинг с таким названием уже есть"); return; }
+    S.landingsCustom=S.landingsCustom||[]; S.landingsCustom.unshift([n,u,id]); U.page=n; save(); route(); toast("Лендинг добавлен и выбран");
+  });
+};
+
 /* ---------- Инструменты ---------- */
 var SHEET_URL = "https://docs.google.com/spreadsheets/d/13g6C4C53GXcmBibUeaEqvL4i7CsjDA1SVy1S2GwhfnE";
 VIEWS.tools = function(){
-  return head("Инструменты","Инструменты и данные","Генератор меток, резервная копия плана и всё, что нужно новому человеку в команде.")+
-  '<section class="card"><h2>Генератор UTM-меток</h2><div class="sub">utm_source=smm · площадка в utm_medium · формат и дата в utm_content</div><div class="form-grid">'+
-   '<div class="field full"><label for="u-url">Ссылка на страницу</label><input id="u-url" placeholder="https://vastuhome.ru/..." value="https://"></div>'+
-   '<div class="field"><label for="u-net">Площадка</label><select id="u-net">'+Object.keys(NETS).map(function(k){return '<option value="'+k+'">'+NETS[k].name+'</option>';}).join("")+'<option value="bot">Telegram-бот</option><option value="collab">Коллаборация</option><option value="guest">Гостевой эфир</option><option value="ref">Реферальная ссылка</option></select></div>'+
-   '<div class="field"><label for="u-fmt">Формат</label><input id="u-fmt" value="reels"></div>'+
-   '<div class="field"><label for="u-date">Дата публикации</label><input type="date" id="u-date" value="'+iso(new Date())+'"></div>'+
-   '<div class="field"><label for="u-camp">Кампания</label><input id="u-camp" placeholder="например: obustroystvo_nov"></div>'+
-  '</div><div class="out" id="u-out" style="margin-top:14px"></div><div class="row" style="margin-top:10px"><button class="btn primary" type="button" id="u-copy">'+ico("copy")+'Скопировать ссылку</button></div></section>'+
+  return head("Инструменты","Инструменты и данные","Резервная копия данных и всё, что нужно новому человеку в команде.")+
   '<div class="grid g2"><section class="card"><h2>Резервная копия</h2><p class="small muted">Контент-план, чек-листы и отчёты хранятся в этом браузере. Раз в неделю сохраняйте копию — например, в общую папку команды. Чтобы перенести данные на другой компьютер, вставьте копию там.</p>'+
    '<div class="row"><button class="btn primary" type="button" id="b-copy">'+ico("copy")+'Скопировать данные</button><button class="btn" type="button" id="b-show">Вставить копию</button></div>'+
    '<div id="b-import" hidden style="margin-top:12px"><div class="field"><label for="b-text">Вставьте сюда скопированные данные</label><textarea id="b-text" style="min-height:120px" class="mono"></textarea></div><div class="row" style="margin-top:8px"><button class="btn primary" type="button" id="b-apply">Загрузить</button></div></div>'+
@@ -1004,23 +1084,13 @@ VIEWS.tools = function(){
    '<dt>Таблица данных</dt><dd><a href="'+SHEET_URL+'" target="_blank" rel="noopener">Рабочая таблица SMM</a><div class="small muted">листы «еженедельно», «ежемесячно», «Контент» — их читает дашборд</div></dd>'+
    '<dt>Обновить дашборд</dt><dd class="small">Внесите цифры в таблицу и нажмите «обновить» во вкладке «Дашборд»</dd>'+
    '<dt>Отчёты</dt><dd class="small">Пн 9:30 — статистика и план недели · Пт 9:30 — итоги · раз в месяц — отчёт во вкладке «Отчёты»</dd>'+
+   '<dt>UTM-метки</dt><dd class="small">Только через вкладку «UTM-метки» — по методике таблицы генератора школы</dd>'+
    '<dt>Съёмки</dt><dd class="small">Раз в 10 дней с Ларисой, 2–3 часа, 6–8 роликов</dd>'+
    '<dt>Маркетинг</dt><dd class="small">Ксения: реклама, оплаты, воронки запусков</dd>'+
    '<dt>Продукт</dt><dd class="small">Наталья: лид-магниты и продуктовая линейка</dd>'+
   '</dl></section></div>';
 };
-function utm(){
-  var url=(document.getElementById("u-url").value||"").trim();
-  var p={utm_source:"smm",utm_medium:document.getElementById("u-net").value,utm_content:(document.getElementById("u-fmt").value.trim().toLowerCase().replace(/\s+/g,"_")||"post")+"_"+document.getElementById("u-date").value.replace(/-/g,"")};
-  var c=document.getElementById("u-camp").value.trim(); if(c) p.utm_campaign=c.toLowerCase().replace(/\s+/g,"_");
-  var q=Object.keys(p).map(function(k){return k+"="+encodeURIComponent(p[k]);}).join("&");
-  var res = url.length>8 ? url.replace(/#.*$/,"")+(url.indexOf("?")>-1?"&":"?")+q : "Вставьте ссылку на страницу";
-  document.getElementById("u-out").textContent=res; return res;
-}
 AFTER.tools = function(){
-  ["u-url","u-net","u-fmt","u-date","u-camp"].forEach(function(id){ document.getElementById(id).addEventListener("input",utm); });
-  utm();
-  document.getElementById("u-copy").addEventListener("click",function(){ var r=utm(); if(r.indexOf("http")===0) copy(r,"Ссылка скопирована"); else toast("Сначала вставьте ссылку"); });
   document.getElementById("b-copy").addEventListener("click",function(){ copy(JSON.stringify(S),"Данные скопированы — сохраните их в файл или документ"); });
   document.getElementById("b-show").addEventListener("click",function(){ var b=document.getElementById("b-import"); b.hidden=!b.hidden; });
   document.getElementById("b-apply").addEventListener("click",function(){
@@ -1053,6 +1123,9 @@ document.addEventListener("click",function(e){
   var re=t.closest("[data-rep-edit]"); if(re){ openReport(S.reports.filter(function(x){return x.id===re.dataset.repEdit;})[0],false); return; }
   var rc=t.closest("[data-rep-copy]"); if(rc){ copy(reportText(S.reports.filter(function(x){return x.id===rc.dataset.repCopy;})[0]),"Текст отчёта скопирован"); return; }
   if(t.closest("#rep-new")){ var d=new Date(), m=iso(d).slice(0,7); openReport({id:uid(),month:m,title:MONTHS_N[d.getMonth()]+" "+d.getFullYear(),vals:{},cont:"",change:"",test:"",stop:"",note:""},true); return; }
+  var uc=t.closest("[data-uch]"); if(uc){ U.ch=uc.dataset.uch; document.getElementById("ug-ch").value=U.ch; document.querySelectorAll("[data-uch]").forEach(function(x){ x.style.borderColor=x===uc?"var(--green)":"transparent"; }); utmRender(); return; }
+  var ulc=t.closest("[data-ulcopy]"); if(ulc){ var r=(S.utmLog||[]).filter(function(x){return x.id===ulc.dataset.ulcopy;})[0]; if(r) copy(r.link,"Ссылка скопирована"); return; }
+  var uld=t.closest("[data-uldel]"); if(uld){ if(uld.dataset.armed){ S.utmLog=S.utmLog.filter(function(x){return x.id!==uld.dataset.uldel;}); save(); route(); toast("Удалено"); } else { uld.dataset.armed="1"; uld.textContent="Точно?"; } return; }
   var cp=t.closest("[data-copy]"); if(cp){ copy(cp.dataset.copy,"Цвет "+cp.dataset.copy+" скопирован"); return; }
 });
 document.addEventListener("change",function(e){
