@@ -1,0 +1,1143 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Дашборд VASTU</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --bg:#f6f1eb; --card:#fbf8f4; --line:#e5dcd0; --ink:#2f2a25; --ink-2:#6b6158; --ink-3:#958a7e;
+    --accent:#3e6d65; --accent-soft:#e3ece8; --accent-2:#d4a06a; --slate:#ad9473;
+    --up:#5f6d31; --down:#c96f4a; --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font:15px/1.45 Manrope,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 24px 56px}
+  header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;margin-bottom:22px}
+  .brand{font-size:30px;font-weight:700;letter-spacing:.06em}
+  .brand span{color:var(--accent)}
+  .updated{color:var(--ink-2);font-size:14px;margin-top:2px}
+  .period-label{color:var(--ink-2);font-size:14px;margin-left:4px}
+  .note{color:var(--ink-3);font-size:12px;margin-top:6px;line-height:1.35}
+  .post-note{color:var(--ink-2);font-size:13px;border-top:1px solid var(--line);padding-top:10px}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:22px}
+  .seg{display:inline-flex;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px}
+  .seg button{border:0;background:transparent;color:var(--ink-2);font:inherit;font-size:14px;padding:7px 14px;border-radius:999px;cursor:pointer;white-space:nowrap}
+  .seg button:hover{color:var(--ink)}
+  .seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+  .spacer{flex:1}
+  .refresh{border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:14px;padding:9px 16px;border-radius:999px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+  .refresh:hover{border-color:var(--accent);color:var(--accent)}
+  .refresh svg{width:15px;height:15px}
+  .refresh.busy svg{animation:spin .9s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px;min-width:0}
+  .card h2{margin:0 0 4px;font-size:15px;font-weight:600}
+  .card .sub{color:var(--ink-3);font-size:13px;margin-bottom:16px}
+  .kpis{grid-column:span 12;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+  .flow,.eff{grid-column:span 12}
+  .insights{grid-column:span 7} .flags{grid-column:span 5}
+  .ins{margin:0;padding:0;list-style:none;counter-reset:i;display:grid;gap:14px}
+  .ins li{counter-increment:i;display:grid;grid-template-columns:28px 1fr;gap:12px;font-size:15px;line-height:1.5}
+  .ins li::before{content:counter(i);width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;margin-top:-1px}
+  .ins li.empty-li{display:block;color:var(--ink-3)} .ins li.empty-li::before{display:none}
+  .ins b{font-weight:700}
+  .flag-list{display:grid;gap:14px}
+  .flag{display:grid;grid-template-columns:12px 1fr;gap:12px;align-items:start}
+  .flag .dot{width:10px;height:10px;border-radius:50%;margin-top:6px;background:var(--ink-3)}
+  .flag.high .dot{background:#c96f4a} .flag.mid .dot{background:#d4a06a} .flag.ok-flag .dot{background:var(--up)}
+  .f-title{font-size:15px;line-height:1.45} .f-title b{font-weight:700}
+  .flag.high .f-title b{color:#b25c38}
+  .f-hint{color:var(--ink-3);font-size:13px;line-height:1.4;margin-top:3px}
+  .eff-table tr.sel td{background:var(--accent-soft)}
+  .eff-table tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--accent);padding-left:10px}
+  .bar-col{min-width:200px}
+  .mini-bar{display:flex;align-items:center;gap:10px;justify-content:flex-end}
+  .mini-track{flex:1;max-width:160px;height:8px;background:var(--accent-soft);border-radius:999px;overflow:hidden}
+  .mini-fill{height:100%;background:var(--accent);border-radius:999px}
+  .mini-bar span{min-width:40px;text-align:right}
+  .ftable{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  .ftable th{color:var(--ink-3);font-weight:400;font-size:13px;text-align:right;padding:0 0 10px 16px;white-space:nowrap}
+  .ftable th:first-child,.ftable td:first-child{text-align:left;padding-left:0}
+  .ftable td{text-align:right;padding:11px 0 11px 16px;border-top:1px solid var(--line);font-size:16px;font-weight:600;white-space:nowrap}
+  .ftable td:first-child{font-weight:500}
+  .ftable tr.total td{font-weight:700;border-top:1.5px solid var(--ink-3)}
+  .na{color:var(--ink-3);font-weight:400}
+  .pos{color:var(--up)} .neg{color:var(--down)}
+  .ftable small{color:var(--ink-3);font-weight:400;font-size:13px}
+  .table-scroll{overflow-x:auto}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:18px}
+  .tiles .t-label{color:var(--ink-2);font-size:14px}
+  .tiles .t-val{font-size:32px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin-top:4px}
+  .tiles .t-sub{color:var(--ink-3);font-size:13px}
+  .kpi .label{color:var(--ink-2);font-size:14px}
+  .kpi .value{font-size:40px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin:8px 0 8px;font-variant-numeric:tabular-nums}
+  .kpi .value small{font-size:22px;font-weight:600;color:var(--ink-2)}
+  .delta{font-size:14px;font-variant-numeric:tabular-nums}
+  .delta.up{color:var(--up)} .delta.down{color:var(--down)} .delta.flat{color:var(--ink-3)}
+  .delta .ctx{color:var(--ink-3)}
+  .chart{grid-column:span 6}
+  .mix{grid-column:span 5}
+  .bars{grid-column:span 7}
+  .top{grid-column:span 12}
+  .chart-box{position:relative;height:230px;display:flex;align-items:center;justify-content:center}
+  .chart-box svg{flex:1}
+  .chart-box svg{display:block;width:100%;height:100%;overflow:visible}
+  .chart-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+  .chart-head .big{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+  .tip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;font-size:12px;padding:6px 9px;border-radius:8px;white-space:nowrap;transform:translate(-50%,-120%);opacity:0;transition:opacity .12s}
+  .axis{fill:var(--ink-3);font-size:11px}
+  .gridline{stroke:var(--line);stroke-width:1}
+  .donut-row{display:flex;align-items:center;gap:28px;flex-wrap:wrap}
+  .donut{width:190px;height:190px;flex:none}
+  .legend{display:grid;gap:12px;flex:1;min-width:170px}
+  .legend .row{display:grid;grid-template-columns:12px 1fr auto;gap:10px;align-items:center}
+  .legend .sw{width:12px;height:12px;border-radius:4px}
+  .legend .pct{font-weight:700;font-variant-numeric:tabular-nums}
+  .legend .n{color:var(--ink-3);font-size:13px;grid-column:2}
+  .bar-list{display:grid;gap:18px}
+  .bar-row .top-line{display:flex;justify-content:space-between;margin-bottom:7px}
+  .bar-row .val{font-weight:700;font-variant-numeric:tabular-nums}
+  .bar-row .muted{color:var(--ink-3);font-weight:400;font-size:13px;margin-left:6px}
+  .track{height:12px;background:var(--accent-soft);border-radius:999px;overflow:hidden}
+  .fill{height:100%;border-radius:999px;background:var(--accent);transition:width .4s ease}
+  .posts{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .post{border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px}
+  .post .meta{display:flex;justify-content:space-between;gap:8px;color:var(--ink-3);font-size:13px}
+  .badge{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .badge.viral{background:var(--accent);color:#fff}
+  .badge.strong{background:var(--accent-soft);color:var(--accent)}
+  .badge.normal{background:#efe9df;color:var(--ink-2)}
+  .post .title{font-weight:600;font-size:16px;line-height:1.3}
+  .post .nums{display:flex;gap:22px;margin-top:auto}
+  .post .nums div{display:flex;flex-direction:column}
+  .post .nums b{font-size:22px;font-variant-numeric:tabular-nums}
+  .post .nums span{color:var(--ink-3);font-size:12px}
+  .empty{color:var(--ink-3);padding:24px 0;text-align:center}
+  @media (max-width:980px){
+    .chart,.mix,.bars,.insights,.flags{grid-column:span 12}
+    .posts{grid-template-columns:1fr 1fr}
+  }
+  @media (max-width:640px){
+    .wrap{padding:20px 16px 40px}
+    .grid{gap:12px}
+    .chart,.mix,.bars,.top,.insights,.flags{grid-column:span 12}
+    .kpis{grid-template-columns:1fr;gap:12px}
+    .posts{grid-template-columns:1fr}
+    .card{padding:18px}
+    .kpi .value{font-size:36px}
+    .spacer{display:none}
+    .seg{max-width:100%}
+    .donut-row{justify-content:center}
+  }
+  html.embed header{display:none}
+  html.embed .wrap{padding-top:8px}
+</style>
+<script>if(location.hash==="#embed")document.documentElement.classList.add("embed")</script>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="brand"><span>[</span>VASTU<span>]</span></div>
+      <div class="updated"><span id="updated">обновлено сегодня</span></div>
+    </div>
+  </header>
+
+  <div class="controls">
+    <div class="seg" id="net" role="group" aria-label="Соцсеть">
+      <button data-v="all" aria-pressed="true">все</button>
+      <button data-v="ig" aria-pressed="false">Instagram</button>
+      <button data-v="tg" aria-pressed="false">Telegram</button>
+      <button data-v="max" aria-pressed="false">MAX</button>
+      <button data-v="pin" aria-pressed="false">Pinterest</button>
+      <button data-v="vk" aria-pressed="false">ВКонтакте</button>
+    </div>
+    <div class="seg" id="period" role="group" aria-label="Период">
+      <button data-v="week" aria-pressed="true">неделя</button>
+      <button data-v="month" aria-pressed="false">месяц</button>
+      <button data-v="all" aria-pressed="false">все время</button>
+    </div>
+    <span class="period-label" id="period-label"></span>
+    <div class="spacer"></div>
+    <button class="refresh" id="refresh" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
+      обновить
+    </button>
+  </div>
+
+  <main class="grid">
+    <div class="kpis">
+      <section class="card kpi" id="kpi-followers"></section>
+      <section class="card kpi" id="kpi-leads"></section>
+      <section class="card kpi" id="kpi-reach"></section>
+      <section class="card kpi" id="kpi-er"></section>
+    </div>
+
+    <section class="card insights" id="insights-card">
+      <h2>Выводы</h2>
+      <div class="sub" id="ins-sub"></div>
+      <ol class="ins" id="insights"></ol>
+    </section>
+    <section class="card flags" id="flags-card">
+      <h2>Тревожные флажки</h2>
+      <div class="sub" id="flags-sub"></div>
+      <div class="flag-list" id="flags"></div>
+    </section>
+
+    <section class="card flow" id="flow-card">
+      <h2>Подписки, отписки и публикации</h2>
+      <div class="sub" id="flow-sub"></div>
+      <div id="flow"></div>
+    </section>
+
+    <section class="card eff" id="eff-card">
+      <h2>Эффективность сетей</h2>
+      <div class="sub" id="eff-sub"></div>
+      <div id="eff"></div>
+    </section>
+
+    <section class="card chart">
+      <div class="chart-head"><h2>Подписчики</h2><span class="big" id="ch-f-last"></span></div>
+      <div class="sub" id="ch-f-sub">по неделям</div>
+      <div class="chart-box" id="ch-followers"></div>
+    </section>
+    <section class="card chart">
+      <div class="chart-head"><h2>Охваты</h2><span class="big" id="ch-r-last"></span></div>
+      <div class="sub" id="ch-r-sub">по неделям</div>
+      <div class="chart-box" id="ch-reach"></div>
+    </section>
+
+    <section class="card mix">
+      <h2>Микс контента</h2>
+      <div class="sub" id="mix-sub">доля форматов</div>
+      <div class="donut-row"><svg class="donut" id="donut" viewBox="0 0 200 200"></svg><div class="legend" id="legend"></div></div>
+    </section>
+    <section class="card bars">
+      <h2>Сравнение форматов</h2>
+      <div class="sub">средний охват на одну публикацию · по журналу «Контент», охват = просмотры</div>
+      <div class="bar-list" id="bars"></div>
+    </section>
+
+    <section class="card top">
+      <h2>Топ публикаций</h2>
+      <div class="sub">три лучшие по просмотрам за период · по журналу «Контент»</div>
+      <div class="posts" id="posts"></div>
+    </section>
+  </main>
+</div>
+
+<!--
+  ВШИТЫЕ ДАННЫЕ. Это копии листов таблицы в формате CSV (первая строка — заголовки).
+  Чтобы обновить вшитые цифры, замените содержимое блоков на CSV из листов.
+  data-snapshot — дата снимка (показывается как «обновлено …»).
+-->
+<script type="text/csv" id="csv-weekly" data-snapshot="2026-10-13">
+Показатель,5.10-11.10,12.10-18.10,19.10-25.10,26.10-1.11,2.11-8.11,9.11-15.11,16.11-22.11,23.11-29.11,30.11-6.12,7.12-13.12,14.12-20.12,21.12-27.12
+ОБЩИЕ ПОКАЗАТЕЛИ
+Заявки / лиды,64
+ИНСТАГРАМ
+Подписчики,164939
+Прирост подписчиков,32
+Просмотры,70666
+Вовлеченность,3526
+Посещения профиля,468
+Нажатия на ссылку в биографии,0
+Лиды,5
+ВКОНТАКТЕ
+Подписчики,20166
+Прирост подписчиков,2249
+Просмотры,16000000
+Охват,638100
+Посещения профиля,4700
+Лиды,40
+Количество публикаций,53
+MAX
+Подписчики,3418
+Подписки,176
+Отписки,146
+Прирост подписчиков,30
+Просмотры,2234105
+Лиды,8
+ТЕЛЕГРАМ
+Подписчики,21584
+Подписки,197
+Отписки,174
+Прирост подписчиков,23
+Средний охват поста,785
+"Вовлеченность ER, %","5,01"
+Лиды,11
+Количество постов,38
+Количество историй,5
+PINTEREST,,ъ
+Подписчики,586
+Просмотры,28780
+Вовлеченность,2320
+Переходы на сайт,96
+Лиды,0
+</script>
+<script type="text/csv" id="csv-monthly">
+Показатель,Июль 26,Август 26,Сентябрь 26,Октябрь 26,Ноябрь 26,Декабрь 26
+ОБЩИЕ ПОКАЗАТЕЛИ
+Заявки / лиды,527,737,773
+ИНСТАГРАМ
+Подписчики,165384,165120,164885
+Прирост подписчиков,-,-264,-235
+Просмотры,-,228738,173585
+Вовлеченность,-,7873,5690
+Посещения профиля,-,1500,1200
+Нажатия на ссылку в биографии,-,64,27
+Лиды,119,86,46
+ВКОНТАКТЕ
+Подписчики,12033,13864,17254
+Прирост подписчиков,1200,1831,3390
+Просмотры,25000000,23000000,34000000
+Охват,735900,710600,1100000
+Посещения профиля,6900,6700,10500
+Лиды,183,344,458
+Количество публикаций,115,92,142
+MAX
+Подписчики,2419,2693,3352
+Прирост подписчиков,-,274,659
+Просмотры,-,-,-
+Лиды,102,110,179
+ТЕЛЕГРАМ
+Подписчики,21290,21705,21603
+Прирост подписчиков,134,415,-102
+Средний охват поста,901,910,840
+"Вовлеченность ER, %","7,26","11,87","5,3"
+Лиды,148,187,92
+Количество постов,181,163,127
+Количество историй,18,21,21
+PINTEREST,,ъ
+Подписчики,-,552,576
+Просмотры,37730,30888,56880
+Вовлеченность,2720,2220,4990
+Переходы на сайт,307,321,315
+Лиды,0,0,0
+</script>
+<script type="text/csv" id="csv-content">
+Дата,Соцсеть,Формат,Тема публикации,Просмотры,Лайки,Комментарии,Репосты,Сохранения,Подписки с публикации,Переходы,Вывод
+05.10.2026,Instagram,Пост-карусель,Сколько еще вы будете себя исправлять?,7903,49,13,1,31,0,10,"Тема хорошая, нужно доработать призыв и воронку"
+06.10.2026,Instagram,Пост-карусель,Васту-тайминг по дням недели (чек-лист благоприятных дел),26502,1000,71,14,1300,153,157,МАСШТАБИРОВАТЬ - рабочая связка
+07.10.2026,Instagram,Пост-карусель,Ретроградная венера: 3 октября - 14 ноября,7226,76,4,1,23,1,15,"Тема хорошая, нужно доработать призыв и воронку"
+08.10.2026,Instagram,Пост-карусель,Как голливудские звезды и президенты США переписывают сценарии своей жизни?,4016,18,2,2,9,0,1,"Тема хорошая, нужно доработать призыв и воронку"
+09.10.2026,Instagram,Пост-карусель,Почему с 11 октября менять жизнь станет проще?,11818,122,7,2,109,1,12,"Тема хорошая, нужно доработать призыв и воронку"
+10.10.2026,Instagram,Пост-карусель,"14-19 октября: период процветания, красоты и мудрости",4876,56,20,2,27,0,14,"Тема хорошая, нужно доработать призыв и воронку"
+</script>
+
+<script>
+(function(){
+"use strict";
+
+/* ===== Источник данных =====
+   SHEET_ID — ваша таблица (открыта на просмотр по ссылке): кнопка «обновить» читает её напрямую.
+   PUBLISHED — сюда можно вставить ссылки «Файл → Поделиться → Опубликовать в интернете → CSV»
+   для каждого листа; если они заданы, читаются в первую очередь. */
+var SHEET_ID = "13g6C4C53GXcmBibUeaEqvL4i7CsjDA1SVy1S2GwhfnE";
+var PUBLISHED = { weekly: "", monthly: "", content: "" };
+var SHEET_NAMES = {
+  weekly:  ["Еженедельная статистика", "еженедельная статистика"],
+  monthly: ["Ежемесячная статистика", "ежемесячная статистика"],
+  content: ["Контент", "контент"]
+};
+var CACHE_KEY = "vastu-dashboard-cache-v2";
+
+/* ===== Справочники ===== */
+var NETS = { ig:"Instagram", tg:"Telegram", max:"MAX", pin:"Pinterest", vk:"ВКонтакте" };
+var NET_IDS = Object.keys(NETS);
+function netKey(s){
+  s = String(s||"").toLowerCase().replace(/[^a-zа-яё]/g,"");
+  if (!s) return null;
+  if (/^(inst|инст|ig$|иг$)/.test(s)) return "ig";
+  if (/^(vk|вк$|вконт|vkontakte)/.test(s)) return "vk";
+  if (/^(max$|макс$)/.test(s)) return "max";
+  if (/^(tg$|тг$|telegr|телегр)/.test(s)) return "tg";
+  if (/^(pinterest|пинтерест)/.test(s)) return "pin";
+  return null; // другие сети в таблице игнорируем
+}
+var FORMATS = [
+  { key:"reels",   label:"Рилс",    color:"#3e6d65" },
+  { key:"posts",   label:"Посты",   color:"#d4a06a" },
+  { key:"stories", label:"Stories", color:"#c96f4a" }
+];
+function fmtKey(s){
+  s = String(s||"").toLowerCase();
+  if (/(рилс|reel|клип|clip|видео|video|шортс|short)/.test(s)) return "reels";
+  if (/(stor|стор|истори)/.test(s)) return "stories";
+  return s ? "posts" : null;
+}
+var MON_NOM=["январь","февраль","март","апрель","май","июнь","июль","август","сентябрь","октябрь","ноябрь","декабрь"];
+var MON_GEN=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+var MON_DAT=["январю","февралю","марту","апрелю","маю","июню","июлю","августу","сентябрю","октябрю","ноябрю","декабрю"];
+var MON_SHORT=["янв","фев","мар","апр","май","июн","июл","авг","сен","окт","ноя","дек"];
+
+/* ===== CSV ===== */
+function parseCSV(text){
+  text = String(text||"").replace(/^﻿/,"");
+  var first=text.split("\n")[0], delim=(first.split(";").length>first.split(",").length)?";":",";
+  var rows=[], row=[], cell="", q=false, i, c;
+  for (i=0;i<text.length;i++){
+    c=text[i];
+    if (q){
+      if (c==='"'){ if (text[i+1]==='"'){ cell+='"'; i++; } else q=false; }
+      else cell+=c;
+    } else if (c==='"') q=true;
+    else if (c===delim) { row.push(cell); cell=""; }
+    else if (c==="\n"||c==="\r"){ if (c==="\r"&&text[i+1]==="\n") i++; row.push(cell); rows.push(row); row=[]; cell=""; }
+    else cell+=c;
+  }
+  if (cell!==""||row.length){ row.push(cell); rows.push(row); }
+  return rows.map(function(r){ return r.map(function(x){ return x.trim(); }); })
+             .filter(function(r){ return r.some(function(x){ return x!==""; }); });
+}
+function num(v){
+  if (v==null) return NaN;
+  var s=String(v).replace(/[\s  %₽]/g,"").replace(/[−–]/g,"-").replace(/,(?=\d{1,2}$)/,".").replace(/,/g,"");
+  if (!/^-?\d+(\.\d+)?$/.test(s)) return NaN;
+  return parseFloat(s);
+}
+function parseDate(v){
+  var s=String(v||"").trim().toLowerCase(), m;
+  if ((m=s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/))) return new Date(+m[1],m[2]-1,+m[3]);
+  if ((m=s.match(/(\d{1,2})[.\/](\d{1,2})[.\/](\d{2,4})/))) return new Date(m[3].length===2?2000+ +m[3]:+m[3],m[2]-1,+m[1]);
+  return null;
+}
+/* «Июль 26», «сентябрь 2026» → 1-е число месяца */
+function parseMonth(s){
+  s=String(s||"").toLowerCase();
+  var i=MON_SHORT.findIndex(function(x){ return s.indexOf(x==="май"?"ма":x)===0; });
+  if (i<0) { var d=parseDate(s); return d ? new Date(d.getFullYear(), d.getMonth(), 1) : null; }
+  var y=(s.match(/(\d{2,4})\s*$/)||[])[1];
+  y = y ? (y.length===2 ? 2000+ +y : +y) : new Date().getFullYear();
+  return new Date(y, i, 1);
+}
+
+/* ===== Листы статистики: показатели в строках, периоды в столбцах, блоки по соцсетям ===== */
+function metricKey(name){
+  var l=name.toLowerCase();
+  if (l.indexOf("прирост")===0) return "growth";
+  if (l.indexOf("подписчик")===0) return "followers";
+  if (l.indexOf("подписк")===0) return "subs";
+  if (l.indexOf("отписк")===0) return "unsubs";
+  if (l.indexOf("средний охват")>=0) return "avgReach";
+  if (l.indexOf("охват")===0) return "reach";
+  if (l.indexOf("просмотр")===0) return "views";
+  if (l.indexOf("вовлеч")>=0) return (/%|er/.test(l)) ? "erPct" : "engagement";
+  if (/лид|заявк/.test(l)) return "leads";
+  if (/переход|нажати/.test(l)) return "clicks";
+  if (/истори|stories|сторис/.test(l)) return "stories";
+  if (l.indexOf("количество постов")>=0) return "posts";
+  if (l.indexOf("количество публикаций")>=0) return "pubs";
+  return null;
+}
+function wide(text, kind){
+  var rows=parseCSV(text); if (!rows.length) return [];
+  var h=0;
+  for (var i=0;i<Math.min(rows.length,5);i++) if (/показател/i.test(rows[i][0])) { h=i; break; }
+  var periods=[], prevStart=null;
+  rows[h].forEach(function(lbl, col){
+    if (!col || !lbl) return;
+    var p={ label:lbl, col:col, nets:{}, total:{} }, m;
+    if (kind==="monthly"){
+      p.start=parseMonth(lbl); if (!p.start) return;
+      p.end=new Date(p.start.getFullYear(), p.start.getMonth()+1, 1);
+    } else {
+      m=lbl.match(/(\d{1,2})\.(\d{1,2})(?:\.(\d{2,4}))?\s*[-–—]\s*(\d{1,2})\.(\d{1,2})/);
+      if (!m) return;
+      var y=m[3] ? (m[3].length===2?2000+ +m[3]:+m[3]) : (prevStart ? prevStart.getFullYear() : new Date().getFullYear());
+      p.start=new Date(y, m[2]-1, +m[1]);
+      if (prevStart && p.start<prevStart) p.start.setFullYear(y+1);           // переход через Новый год
+      p.end=new Date(p.start.getFullYear(), m[5]-1, +m[4]+1);
+      if (p.end<=p.start) p.end.setFullYear(p.end.getFullYear()+1);
+      prevStart=p.start;
+    }
+    periods.push(p);
+  });
+  var section=null;
+  rows.slice(h+1).forEach(function(r){
+    var name=r[0]||""; if (!name) return;
+    var vals=periods.map(function(p){ return num(r[p.col]); });
+    var any=vals.some(ok), nk=netKey(name);
+    if (!any && (nk || /общ/i.test(name))) { section = nk || "total"; return; }
+    if (!section) return;
+    var m=metricKey(name); if (!m) return;
+    periods.forEach(function(p, i){
+      if (!ok(vals[i])) return;
+      var t = section==="total" ? p.total : (p.nets[section] = p.nets[section] || {});
+      t[m]=vals[i];
+    });
+  });
+  periods.forEach(function(p){
+    p.filled = ok(p.total.leads) || NET_IDS.some(function(n){ var o=p.nets[n]; return o && Object.keys(o).length; });
+  });
+  return periods.filter(function(p){ return p.filled; });
+}
+
+/* ===== Журнал публикаций ===== */
+function findCol(head, include){
+  for (var i=0;i<head.length;i++){
+    var h=head[i].toLowerCase();
+    if (include.some(function(w){ return h.indexOf(w)>=0; })) return i;
+  }
+  return -1;
+}
+var K = {
+  date:["дата","date"], net:["соцсет","сеть","платформ","площадк","network"],
+  reach:["охват","reach"], views:["просмотр","view"],
+  likes:["лайк","like"], comments:["коммент","comment"], saves:["сохран","save"], reactions:["реакц","reaction"],
+  format:["формат","format"], topic:["тема","заголов","topic"], note:["вывод","итог"]
+};
+function contentTable(text){
+  var rows=parseCSV(text); if (!rows.length) return [];
+  var h=0;
+  for (var i=0;i<Math.min(rows.length,5);i++) if (findCol(rows[i],K.net)>=0 && findCol(rows[i],K.date)>=0){ h=i; break; }
+  var head=rows[h], c={};
+  Object.keys(K).forEach(function(k){ c[k]=findCol(head,K[k]); });
+  var out=[];
+  rows.slice(h+1).forEach(function(r, idx){
+    var net=netKey(r[c.net]); if (!net) return;
+    function g(k){ return c[k]>=0 ? num(r[c[k]]) : NaN; }
+    var o={ net:net, order:idx, date:parseDate(r[c.date]), views:g("views"), reach:g("reach"),
+      likes:g("likes"), comments:g("comments"), saves:g("saves"), reactions:g("reactions"),
+      formatRaw:r[c.format]||"", topic:c.topic>=0?r[c.topic]:"", note:c.note>=0?r[c.note]:"" };
+    o.format=fmtKey(o.formatRaw);
+    if (!ok(o.reach)) o.reach=o.views;      // охвата в журнале нет — берём просмотры
+    out.push(o);
+  });
+  return out;
+}
+
+/* ===== Состояние ===== */
+var DATA = { weekly:[], monthly:[], content:[] };
+var state = { net:"all", period:"week", stamp:null, live:false };
+
+function applyCSV(csv, at, live){
+  var w=wide(csv.weekly||"","weekly"), m=wide(csv.monthly||"","monthly"), ct=contentTable(csv.content||"");
+  if (!w.length && !m.length) return false;
+  DATA.weekly=w; DATA.monthly=m; DATA.content=ct;
+  state.stamp=at; state.live=live;
+  return true;
+}
+function loadEmbedded(){
+  var el=document.getElementById("csv-weekly");
+  applyCSV({ weekly:el.textContent, monthly:document.getElementById("csv-monthly").textContent,
+             content:document.getElementById("csv-content").textContent }, parseDate(el.getAttribute("data-snapshot")), false);
+  try {
+    var cached=JSON.parse(localStorage.getItem(CACHE_KEY)||"null");
+    if (cached && cached.at && (!state.stamp || cached.at>state.stamp.getTime())) applyCSV(cached, new Date(cached.at), true);
+  } catch(e){}
+}
+
+/* ===== Загрузка из таблицы ===== */
+function fetchText(url){
+  var ctrl = window.AbortController ? new AbortController() : null;
+  var t = ctrl ? setTimeout(function(){ ctrl.abort(); }, 12000) : null;
+  return fetch(url, { cache:"no-store", signal: ctrl?ctrl.signal:undefined }).then(function(r){
+    if (t) clearTimeout(t);
+    if (!r.ok) throw new Error(r.status);
+    return r.text();
+  }).then(function(s){ if (/^\s*</.test(s)) throw new Error("not csv"); return s; });
+}
+function fetchSheet(kind){
+  var urls=[];
+  if (PUBLISHED[kind]) urls.push(PUBLISHED[kind]);
+  SHEET_NAMES[kind].forEach(function(n){
+    urls.push("https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:csv&headers=1&sheet="+encodeURIComponent(n));
+  });
+  var i=0;
+  function next(){ if (i>=urls.length) return Promise.resolve(""); return fetchText(urls[i++]).catch(next); }
+  return next();
+}
+function refresh(){
+  var btn=document.getElementById("refresh");
+  if (btn.classList.contains("busy")) return;
+  btn.classList.add("busy");
+  Promise.all([fetchSheet("weekly"), fetchSheet("monthly"), fetchSheet("content")]).then(function(res){
+    var csv={ weekly:res[0], monthly:res[1], content:res[2], at:Date.now() };
+    if (applyCSV(csv, new Date(csv.at), true)){
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(csv)); } catch(e){}
+      render();
+    }
+  }).catch(function(){ /* тихо остаёмся на текущих цифрах */ })
+    .then(function(){ btn.classList.remove("busy"); });
+}
+
+/* ===== Расчёты ===== */
+function ok(x){ return typeof x==="number" && isFinite(x); }
+function sum(a,f){ return a.reduce(function(s,x){ var v=f(x); return s+(ok(v)?v:0); },0); }
+function selNets(){ return state.net==="all" ? NET_IDS : [state.net]; }
+
+/* Охват соцсети за столбец: охват → средний охват поста × число постов → просмотры. */
+function reachIn(p, n){
+  var o=p.nets[n]||{};
+  if (ok(o.reach)) return o.reach;
+  if (ok(o.avgReach) && ok(o.posts)) return o.avgReach*o.posts;
+  return o.views;
+}
+function reachKind(n){
+  return n==="vk" ? "охват" : n==="tg" ? "≈ средний охват поста × число постов" : "просмотры (охвата в таблице нет)";
+}
+/* Значение показателя сети по набору столбцов. */
+function val(cols, n, m){
+  var v=cols.map(function(p){ return m==="reachX" ? reachIn(p,n) : (p.nets[n]||{})[m]; }).filter(ok);
+  if (!v.length) return NaN;
+  if (m==="followers") return v[v.length-1];
+  if (m==="erPct") return v.reduce(function(a,b){return a+b;},0)/v.length;
+  return v.reduce(function(a,b){return a+b;},0);
+}
+function useTotalLeads(cols){ return state.net==="all" && cols.length && cols.every(function(p){ return ok(p.total.leads); }); }
+function total(cols, m){
+  if (m==="leads" && useTotalLeads(cols)) return sum(cols,function(p){ return p.total.leads; });
+  var v=selNets().map(function(n){ return val(cols,n,m); }).filter(ok);
+  return v.length ? v.reduce(function(a,b){return a+b;},0) : NaN;
+}
+/* Сравнение: прирост считаем только по сетям, у которых есть цифры в обоих периодах. */
+function compare(cur, prev, m){
+  var r={ v: total(cur,m) };
+  if (!prev || !prev.length) return r;
+  if (m==="leads" && useTotalLeads(cur) && useTotalLeads(prev)){ r.c=r.v; r.p=total(prev,m); return r; }
+  var c=0, p=0, any=false;
+  selNets().forEach(function(n){
+    var a=val(cur,n,m), b=val(prev,n,m);
+    if (ok(a)&&ok(b)){ c+=a; p+=b; any=true; }
+  });
+  if (any){ r.c=c; r.p=p; }
+  return r;
+}
+/* ER из статистики: вовлечённость / просмотры × 100 (для телеграма — готовый ER из таблицы). */
+function erStats(cols){
+  var e=0, v=0, used=[];
+  selNets().forEach(function(n){
+    var a=val(cols,n,"engagement"), b=val(cols,n,"views");
+    if (ok(a)&&ok(b)&&b>0){ e+=a; v+=b; used.push(n); }
+  });
+  if (v>0) return { v:e/v*100, used:used };
+  if (state.net!=="all"){ var x=val(cols,state.net,"erPct"); if (ok(x)) return { v:x, used:[state.net], ready:true }; }
+  return { v:NaN, used:[] };
+}
+/* ER публикации: (лайки + комментарии + сохранения) / просмотры × 100 */
+function erPost(rows){
+  var a=0, b=0;
+  rows.forEach(function(r){
+    var inter = ok(r.likes)||ok(r.comments)||ok(r.saves)
+      ? (ok(r.likes)?r.likes:0)+(ok(r.comments)?r.comments:0)+(ok(r.saves)?r.saves:0) : r.reactions;
+    var base = ok(r.views)&&r.views>0 ? r.views : r.reach;
+    if (ok(inter)&&ok(base)&&base>0){ a+=inter; b+=base; }
+  });
+  return b>0 ? a/b*100 : NaN;
+}
+
+/* Текущий и прошлый период. */
+function periodSel(){
+  var W=DATA.weekly, M=DATA.monthly, P=state.period, s={};
+  if (P==="week"){
+    if (!W.length) return null;
+    var w=W[W.length-1];
+    s.cur=[w]; s.prev=W.length>1?[W[W.length-2]]:null;
+    s.ctx="к прошлой неделе"; s.noPrev="первая неделя в таблице";
+    s.title=dayRange(w.start, w.end);
+    s.from=w.start; s.to=w.end;
+  } else if (P==="month"){
+    if (!M.length) return null;
+    var m=M[M.length-1];
+    s.cur=[m]; s.prev=M.length>1?[M[M.length-2]]:null;
+    s.ctx=s.prev ? "к "+MON_DAT[s.prev[0].start.getMonth()] : ""; s.noPrev="первый месяц в таблице";
+    s.title=MON_NOM[m.start.getMonth()]+" "+m.start.getFullYear();
+    s.from=m.start; s.to=m.end;
+  } else {
+    var lastEnd = M.length ? M[M.length-1].end : null;
+    s.cur=M.concat(W.filter(function(w){ return !lastEnd || w.start>=lastEnd; }));
+    if (!s.cur.length) return null;
+    var first=s.cur[0].start;
+    s.prev=null; s.ctx=""; s.since="с "+MON_GEN[first.getMonth()];
+    s.title=MON_NOM[first.getMonth()]+" "+first.getFullYear()+" — сейчас";
+    s.from=null; s.to=null;
+  }
+  return s;
+}
+function dayRange(a, bExcl){
+  var b=new Date(bExcl-86400000);
+  return a.getMonth()===b.getMonth() ? a.getDate()+"–"+b.getDate()+" "+MON_GEN[b.getMonth()]
+       : a.getDate()+" "+MON_GEN[a.getMonth()]+" – "+b.getDate()+" "+MON_GEN[b.getMonth()];
+}
+
+/* ===== Формат ===== */
+function fmt(n){
+  if (!ok(n)) return "—";
+  var a=Math.abs(n);
+  if (a>=1e7) return (n/1e6).toLocaleString("ru-RU",{maximumFractionDigits:1})+" млн";
+  return Math.round(n).toLocaleString("ru-RU");
+}
+function short(n, step){
+  var a=Math.abs(n), d=function(u){ return step ? Math.max(0,Math.min(2,Math.ceil(-Math.log10(step/u)))) : 1; };
+  if (a>=1e6) return (n/1e6).toLocaleString("ru-RU",{maximumFractionDigits:d(1e6)})+"M";
+  if (a>=1e3) return (n/1e3).toLocaleString("ru-RU",{maximumFractionDigits:d(1e3)})+"K";
+  return Math.round(n).toLocaleString("ru-RU");
+}
+function pct(n,d){ return n.toLocaleString("ru-RU",{maximumFractionDigits:d==null?1:d}); }
+function plural(n,a,b,c){ n=Math.abs(n)%100; var m=n%10; return n>10&&n<20?c:m===1?a:m>=2&&m<=4?b:c; }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function dm(d){ return d ? String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0") : ""; }
+
+function deltaHTML(cur, prev, ctx, isPct, noPrev){
+  if (!ok(cur) || !ok(prev)) return '<div class="delta flat"><span class="ctx">'+esc(noPrev||"нет данных для сравнения")+'</span></div>';
+  var d=cur-prev, txt;
+  if (isPct) txt=pct(Math.abs(d))+" п.п.";
+  else txt = prev ? pct(Math.abs(d/prev*100))+"%" : fmt(Math.abs(d));
+  var cls = d>0?"up":d<0?"down":"flat", arrow = d>0?"↑":d<0?"↓":"→";
+  var extra = (!isPct && prev) ? " ("+(d>0?"+":d<0?"−":"")+fmt(Math.abs(d))+")" : "";
+  return '<div class="delta '+cls+'">'+arrow+" "+txt+extra+' <span class="ctx">'+esc(ctx)+'</span></div>';
+}
+function kpiHTML(label, val, delta, note){
+  return '<div class="label">'+label+'</div><div class="value">'+val+'</div>'+delta+(note?'<div class="note">'+esc(note)+'</div>':"");
+}
+
+/* ===== График ===== */
+function smoothPath(p){
+  if (p.length<2) return p.length?"M"+p[0][0]+","+p[0][1]:"";
+  var d="M"+p[0][0]+","+p[0][1];
+  for (var i=0;i<p.length-1;i++){
+    var p0=p[i-1]||p[i], p1=p[i], p2=p[i+1], p3=p[i+2]||p2, t=0.18;
+    var c1x=p1[0]+(p2[0]-p0[0])*t, c1y=p1[1]+(p2[1]-p0[1])*t;
+    var c2x=p2[0]-(p3[0]-p1[0])*t, c2y=p2[1]-(p3[1]-p1[1])*t;
+    var lo=Math.min(p1[1],p2[1]), hi=Math.max(p1[1],p2[1]);
+    c1y=Math.max(lo,Math.min(hi,c1y)); c2y=Math.max(lo,Math.min(hi,c2y));
+    d+=" C"+c1x+","+c1y+" "+c2x+","+c2y+" "+p2[0]+","+p2[1];
+  }
+  return d;
+}
+function niceTicks(min,max,count){
+  if (min===max){ max=min+1; }
+  var step=Math.pow(10,Math.floor(Math.log10((max-min)/count))), err=(max-min)/count/step;
+  step*= err>=7.5?10:err>=3.5?5:err>=1.5?2:1;
+  var lo=Math.floor(min/step)*step, hi=Math.ceil(max/step)*step, t=[];
+  for (var v=lo; v<=hi+step/2; v+=step) t.push(v);
+  return t;
+}
+var gradId=0;
+function lineChart(box, pts, name){
+  box.innerHTML="";
+  if (pts.length<2){ box.innerHTML='<div class="empty">'+(pts.length?"Пока одна точка — график появится со второго периода":"Нет данных")+'</div>'; return; }
+  var vals=pts.map(function(p){ return p.v; });
+  var W=box.clientWidth||600, H=box.clientHeight||230, L=48, R=14, T=10, B=26;
+  var mn=Math.min.apply(null,vals), mx=Math.max.apply(null,vals), pad=(mx-mn)*0.15||mx*0.05||1;
+  var ticks=niceTicks(Math.max(0,mn-pad), mx+pad, 3), y0=ticks[0], y1=ticks[ticks.length-1];
+  function X(i){ return L+(W-L-R)*i/(pts.length-1); }
+  function Y(v){ return T+(H-T-B)*(1-(v-y0)/(y1-y0)); }
+  var P=pts.map(function(p,i){ return [X(i),Y(p.v)]; });
+  var line=smoothPath(P), id="g"+(++gradId);
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none"><defs><linearGradient id="'+id+'" x1="0" y1="0" x2="0" y2="1">'+
+    '<stop offset="0" stop-color="#3e6d65" stop-opacity=".22"/><stop offset="1" stop-color="#3e6d65" stop-opacity="0"/></linearGradient></defs>';
+  ticks.forEach(function(t){ var y=Y(t); svg+='<line class="gridline" x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'"/><text class="axis" x="'+(L-8)+'" y="'+(y+4)+'" text-anchor="end">'+short(t, ticks[1]-ticks[0])+'</text>'; });
+  var every=Math.max(1,Math.ceil(pts.length/(W<420?4:7)));
+  pts.forEach(function(p,i){ if ((pts.length-1-i)%every===0) svg+='<text class="axis" x="'+X(i)+'" y="'+(H-6)+'" text-anchor="'+(i===0?"start":i===pts.length-1?"end":"middle")+'">'+esc(p.axis)+'</text>'; });
+  svg+='<path d="'+line+" L"+X(pts.length-1)+","+(H-B)+" L"+L+","+(H-B)+' Z" fill="url(#'+id+')"/>';
+  svg+='<path d="'+line+'" fill="none" stroke="#3e6d65" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+  P.forEach(function(q,i){ svg+='<circle cx="'+q[0]+'" cy="'+q[1]+'" r="'+(i===P.length-1?4:3)+'" fill="#3e6d65" stroke="#fbf8f4" stroke-width="2"/>'; });
+  svg+='<line class="hover-line" x1="0" x2="0" y1="'+T+'" y2="'+(H-B)+'" stroke="#3e6d65" stroke-opacity=".35" stroke-dasharray="3 3" style="display:none"/>';
+  svg+='<circle class="hover-dot" r="5" fill="#fbf8f4" stroke="#3e6d65" stroke-width="2.5" style="display:none"/></svg><div class="tip"></div>';
+  box.innerHTML=svg;
+  var s=box.querySelector("svg"), tip=box.querySelector(".tip"), hl=s.querySelector(".hover-line"), hd=s.querySelector(".hover-dot");
+  function move(e){
+    var rect=s.getBoundingClientRect(), x=(e.clientX-rect.left)*W/rect.width;
+    var i=Math.round((x-L)/((W-L-R)/(pts.length-1))); i=Math.max(0,Math.min(pts.length-1,i));
+    hl.setAttribute("x1",P[i][0]); hl.setAttribute("x2",P[i][0]); hl.style.display="";
+    hd.setAttribute("cx",P[i][0]); hd.setAttribute("cy",P[i][1]); hd.style.display="";
+    tip.innerHTML=esc(pts[i].tip)+" · <b>"+fmt(vals[i])+"</b> "+name;
+    var left=P[i][0]/W*rect.width; left=Math.max(70,Math.min(rect.width-70,left));
+    tip.style.left=left+"px"; tip.style.top=(P[i][1]/H*rect.height)+"px"; tip.style.opacity=1;
+  }
+  function leave(){ hl.style.display="none"; hd.style.display="none"; tip.style.opacity=0; }
+  s.addEventListener("pointermove",move); s.addEventListener("pointerleave",leave);
+}
+/* Ряд для графиков: по неделям, когда их в таблице от трёх; до этого — по месяцам. */
+function chartSeries(m){
+  var weekly=DATA.weekly.length>=3, cols=weekly?DATA.weekly:DATA.monthly, nets=selNets();
+  var pts=[];
+  cols.forEach(function(p, i){
+    var v=0, any=false;
+    nets.forEach(function(n){
+      var x = m==="reachX" ? reachIn(p,n) : (p.nets[n]||{})[m];
+      if (!ok(x) && m==="followers" && state.net==="all"){        // пропуск у одной сети — берём ближайшее значение
+        for (var d=1; d<cols.length && !ok(x); d++) x=[cols[i-d],cols[i+d]].map(function(q){ return q&&(q.nets[n]||{})[m]; }).filter(ok)[0];
+      }
+      if (ok(x)){ v+=x; any=true; }
+    });
+    if (any) pts.push({ v:v, axis: weekly?dm(p.start):MON_SHORT[p.start.getMonth()],
+      tip: weekly ? dayRange(p.start,p.end) : MON_NOM[p.start.getMonth()]+" "+p.start.getFullYear() });
+  });
+  return { pts:pts, weekly:weekly };
+}
+
+/* ===== Кольцо ===== */
+function donut(counts){
+  var total=counts.reduce(function(s,c){return s+c.n;},0), svg="", a=-Math.PI/2, R=86, r=60, cx=100, cy=100;
+  var gap=counts.filter(function(c){return c.n;}).length>1?0.025:0;
+  if (!total) svg='<circle cx="100" cy="100" r="73" fill="none" stroke="#e5dcd0" stroke-width="26"/>';
+  counts.forEach(function(c){
+    if (!c.n) return;
+    var ang=c.n/total*Math.PI*2;
+    if (ang>=Math.PI*2-1e-6){ svg+='<circle cx="100" cy="100" r="73" fill="none" stroke="'+c.color+'" stroke-width="26"/>'; return; }
+    var a0=a+gap/2, a1=a+ang-gap/2, large=a1-a0>Math.PI?1:0;
+    function pt(rad,an){ return (cx+rad*Math.cos(an))+","+(cy+rad*Math.sin(an)); }
+    svg+='<path d="M'+pt(R,a0)+" A"+R+","+R+" 0 "+large+" 1 "+pt(R,a1)+" L"+pt(r,a1)+" A"+r+","+r+" 0 "+large+" 0 "+pt(r,a0)+' Z" fill="'+c.color+'"><title>'+c.label+": "+c.n+'</title></path>';
+    a+=ang;
+  });
+  svg+='<text x="100" y="98" text-anchor="middle" font-size="30" font-weight="700" fill="#2f2a25">'+total+'</text>'+
+       '<text x="100" y="120" text-anchor="middle" font-size="12" fill="#958a7e">'+plural(total,"публикация","публикации","публикаций")+'</text>';
+  return svg;
+}
+
+/* ===== Рендер ===== */
+function render(){
+  var up=document.getElementById("updated"), now=new Date(), st=state.stamp;
+  if (st && st.toDateString()===now.toDateString())
+    up.textContent="обновлено сегодня"+(state.live?" в "+String(st.getHours()).padStart(2,"0")+":"+String(st.getMinutes()).padStart(2,"0"):"");
+  else up.textContent = st ? "обновлено "+st.getDate()+" "+MON_GEN[st.getMonth()] : "обновлено сегодня";
+
+  var s=periodSel();
+  document.getElementById("period-label").textContent = s ? s.title : "";
+  var ids=["followers","leads","reach","er"];
+  if (!s){
+    ids.forEach(function(id){ document.getElementById("kpi-"+id).innerHTML=kpiHTML("—","—",'<div class="delta flat"><span class="ctx">нет данных за период</span></div>'); });
+  } else {
+    var f=compare(s.cur,s.prev,"followers"), l=compare(s.cur,s.prev,"leads"), r=compare(s.cur,s.prev,"reachX");
+    var fDelta;
+    if (state.period==="all"){
+      var base=0, cur=0, any=false;
+      selNets().forEach(function(n){
+        var vals=s.cur.map(function(p){ return (p.nets[n]||{}).followers; }).filter(ok);
+        if (vals.length>1){ base+=vals[0]; cur+=vals[vals.length-1]; any=true; }
+      });
+      fDelta=deltaHTML(any?cur:NaN, any?base:NaN, s.since, false, "мало данных для сравнения");
+    } else fDelta=deltaHTML(f.c,f.p,s.ctx,false,s.prev?null:s.noPrev);
+    var allCtx = state.period==="all" ? '<div class="delta flat"><span class="ctx">'+esc("сумма "+s.since)+'</span></div>' : null;
+
+    document.getElementById("kpi-followers").innerHTML=kpiHTML("Подписчики", fmt(f.v), fDelta);
+    document.getElementById("kpi-leads").innerHTML=kpiHTML("Лиды", fmt(l.v), allCtx || deltaHTML(l.c,l.p,s.ctx,false,s.prev?null:s.noPrev));
+    document.getElementById("kpi-reach").innerHTML=kpiHTML("Охваты", fmt(r.v), allCtx || deltaHTML(r.c,r.p,s.ctx,false,s.prev?null:s.noPrev),
+      state.net==="all" ? "охват ВКонтакте, ≈ охват Telegram, просмотры Instagram, MAX, Pinterest" : reachKind(state.net));
+
+    var e=erStats(s.cur), ep=s.prev?erStats(s.prev):{v:NaN};
+    var erNote = !e.used.length ? (state.net==="vk"||state.net==="max" ? "вовлечённости по этой сети в таблице нет" : "")
+      : e.ready ? "ER из таблицы" : "вовлечённость / просмотры × 100"+(state.net==="all"?" · "+e.used.map(function(n){return NETS[n];}).join(", "):"");
+    document.getElementById("kpi-er").innerHTML=kpiHTML("Вовлечённость (ER)", ok(e.v)?pct(e.v)+"<small>%</small>":"—",
+      !ok(e.v) ? "" : state.period==="all" ? '<div class="delta flat"><span class="ctx">'+esc("в среднем "+s.since)+'</span></div>' : deltaHTML(e.v,ep.v,s.ctx,true,s.prev?null:s.noPrev), erNote);
+  }
+
+  document.getElementById("kpi-er").style.display = hasER() ? "" : "none";
+  renderFlow(s);
+
+  ["followers","reachX"].forEach(function(m){
+    var cs=chartSeries(m), id=m==="followers"?"f":"r";
+    var sub = cs.weekly ? "по неделям" : "по месяцам · на недели график перейдёт, когда в таблице будет 3+ недели";
+    if (m==="reachX" && state.net!=="all" && state.net!=="vk") sub=reachKind(state.net)+" · "+sub;
+    document.getElementById("ch-"+id+"-sub").textContent=sub;
+    document.getElementById("ch-"+id+"-last").textContent=cs.pts.length?fmt(cs.pts[cs.pts.length-1].v):"";
+    lineChart(document.getElementById("ch-"+(m==="followers"?"followers":"reach")), cs.pts, m==="followers"?"подписчиков":"охват");
+  });
+
+  // публикации за период
+  var c=DATA.content.filter(function(r){ return state.net==="all" || r.net===state.net; });
+  if (s && s.from) c=c.filter(function(r){ return r.date && r.date>=s.from && r.date<s.to; });
+  renderInsights(s, c.length);
+  renderEff(s);
+
+  var counts=FORMATS.map(function(f){ return { key:f.key, label:f.label, color:f.color, n:c.filter(function(r){return r.format===f.key;}).length }; });
+  var mixNote="по журналу публикаций";
+  // телеграм ведёт счётчики постов и историй в статистике — добавляем их, если в журнале записей по нему нет
+  if (s && (state.net==="all"||state.net==="tg") && !c.some(function(r){return r.net==="tg";})){
+    var tp=val(s.cur,"tg","posts"), ts=val(s.cur,"tg","stories");
+    if (ok(tp)||ok(ts)){ counts[1].n+=ok(tp)?tp:0; counts[2].n+=ok(ts)?ts:0; mixNote = c.length ? "журнал публикаций + счётчики Telegram" : "счётчики постов и историй Telegram"; }
+  }
+  var total=counts.reduce(function(a,x){return a+x.n;},0);
+  document.getElementById("mix-sub").textContent="доля форматов · "+mixNote;
+  document.getElementById("donut").innerHTML=donut(counts);
+  document.getElementById("legend").innerHTML=counts.map(function(x){
+    return '<div class="row"><span class="sw" style="background:'+x.color+'"></span><span>'+x.label+'</span><span class="pct">'+(total?Math.round(x.n/total*100):0)+'%</span>'+
+           '<span class="n">'+x.n+" "+plural(x.n,"публикация","публикации","публикаций")+'</span></div>'; }).join("");
+
+  var avgs=FORMATS.map(function(f){ var rr=c.filter(function(r){return r.format===f.key && ok(r.reach);});
+    return { label:f.label, n:rr.length, avg: rr.length?sum(rr,function(r){return r.reach;})/rr.length:0, er:erPost(rr) }; });
+  var maxAvg=Math.max.apply(null,avgs.map(function(a){return a.avg;}))||1;
+  avgs.sort(function(a,b){return b.avg-a.avg;});
+  document.getElementById("bars").innerHTML = c.length ? avgs.map(function(a){
+    return '<div class="bar-row"><div class="top-line"><span>'+a.label+'</span><span class="val">'+(a.n?fmt(a.avg):"—")+
+      '<span class="muted">'+(a.n?(ok(a.er)?"ER "+pct(a.er)+"% · ":"")+a.n+" "+plural(a.n,"публикация","публикации","публикаций"):"нет публикаций")+'</span></span></div>'+
+      '<div class="track"><div class="fill" style="width:'+(a.avg/maxAvg*100)+'%"></div></div></div>'; }).join("")
+    : '<div class="empty">В журнале «Контент» нет публикаций за этот период</div>';
+
+  var withReach=c.filter(function(r){return ok(r.reach);}), avgAll=withReach.length?sum(withReach,function(r){return r.reach;})/withReach.length:0;
+  var top=withReach.slice().sort(function(a,b){return b.reach-a.reach;}).slice(0,3);
+  document.getElementById("posts").innerHTML = top.length ? top.map(function(p){
+    var ratio=avgAll?p.reach/avgAll:1, b=ratio>=2?["viral","вирусный"]:ratio>=1.3?["strong","сильный"]:["normal","обычный"], er=erPost([p]);
+    return '<article class="post"><div class="meta"><span>'+esc(NETS[p.net])+" · "+esc(p.formatRaw)+(p.date?" · "+dm(p.date):"")+'</span><span class="badge '+b[0]+'">'+b[1]+'</span></div>'+
+      '<div class="title">'+esc(p.topic||"Без темы")+'</div>'+
+      '<div class="nums"><div><b>'+fmt(p.reach)+'</b><span>просмотры</span></div><div><b>'+(ok(er)?pct(er)+"%":"—")+'</b><span>ER</span></div>'+
+      (withReach.length>1?'<div><b>×'+pct(ratio)+'</b><span>к среднему</span></div>':"")+'</div>'+
+      (p.note?'<div class="post-note">'+esc(p.note)+'</div>':"")+'</article>';
+  }).join("") : '<div class="empty">В журнале «Контент» нет публикаций за этот период</div>';
+}
+
+/* ===== Подписки, отписки, прирост, публикации ===== */
+function signed(v){ return !ok(v) ? '<span class="na">—</span>' : '<span class="'+(v>0?"pos":v<0?"neg":"")+'">'+(v>0?"+":v<0?"−":"")+fmt(Math.abs(v))+'</span>'; }
+function plain(v){ return ok(v) ? fmt(v) : '<span class="na">—</span>'; }
+function pubsOf(cols, n){
+  var pubs=val(cols,n,"pubs"), posts=val(cols,n,"posts"), st=val(cols,n,"stories");
+  return { pubs:pubs, posts:posts, stories:st,
+    total: ok(pubs) ? pubs : (ok(posts)||ok(st)) ? (ok(posts)?posts:0)+(ok(st)?st:0) : NaN };
+}
+function pubsSplit(p){
+  if (!ok(p.stories)) return "";
+  var po=ok(p.posts)?p.posts:0;
+  return fmt(po)+" "+plural(po,"пост","поста","постов")+" + "+fmt(p.stories)+" "+plural(p.stories,"история","истории","историй");
+}
+function renderFlow(s){
+  var card=document.getElementById("flow-card"), box=document.getElementById("flow");
+  if (!s){ card.style.display="none"; return; }
+  var rows=selNets().map(function(n){
+    return { n:n, subs:val(s.cur,n,"subs"), unsubs:val(s.cur,n,"unsubs"), growth:val(s.cur,n,"growth"), pubs:pubsOf(s.cur,n) };
+  });
+  document.getElementById("flow-sub").textContent=s.title+(state.period==="all"?" · сумма за все периоды":"");
+  if (state.net!=="all"){                       // одна соцсеть — только те показатели, что есть в таблице
+    var r=rows[0], tiles=[];
+    if (ok(r.subs)) tiles.push(["Подписались", fmt(r.subs), ""]);
+    if (ok(r.unsubs)) tiles.push(["Отписались", fmt(r.unsubs), ""]);
+    if (ok(r.growth)) tiles.push(["Прирост", signed(r.growth), ""]);
+    if (ok(r.pubs.total)) tiles.push(["Публикаций", fmt(r.pubs.total), pubsSplit(r.pubs)]);
+    card.style.display = tiles.length ? "" : "none";
+    box.innerHTML='<div class="tiles">'+tiles.map(function(x){
+      return '<div><div class="t-label">'+x[0]+'</div><div class="t-val">'+x[1]+'</div>'+(x[2]?'<div class="t-sub">'+x[2]+'</div>':"")+'</div>'; }).join("")+'</div>';
+    return;
+  }
+  card.style.display="";
+  function tot(f){ var v=rows.map(f).filter(ok); return v.length ? v.reduce(function(a,b){return a+b;},0) : NaN; }
+  var T={ subs:tot(function(r){return r.subs;}), unsubs:tot(function(r){return r.unsubs;}),
+          growth:tot(function(r){return r.growth;}), pubs:tot(function(r){return r.pubs.total;}) };
+  box.innerHTML='<div class="table-scroll"><table class="ftable"><thead><tr><th>Соцсеть</th><th>Подписались</th><th>Отписались</th><th>Прирост</th><th>Публикаций</th></tr></thead><tbody>'+
+    rows.map(function(r){ var sp=pubsSplit(r.pubs);
+      return '<tr><td>'+NETS[r.n]+'</td><td>'+plain(r.subs)+'</td><td>'+plain(r.unsubs)+'</td><td>'+signed(r.growth)+'</td><td>'+plain(r.pubs.total)+(sp?' <small>('+sp+')</small>':"")+'</td></tr>'; }).join("")+
+    '<tr class="total"><td>Итого</td><td>'+plain(T.subs)+'</td><td>'+plain(T.unsubs)+'</td><td>'+signed(T.growth)+'</td><td>'+plain(T.pubs)+'</td></tr></tbody></table></div>';
+}
+/* Есть ли у выбранных сетей ER хоть в одном периоде таблицы — иначе плашку ER не показываем */
+function hasER(){
+  var cols=DATA.weekly.concat(DATA.monthly);
+  return selNets().some(function(n){ return cols.some(function(p){ var o=p.nets[n]||{}; return ok(o.erPct) || (ok(o.engagement)&&ok(o.views)); }); });
+}
+
+/* ===== Выводы, тревожные флажки, эффективность сетей ===== */
+var MON_PREP=["январе","феврале","марте","апреле","мае","июне","июле","августе","сентябре","октябре","ноябре","декабре"];
+function erNet(cols, n){
+  var a=val(cols,n,"engagement"), b=val(cols,n,"views");
+  return ok(a)&&ok(b)&&b>0 ? a/b*100 : val(cols,n,"erPct");
+}
+function S(cols, n){
+  return { leads:val(cols,n,"leads"), followers:val(cols,n,"followers"), pubs:pubsOf(cols,n).total,
+    reach:val(cols,n,"reachX"), clicks:val(cols,n,"clicks"), subs:val(cols,n,"subs"),
+    unsubs:val(cols,n,"unsubs"), growth:val(cols,n,"growth"), er:erNet(cols,n) };
+}
+function leadsTotal(cols){
+  if (cols.length && cols.every(function(p){ return ok(p.total.leads); })) return sum(cols,function(p){ return p.total.leads; });
+  var v=NET_IDS.map(function(n){ return val(cols,n,"leads"); }).filter(ok);
+  return v.length ? v.reduce(function(a,b){return a+b;},0) : NaN;
+}
+function small(v){ return !ok(v) ? "—" : v>=100 ? fmt(v) : pct(v, v<1?2:1); }
+function leadWord(v){ var r=v>=100?Math.round(v):Math.round(v*10)/10; return r%1 ? "лида" : plural(r,"лид","лида","лидов"); }
+function share(v){ return v>0&&v<0.01 ? "<1%" : Math.round(v*100)+"%"; }
+function b(s){ return "<b>"+s+"</b>"; }
+
+/* Слова для периода */
+function words(s){
+  var P=state.period, c=s.cur[s.cur.length-1], pv=s.prev&&s.prev[0];
+  return {
+    during: P==="week" ? "за неделю" : P==="month" ? "за "+MON_NOM[c.start.getMonth()] : s.since,
+    thanPrev: !pv ? "" : P==="week" ? "чем на прошлой неделе" : "чем в "+MON_PREP[pv.start.getMonth()],
+    streak: function(k){ return P==="week" ? k+"-ю неделю подряд" : k+"-й месяц подряд"; }
+  };
+}
+/* История показателя сети по периодам той же длины — для «N-й месяц подряд» */
+function hist(n, m){
+  var G = state.period==="week" ? DATA.weekly : DATA.monthly;
+  return G.map(function(p){ return val([p],n,m); });
+}
+/* Сколько последних значений подряд снижается (возвращает сами значения) */
+function fallingTail(a){
+  var i=a.length-1; if (!ok(a[i])) return [];
+  while (i>0 && ok(a[i-1]) && a[i]<a[i-1]) i--;
+  return a.slice(i);
+}
+function risingTail(a){
+  var i=a.length-1; if (!ok(a[i])) return [];
+  while (i>0 && ok(a[i-1]) && a[i]>a[i-1]) i--;
+  return a.slice(i);
+}
+/* Сколько последних периодов подряд сеть теряла подписчиков */
+function lossStreak(n){
+  var G = state.period==="week" ? DATA.weekly : DATA.monthly, k=0;
+  for (var i=G.length-1; i>=0; i--){
+    var g=val([G[i]],n,"growth");
+    if (!ok(g) && i>0){ var a=val([G[i]],n,"followers"), c=val([G[i-1]],n,"followers"); if (ok(a)&&ok(c)) g=a-c; }
+    if (ok(g) && g<0) k++; else break;
+  }
+  return k;
+}
+function arrows(a){ return a.map(fmt).join(" → "); }
+
+/* Эффективность: всегда все пять сетей, чтобы было с чем сравнивать */
+function effRows(s){
+  var tl=leadsTotal(s.cur), fl=sum(NET_IDS,function(n){ return val(s.cur,n,"followers"); });
+  return NET_IDS.map(function(n){
+    var x=S(s.cur,n);
+    return { n:n, leads:x.leads, followers:x.followers, pubs:x.pubs,
+      share: ok(x.leads)&&tl>0 ? x.leads/tl : NaN,
+      aud: ok(x.followers)&&fl>0 ? x.followers/fl : NaN,
+      per1000: ok(x.leads)&&x.followers>0 ? x.leads/x.followers*1000 : NaN,
+      perPub: ok(x.leads)&&x.pubs>0 ? x.leads/x.pubs : NaN };
+  });
+}
+function renderEff(s){
+  var card=document.getElementById("eff-card");
+  if (!s){ card.style.display="none"; return; }
+  card.style.display="";
+  var rows=effRows(s).sort(function(a,b){ return (ok(b.per1000)?b.per1000:-1)-(ok(a.per1000)?a.per1000:-1); });
+  var max=Math.max.apply(null, rows.map(function(r){ return ok(r.per1000)?r.per1000:0; }))||1;
+  document.getElementById("eff-sub").textContent=s.title+" · отсортировано по лидам на 1 000 подписчиков";
+  document.getElementById("eff").innerHTML='<div class="table-scroll"><table class="ftable eff-table"><thead><tr><th>Соцсеть</th><th>Лиды</th><th>Доля лидов</th><th>Доля подписчиков</th><th class="bar-col">Лидов на 1 000 подписчиков</th><th>Лидов на публикацию</th></tr></thead><tbody>'+
+    rows.map(function(r){
+      return '<tr'+(state.net===r.n?' class="sel"':"")+'><td>'+NETS[r.n]+'</td><td>'+plain(r.leads)+'</td><td>'+(ok(r.share)?share(r.share):'<span class="na">—</span>')+'</td><td>'+(ok(r.aud)?share(r.aud):'<span class="na">—</span>')+
+        '</td><td class="bar-col"><div class="mini-bar"><div class="mini-track"><div class="mini-fill" style="width:'+(ok(r.per1000)?r.per1000/max*100:0)+'%"></div></div><span>'+(ok(r.per1000)?small(r.per1000):'<span class="na">—</span>')+'</span></div></td><td>'+(ok(r.perPub)?small(r.perPub):'<span class="na">—</span>')+'</td></tr>';
+    }).join("")+'</tbody></table></div><div class="note">Доля лидов — от общей строки «Заявки / лиды». Лиды на публикацию — только где в таблице есть число публикаций (ВКонтакте, Telegram).</div>';
+}
+
+/* Выводы */
+function insights(s){
+  var w=words(s), out=[], rows=effRows(s), tl=leadsTotal(s.cur);
+  function byKey(k){ return rows.filter(function(r){ return ok(r[k]); }); }
+  if (state.net==="all"){
+    var sh=byKey("share").sort(function(a,b){ return b.share-a.share; });
+    if (sh.length && ok(tl)){
+      var t=sh[0];
+      out.push(b(NETS[t.n])+" даёт "+b(share(t.share))+" лидов ("+fmt(t.leads)+" из "+fmt(tl)+")"+
+        (ok(t.aud) ? (t.share>t.aud*2 ? ", хотя там только "+share(t.aud)+" подписчиков." : " при "+share(t.aud)+" подписчиков.") : "."));
+    }
+    var mm=rows.filter(function(r){ return ok(r.aud)&&ok(r.share)&&r.aud-r.share>=0.3; }).sort(function(a,b){ return (b.aud-b.share)-(a.aud-a.share); })[0];
+    if (mm){
+      var ft=fallingTail(hist(mm.n,"leads"));
+      out.push(b(NETS[mm.n])+" — "+share(mm.aud)+" подписчиков, но только "+b(share(mm.share))+" лидов."+
+        (ft.length>=3 ? " Лиды там снижаются "+w.streak(ft.length-1)+": "+arrows(ft)+"." : ""));
+    }
+    var ef=byKey("per1000").filter(function(r){ return r.per1000>0; }).sort(function(a,b){ return b.per1000-a.per1000; });
+    if (ef.length>=2){
+      var r0=ef[0], r1=ef[1], k=r0.per1000/r1.per1000;
+      out.push("Самая «горячая» аудитория — "+b(NETS[r0.n])+": "+b(small(r0.per1000))+" "+leadWord(r0.per1000)+" на 1 000 подписчиков"+
+        (k>=1.5 ? ", в "+pct(k)+" раза больше, чем у "+NETS[r1.n]+" ("+small(r1.per1000)+")." : "."));
+    }
+    var gr=NET_IDS.map(function(n){
+      var c=S(s.cur,n), g=c.growth, base;
+      if (state.period==="all"){ var h=s.cur.map(function(p){ return val([p],n,"followers"); }).filter(ok); if (h.length>1){ g=h[h.length-1]-h[0]; base=h[0]; } else g=NaN; }
+      else if (ok(g) && ok(c.followers)) base=c.followers-g;
+      else if (s.prev){ var pf=val(s.prev,n,"followers"); if (ok(pf)&&ok(c.followers)){ g=c.followers-pf; base=pf; } }
+      return { n:n, g:g, p: ok(g)&&base>0 ? g/base*100 : NaN };
+    }).filter(function(x){ return ok(x.p); }).sort(function(a,b){ return b.p-a.p; });
+    if (gr.length && gr[0].p>0) out.push("Быстрее всего растёт "+b(NETS[gr[0].n])+": "+b("+"+pct(gr[0].p)+"%")+" подписчиков "+w.during+" (+"+fmt(gr[0].g)+").");
+    var pp=byKey("perPub");
+    if (pp.length>=2) out.push("Лидов на одну публикацию: "+pp.sort(function(a,b){ return b.perPub-a.perPub; }).map(function(r){ return NETS[r.n]+" — "+b(small(r.perPub)); }).join(", ")+".");
+    if (ok(tl)){
+      var pl=s.prev?leadsTotal(s.prev):NaN;
+      out.push("Всего лидов "+w.during+" — "+b(fmt(tl))+(ok(pl)&&pl>0 ? ", "+(tl>=pl?"на "+pct((tl-pl)/pl*100)+"% больше":"на "+pct((pl-tl)/pl*100)+"% меньше")+", "+w.thanPrev+"." : "."));
+    }
+  } else {
+    var n=state.net, me=rows.filter(function(r){ return r.n===n; })[0], c=S(s.cur,n), p=s.prev?S(s.prev,n):null;
+    if (ok(me.share) && me.leads===0) out.push(b(NETS[n])+" пока не приносит лидов (0 из "+fmt(tl)+")"+(ok(me.aud)?", это "+share(me.aud)+" подписчиков.":"."));
+    else if (ok(me.share)) out.push(b(NETS[n])+" даёт "+b(share(me.share))+" всех лидов ("+fmt(me.leads)+" из "+fmt(tl)+")"+(ok(me.aud)?" при "+share(me.aud)+" подписчиков.":"."));
+    var rk=rows.filter(function(r){ return ok(r.per1000); }).sort(function(a,b){ return b.per1000-a.per1000; }), pos=rk.indexOf(me);
+    if (pos>=0 && rk.length>1) out.push("По лидам на 1 000 подписчиков — "+b((pos+1)+"-е место из "+rk.length)+" ("+small(me.per1000)+")"+(pos>0?"; лидер — "+NETS[rk[0].n]+" ("+small(rk[0].per1000)+").":"."));
+    if (ok(c.leads) && p && ok(p.leads) && p.leads>0){
+      var d=(c.leads-p.leads)/p.leads*100, tail=d<0?fallingTail(hist(n,"leads")):risingTail(hist(n,"leads"));
+      out.push("Лиды "+w.during+": "+b(fmt(c.leads))+" — "+(d>=0?"на "+pct(d)+"% больше":"на "+pct(-d)+"% меньше")+", "+w.thanPrev+
+        (tail.length>=3 ? " ("+(d<0?"снижаются":"растут")+" "+w.streak(tail.length-1)+": "+arrows(tail)+")." : "."));
+    }
+    var g=c.growth; if (!ok(g) && p && ok(c.followers) && ok(p.followers)) g=c.followers-p.followers;
+    if (ok(g)) out.push("Подписчики "+w.during+": "+b((g>0?"+":g<0?"−":"")+fmt(Math.abs(g)))+(ok(c.followers)&&c.followers-g>0?" ("+(g>=0?"+":"−")+pct(Math.abs(g)/(c.followers-g)*100)+"%)":"")+".");
+    if (ok(c.er) && p && ok(p.er)) out.push("ER: "+b(pct(c.er)+"%")+" — "+(c.er>=p.er?"выше":"ниже")+" на "+pct(Math.abs(c.er-p.er))+" п.п., "+w.thanPrev+".");
+    else if (ok(c.er)) out.push("ER "+w.during+": "+b(pct(c.er)+"%")+".");
+    if (ok(me.perPub)) out.push(b(fmt(c.pubs))+" "+plural(c.pubs,"публикация","публикации","публикаций")+" → "+b(small(me.perPub))+" "+leadWord(me.perPub)+" на публикацию.");
+  }
+  return out.slice(0,5);
+}
+
+/* Тревожные флажки */
+function flags(s, contentCount){
+  var w=words(s), out=[];
+  function add(level, title, hint){ out.push({ level:level, title:title, hint:hint }); }
+  selNets().forEach(function(n){
+    var c=S(s.cur,n), p=s.prev?S(s.prev,n):null, N=b(NETS[n]);
+    var g=c.growth; if (!ok(g) && p && ok(c.followers) && ok(p.followers)) g=c.followers-p.followers;
+    if (state.period!=="all" && ok(g) && g<0){
+      var k=lossStreak(n);
+      add(k>=2?"high":"mid", N+" теряет подписчиков: "+b("−"+fmt(-g))+" "+w.during+(k>=2?", "+w.streak(k):""),
+        "Посмотрите, после каких публикаций растут отписки, и сравните с темами, которые приводят людей.");
+    }
+    if (ok(c.subs) && ok(c.unsubs) && c.subs>0 && c.unsubs/c.subs>=0.8)
+      add("mid", N+": на "+fmt(c.subs)+" новых подписчиков — "+b(fmt(c.unsubs)+" "+plural(c.unsubs,"отписка","отписки","отписок")),
+        "Почти весь приток уходит. Проверьте, откуда приходят люди и что они видят в первые дни после подписки.");
+    if (p && ok(c.leads) && ok(p.leads) && p.leads>=5 && (p.leads-c.leads)/p.leads>=0.3){
+      var dd=(p.leads-c.leads)/p.leads, ft=fallingTail(hist(n,"leads"));
+      add(dd>=0.5?"high":"mid", "Лиды "+N+" упали на "+b(pct(dd*100,0)+"%")+": "+(ft.length>=3?arrows(ft)+" ("+w.streak(ft.length-1)+")":fmt(p.leads)+" → "+fmt(c.leads)),
+        "Сравните контент этого и прошлого периода: что из приводившего заявки перестало выходить.");
+    }
+    if (p && ok(c.er) && ok(p.er) && p.er-c.er>=2)
+      add(p.er-c.er>=5?"high":"mid", "ER "+N+" упал: "+pct(p.er)+"% → "+b(pct(c.er)+"%"), "Аудитория стала меньше реагировать — проверьте форматы и темы последних публикаций.");
+    if (p && ok(c.reach) && ok(p.reach) && p.reach>0 && (p.reach-c.reach)/p.reach>=0.3)
+      add("mid", (n==="vk"?"Охват ":n==="tg"?"Охват ":"Просмотры ")+N+" упали на "+b(pct((p.reach-c.reach)/p.reach*100,0)+"%")+": "+fmt(p.reach)+" → "+fmt(c.reach), "");
+    if (ok(c.clicks) && c.clicks>=20 && ok(c.leads) && c.leads===0)
+      add("high", N+": "+b(fmt(c.clicks)+" "+plural(c.clicks,"переход","перехода","переходов")+" на сайт")+" "+w.during+" — и "+b("0 лидов"),
+        "Люди доходят до сайта, но не оставляют заявку. Проверьте, есть ли на странице понятная форма и призыв.");
+    if (ok(c.pubs) && c.pubs===0) add("mid", N+": нет публикаций "+w.during, "");
+  });
+  if (contentCount<3) add("info", "В журнале «Контент» "+(contentCount?contentCount+" "+plural(contentCount,"публикация","публикации","публикаций"):"нет публикаций")+" "+w.during,
+    "Пока журнал почти пуст, топ публикаций и сравнение форматов мало что говорят. Вносите хотя бы основные посты.");
+  var order={high:0,mid:1,info:2};
+  return out.sort(function(a,b){ return order[a.level]-order[b.level]; });
+}
+function renderInsights(s, contentCount){
+  var ic=document.getElementById("insights-card"), fc=document.getElementById("flags-card");
+  if (!s){ ic.style.display=fc.style.display="none"; return; }
+  ic.style.display=fc.style.display="";
+  var ins=insights(s), fl=flags(s, contentCount);
+  document.getElementById("ins-sub").textContent=s.title+" · считаются автоматически из таблицы";
+  document.getElementById("insights").innerHTML = ins.length ? ins.map(function(t){ return "<li><span>"+t+"</span></li>"; }).join("")
+    : '<li class="empty-li">Пока мало данных для выводов</li>';
+  var high=fl.filter(function(f){ return f.level==="high"; }).length;
+  document.getElementById("flags-sub").textContent=s.title+(fl.length?" · "+fl.length+" "+plural(fl.length,"сигнал","сигнала","сигналов")+(high?", "+high+" важн"+(high===1?"ый":"ых"):""):"");
+  document.getElementById("flags").innerHTML = fl.length ? fl.map(function(f){
+    return '<div class="flag '+f.level+'"><span class="dot"></span><div><div class="f-title">'+f.title+'</div>'+(f.hint?'<div class="f-hint">'+f.hint+'</div>':"")+'</div></div>';
+  }).join("") : '<div class="flag ok-flag"><span class="dot"></span><div><div class="f-title">Тревожных сигналов нет</div></div></div>';
+}
+
+/* ===== Управление ===== */
+function seg(id, field){
+  var el=document.getElementById(id);
+  el.addEventListener("click", function(e){
+    var b=e.target.closest("button"); if (!b) return;
+    state[field]=b.getAttribute("data-v");
+    Array.prototype.forEach.call(el.querySelectorAll("button"), function(x){ x.setAttribute("aria-pressed", x===b?"true":"false"); });
+    render();
+  });
+}
+seg("net","net"); seg("period","period");
+document.getElementById("refresh").addEventListener("click", refresh);
+var rt, lastW=window.innerWidth;
+window.addEventListener("resize", function(){ if (window.innerWidth===lastW) return; lastW=window.innerWidth; clearTimeout(rt); rt=setTimeout(render,120); });
+
+loadEmbedded();
+render();
+refresh(); // при открытии тихо пробуем подтянуть свежие цифры из таблицы
+})();
+</script>
+</body>
+</html>
