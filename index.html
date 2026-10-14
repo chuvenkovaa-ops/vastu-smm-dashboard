@@ -280,6 +280,91 @@ code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13p
   .compare > div:nth-child(odd){border-right:0}
   .compare > div:nth-child(2){display:none}
 }
+
+/* ---- v2: таблицы-листы, слайды, ТЗ ---- */
+.page{gap:16px}
+.subtabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);scrollbar-width:none}
+.subtabs::-webkit-scrollbar{display:none}
+.subtabs button{border:0;background:transparent;padding:9px 14px;font-weight:600;font-size:14px;color:var(--ink2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+.subtabs button[aria-pressed="true"]{color:var(--green-deep);border-bottom-color:var(--green)}
+.subtabs button span{font-weight:500;color:var(--ink3);font-size:12px;margin-left:4px}
+.sheet-wrap{overflow:auto;background:var(--milk);border:1px solid var(--line);border-radius:var(--r);max-height:calc(100vh - 230px)}
+table.sheet{border-collapse:separate;border-spacing:0;width:100%;font-size:13.5px;line-height:1.4}
+.sheet th{position:sticky;top:0;z-index:1;background:var(--sand);text-align:left;font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);font-weight:700;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+.sheet td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;min-width:90px}
+.sheet tbody tr{cursor:pointer}
+.sheet tbody tr:hover td{background:#f7f2ea}
+.sheet td.w-s{min-width:84px;width:84px} .sheet td.w-m{min-width:150px} .sheet td.w-l{min-width:260px;max-width:340px}
+.sheet td.first{font-weight:700}
+.clamp{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}
+.sheet select.stsel{border:0;border-radius:999px;padding:4px 8px;font-size:12px;font-weight:600;cursor:pointer;background:var(--sand);color:var(--ink)}
+.sheet tr.group-start td{border-top:2px solid var(--line)}
+.s-green{background:var(--green)!important;color:var(--on-green)!important}
+.s-soft{background:var(--green-soft)!important;color:var(--green-deep)!important}
+.s-warm{background:var(--cream)!important;color:#8a5a24!important}
+.s-red{background:#f8e6dc!important;color:#9a4a2a!important}
+.s-gray{background:var(--sand)!important;color:var(--ink2)!important}
+.empty-state{padding:28px;text-align:center;color:var(--ink3)}
+.month-nav{display:flex;align-items:center;gap:8px}
+.month-nav b{min-width:150px;text-align:center;font-size:15px}
+
+/* декомпозиция */
+.decomp td{min-width:240px;max-width:320px}
+.decomp td.first{min-width:170px;max-width:200px}
+.cell-st{display:inline-block;margin-top:8px;font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:999px}
+.decomp td.done .clamp{color:var(--ink3)}
+.mhead small{display:block;font-weight:500;text-transform:none;letter-spacing:0;color:var(--ink3);font-size:12px;margin-top:2px}
+.mprog{display:block;height:4px;border-radius:999px;background:var(--line);margin-top:6px;overflow:hidden}
+.mprog i{display:block;height:100%;background:var(--green)}
+
+/* слайды */
+.deck{display:flex;flex-direction:column;gap:12px}
+.stage{position:relative;background:#e9e2d7;border-radius:var(--r);overflow:hidden;aspect-ratio:16/9;max-width:100%;max-height:calc(100vh - 250px);margin:0 auto;width:100%}
+.stage img{width:100%;height:100%;object-fit:contain;display:block;background:var(--paper)}
+.stage .nav-btn{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:0;background:rgba(251,248,244,.92);box-shadow:0 2px 10px rgba(47,42,37,.15);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--green-deep)}
+.stage .nav-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.2}
+.stage .prev{left:12px} .stage .next{right:12px}
+.deck-bar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}
+.counter{font-variant-numeric:tabular-nums;font-weight:700}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.chips::-webkit-scrollbar{display:none}
+.chips button{border:1px solid var(--line);background:var(--milk);border-radius:999px;padding:6px 12px;font-size:13px;white-space:nowrap;cursor:pointer;color:var(--ink2)}
+.chips button[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--on-green)}
+.chips button b{color:var(--copper);margin-right:4px}
+.chips button[aria-pressed="true"] b{color:var(--ochre)}
+.thumbs{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px}
+.thumbs button{flex:none;width:128px;border:2px solid transparent;border-radius:8px;padding:0;overflow:hidden;cursor:pointer;background:var(--sand);position:relative}
+.thumbs button[aria-current="true"]{border-color:var(--green)}
+.thumbs img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.thumbs span{position:absolute;left:4px;bottom:4px;background:rgba(47,42,37,.7);color:#fff;font-size:10.5px;padding:1px 5px;border-radius:4px}
+.stage:fullscreen{max-height:none;border-radius:0;background:#000}
+.stage:fullscreen img{background:#000}
+
+/* ТЗ */
+.tz-layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px;align-items:start}
+.tz-list{display:flex;flex-direction:column;gap:6px;position:sticky;top:16px}
+.tz-item{border:1px solid var(--line);background:var(--milk);border-radius:12px;padding:10px 12px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:4px;width:100%}
+.tz-item[aria-current="true"]{border-color:var(--green);box-shadow:inset 3px 0 0 var(--green)}
+.tz-item b{font-size:14px;line-height:1.3}
+.tz-item small{color:var(--ink3);font-size:12px}
+.tz-item .chip{align-self:flex-start}
+.tz-doc{background:var(--milk);border:1px solid var(--line);border-radius:var(--r);padding:26px 30px;display:flex;flex-direction:column;gap:18px;min-width:0}
+.tz-doc h2{font-size:22px}
+.tz-meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13.5px;color:var(--ink2)}
+.tz-meta b{color:var(--ink)}
+.tz-sec h3{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--copper);margin-bottom:6px}
+.tz-sec p{margin:0;white-space:pre-line;max-width:72ch}
+.tz-sec ol,.tz-sec ul{margin:0;padding-left:20px;display:grid;gap:4px;max-width:72ch}
+.tz-sec .say{background:var(--cream);border-radius:12px;padding:14px 16px;white-space:pre-line;font-style:italic}
+.list-line{display:flex;flex-wrap:wrap;gap:6px}
+@media (max-width:860px){
+  .tz-layout{grid-template-columns:1fr}
+  .tz-list{position:static;flex-direction:row;overflow-x:auto}
+  .tz-item{min-width:220px}
+  .tz-doc{padding:18px}
+  .sheet-wrap{max-height:none}
+  .stage{max-height:none}
+}
 </style>
 </head>
 <body>
@@ -288,7 +373,6 @@ code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13p
   <aside class="side">
     <div class="logo"><b>VASTU HOME</b><span>SMM-платформа</span></div>
     <nav class="nav" id="nav" aria-label="Разделы"></nav>
-    <div class="side-foot">Стратегия: октябрь 2026 — март 2027.<br>Данные плана и чек-листов хранятся в этом браузере. Резервная копия — во вкладке «Инструменты».</div>
   </aside>
   <main class="main"><div class="page" id="page"></div></main>
 </div>
@@ -296,36 +380,18 @@ code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13p
 <div id="modal-root"></div>
 
 <script src="utm-data.js"></script>
+<script src="seed-data.js"></script>
+<script src="slides/slides.js"></script>
 <script>
 (function(){
 "use strict";
 
 /* ============================================================
-   СПРАВОЧНИКИ (из SMM-стратегии VASTU HOME)
+   СПРАВОЧНИКИ
    ============================================================ */
 var NETS = {
-  ig:  {name:"Instagram", c:"#c96f4a", formats:["Reels","Карусель","Stories","Пост"]},
-  tg:  {name:"Telegram",  c:"#3e6d65", formats:["Пост","Голосовое","Видео","Подборка","Анонс запуска"]},
-  vk:  {name:"VK",        c:"#5f6d31", formats:["Клип","Карусель","Пост"]},
-  max: {name:"MAX",       c:"#d4a06a", formats:["Пост","Голосовое","Видео"]},
-  pin: {name:"Pinterest", c:"#9a7650", formats:["Пин-гайд","Пин-статья","Пин охватный"]}
-};
-var FNS = {
-  reach:{name:"Охват",            c:"#d4a06a", hint:"привлечь новую аудиторию"},
-  sub:  {name:"Подписка",         c:"#5f6d31", hint:"дать причину остаться"},
-  trust:{name:"Доверие",          c:"#3e6d65", hint:"показать Ларису и глубину подхода"},
-  warm: {name:"Прогрев",          c:"#c96f4a", hint:"помочь понять ценность метода и продукта"},
-  act:  {name:"Целевое действие", c:"#7a5a3a", hint:"перевести интерес дальше"}
-};
-var DIRS = ["Лариса и личный бренд","Практическое васту","Жизненные ситуации","Кейсы и доказательства","Обучение и школа","Вовлечение","Продажи"];
-var STATUSES = {idea:"Идея", prod:"В работе", ready:"Готово", pub:"Опубликовано"};
-/* недельный ритм из стратегии */
-var NORMS = {
-  ig:{label:"3 reels · 3 карусели · stories", parts:{"Reels":3,"Карусель":3,"Stories":1}},
-  vk:{label:"3 клипа · 3 карусели", parts:{"Клип":3,"Карусель":3}},
-  tg:{label:"1–2 поста в день", total:[7,14]},
-  max:{label:"1–2 поста в день", total:[7,14]},
-  pin:{label:"5 пинов в неделю", total:[5,5]}
+  ig:{name:"Instagram", c:"#c96f4a"}, tg:{name:"Telegram", c:"#3e6d65"}, vk:{name:"VK", c:"#5f6d31"},
+  max:{name:"MAX", c:"#d4a06a"}, pin:{name:"Pinterest", c:"#9a7650"}
 };
 var KPIS = [
   {id:"ig_clicks", label:"Instagram · клики по ссылке", unit:"в месяц", base:27,  target:150, dir:"up"},
@@ -339,87 +405,6 @@ var KPIS = [
   {id:"smm_regs",  label:"Регистрации на ключевой запуск с меткой SMM", unit:"все площадки", base:null, target:null, dir:"track"}
 ];
 
-/* ---------- Чек-листы ---------- */
-var REPACK = [
-  {net:"common", title:"Общая логика упаковки", items:[
-    ["r-c1","Кто мы → почему нам можно доверять → чем можем помочь → с чего начать → куда идти дальше","Единая последовательность для всех площадок"],
-    ["r-c2","Новая фотосессия Ларисы без сильной ретуши","Нужна для аватаров, закрепов и обложек"],
-    ["r-c3","Метки utm на всех ссылках пяти площадок","utm_source=smm, площадка в utm_medium"],
-    ["r-c4","Один приоритетный вход для нового человека на каждой площадке","Вместо множества параллельных маршрутов"]
-  ]},
-  {net:"ig", title:"Instagram", items:[
-    ["r-ig1","Сократить highlights до 6","Сейчас их слишком много"],
-    ["r-ig2","3 новых закрепа в формате 4:5: кто Лариса · метод · с чего начать","Старые сделаны под квадратный формат"],
-    ["r-ig3","Описание профиля по новой логике","Кто такая Лариса и что такое VASTU HOME за 3 секунды"],
-    ["r-ig4","Ссылка в профиле ведёт в Telegram-бот основной воронки",""],
-    ["r-ig5","Убрать устаревшие и дублирующие точки входа",""]
-  ]},
-  {net:"tg", title:"Telegram", items:[
-    ["r-tg1","Описание канала объясняет, зачем оставаться",""],
-    ["r-tg2","Закреп-навигация для нового подписчика","Вместо закрепов под текущие прогревы"],
-    ["r-tg3","Прогревы, напоминания и дожимы перенести в запусковые каналы","Основной канал = экспертный и спокойный"],
-    ["r-tg4","Ритм 1–2 поста в день вместо 4–5",""]
-  ]},
-  {net:"vk", title:"VK", items:[
-    ["r-vk1","Сократить количество параллельных маршрутов в меню",""],
-    ["r-vk2","Оставить сильное: продукты, отзывы, знакомство, вебинары, контакт с менеджером",""],
-    ["r-vk3","Кодовое слово и бот в меню сообщества","Путь от дешёвой подписки до лид-магнита"],
-    ["r-vk4","Обложка и описание в новой визуальной системе",""]
-  ]},
-  {net:"max", title:"MAX", items:[
-    ["r-max1","Сформулировать, зачем подписываться именно сюда","Канал для тех, кто не в Telegram"],
-    ["r-max2","Своё описание и закреп, без копии Telegram",""],
-    ["r-max3","Убрать дублирование запусковых сообщений",""]
-  ]},
-  {net:"pin", title:"Pinterest", items:[
-    ["r-pin1","Усилить доски «Статьи и гайды» и «Сектора дома»","Переводят на сайт лучше всего"],
-    ["r-pin2","Описания досок и пинов под поисковые запросы",""],
-    ["r-pin3","Каждый пин ведёт на конкретную статью или лид-магнит с меткой",""],
-    ["r-pin4","«Дни недели» оставить как охватный формат",""]
-  ]}
-];
-var ROADMAP = [
-  {title:"Месяц 1 · конец октября и ноябрь", sub:"Фундамент", result:"Система запущена, метрики считаются", items:[
-    ["m1-1","Согласовать позиционирование и ключевые запуски для SMM"],
-    ["m1-2","Метки на всех ссылках"],
-    ["m1-3","Новая упаковка четырёх площадок"],
-    ["m1-4","Новый ритм публикаций, прогревы — в запусковые каналы"],
-    ["m1-5","Собрать Telegram-бот основной воронки"],
-    ["m1-6","Первые съёмочные дни с Ларисой"]
-  ]},
-  {title:"Месяц 2 · декабрь", sub:"Запуск системы", result:"Первые данные по лидам и регистрациям из каждой площадки", items:[
-    ["m2-1","Reels с Ларисой регулярно, 3 съёмки в месяц"],
-    ["m2-2","Основная воронка через бот работает"],
-    ["m2-3","Бот-диагностика и чек-листы «Переезд» и «Ремонт»"],
-    ["m2-4","Тест коллабораций и взаимных рекомендаций"],
-    ["m2-5","Новогодний период: SMM ведёт один ключевой запуск"],
-    ["m2-6","Тест новой роли MAX"]
-  ]},
-  {title:"Месяц 3 · январь", sub:"Оценка и масштаб", result:"Понятно, что масштабировать дальше", items:[
-    ["m3-1","Разбор лидов и регистраций по площадкам и форматам"],
-    ["m3-2","Рекомендации маркетингу по рекламе в Telegram и MAX"],
-    ["m3-3","Масштабировать форматы и источники, которые дают подписки и лиды"],
-    ["m3-4","Убрать слабые рубрики"],
-    ["m3-5","Обновить регламент SMM"],
-    ["m3-6","План на следующий квартал"]
-  ]}
-];
-var FIRST = [
-  ["d-1","Выбрать ключевые запуски, которые SMM ведёт в ноябре и декабре","С Ксенией и Натальей на ближайшем созвоне"],
-  ["d-2","Утвердить основную SMM-воронку через Telegram-бот",""],
-  ["d-3","Назначить ответственного за входящие","Сейчас не назначен"],
-  ["d-4","Поставить съёмочные дни в календарь Ларисы","Раз в 10 дней, 2–3 часа"],
-  ["d-5","Применить правила ДНК бренда к текстам Salebot и писем запусков",""]
-];
-var TEAM = [
-  ["Лариса","Съёмочный день раз в 10 дней, голосовые для Telegram, согласование смыслов"],
-  ["Ксения · маркетинг","Реклама, окупаемость, оплаты, воронки ключевых запусков"],
-  ["Наталья · продукт","Лид-магниты и продуктовая линейка под новое позиционирование"],
-  ["SMM","Стратегия, контент, упаковка, основная SMM-воронка, лиды и регистрации из соцсетей"],
-  ["Входящие","Ответственный не назначен. Решение нужно в первый месяц"]
-];
-
-/* ---------- Стоп-слова для проверки текста (ToV) ---------- */
 var STOP = [
   [/здоров\S*|болезн\S*|болеют|болеет|исцел\S*|лечит\S*|органы|органов|органам/gi, "Здоровье и исцеление", "Связи между зонами дома и здоровьем не используем. Пример: «как устроить детскую, чтобы ребёнку было проще засыпать»"],
   [/гарант\S*/gi, "Гарантии результата", "Не обещаем гарантированный результат. Говорим, что пространство создаёт условия"],
@@ -431,67 +416,90 @@ var STOP = [
   [/чакр\S*|мандал\S*|энерги\S* (вселенн|космос)\S*/gi, "Мистика", "Понятное васту без мистики. Космос — только для астрологических тем"]
 ];
 
+
+/* Цвет статуса по названию */
+var ST_CLASS = {
+  "Идея":"s-gray","В работе":"s-warm","Готово":"s-soft","Опубликовано":"s-green",
+  "Черновик":"s-gray","К разработке":"s-warm","Приоритет":"s-red","Рабочая":"s-soft","Согласовано":"s-green",
+  "Не брали":"s-gray","Взяли в КП":"s-green","На потом":"s-warm","Отказались":"s-gray","Правило":"s-soft",
+  "Отправлено Ларисе":"s-warm","Снято":"s-soft",
+  "":"s-gray","wip":"s-warm","done":"s-green"
+};
+var ST = {
+  cp:["Идея","В работе","Готово","Опубликовано"],
+  ideas:["Не брали","Взяли в КП","На потом","Опубликовано","Отказались","Правило"],
+  rp:["Черновик","К разработке","Приоритет","Рабочая","Согласовано","Готово"],
+  tz:["Черновик","Отправлено Ларисе","Снято","Опубликовано"]
+};
+
+/* Листы-таблицы. long — длинный текст (в таблице обрезается, полностью в карточке) */
+var COLS = {
+  cp:[["date","Дата","date","w-s"],["unit","Единица контента","text","w-m first"],["prod","Формат производства","long","w-m"],["topic","Тема / конкретика","long","w-m"],["tz","Структура / ТЗ","long","w-l"],["cta","CTA","long","w-m"],["route","Воронка / куда ведём","long","w-m"],["status","Статус","status:cp","w-s"]],
+  ideas:[["title","Идея / рабочее название","text","w-m first"],["rubric","Рубрика","text","w-m"],["nets","Площадка","text","w-m"],["format","Формат","text","w-s"],["essence","Суть / как использовать","long","w-l"],["source","Источник / что нужно","long","w-m"],["prio","Приоритет","select:Высокий|Средний|Низкий","w-s"],["status","Статус","status:ideas","w-s"],["date","Дата в КП","text","w-s"],["comment","Комментарий","long","w-m"]],
+  rp:[["block","Блок","text","w-m first"],["variant","Вариант / элемент","text","w-m"],["task","Основная задача","long","w-m"],["text","Текст / структура","long","w-l"],["visual","Визуал / формат","long","w-m"],["cta","CTA","long","w-m"],["route","Воронка / куда ведём","long","w-m"],["prep","Что нужно подготовить","long","w-m"],["status","Статус","status:rp","w-s"]],
+  rptg:[["block","Блок","text","w-m first"],["variant","Вариант / элемент","text","w-m"],["task","Задача","long","w-m"],["text","Текст / структура","long","w-l"],["cta","CTA","long","w-m"],["route","Куда ведём","long","w-m"],["prep","Что подготовить","long","w-m"],["status","Статус","status:rp","w-s"]],
+  hl:[["block","Название","text","w-m first"],["task","Задача","long","w-m"],["n","№","text","w-s"],["text","Содержание stories","long","w-l"],["visual","Формат","long","w-m"],["cta","CTA","long","w-m"],["route","Куда ведём","long","w-m"],["prep","Что подготовить","long","w-m"],["status","Статус","status:rp","w-s"]],
+  fun:[["block","Источник / контент","text","w-m first"],["think","Что человек думает на входе","long","w-m"],["cta","CTA в контенте","long","w-m"],["entry","Точка входа","long","w-m"],["s1","Шаг 1","long","w-m"],["s2","Шаг 2","long","w-m"],["s3","Шаг 3","long","w-m"],["target","Целевое действие","long","w-m"],["measure","Что измеряем","long","w-m"],["status","Статус","status:rp","w-s"]]
+};
+var SHEETS = {
+  cp:[["ig","Instagram","cp"],["tg","Telegram","cp"],["vk","VK","cp"],["max","MAX","cp"],["pin","Pinterest","cp"],["ideas","Идеи","ideas"]],
+  rp:[["ig","Instagram","rp"],["hl","Highlights","hl"],["tg","Telegram","rptg"],["vk","VK","rp"],["max","MAX","rp"],["pin","Pinterest","rp"],["funnels","Воронки и CTA","fun"]]
+};
+function colsOf(table, sheet){ var s=SHEETS[table].filter(function(x){return x[0]===sheet;})[0]; return COLS[s[2]]; }
+
 /* ============================================================
    ХРАНИЛИЩЕ
    ============================================================ */
 var KEY = "vastu-smm-platform-v1";
-var S;
-function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
-function parseISO(s){ var p=s.split("-"); return new Date(+p[0],+p[1]-1,+p[2]); }
-function addDays(d,n){ var x=new Date(d); x.setDate(x.getDate()+n); return x; }
-function monday(d){ var x=new Date(d.getFullYear(),d.getMonth(),d.getDate()); var w=(x.getDay()+6)%7; return addDays(x,-w); }
+var SEED = window.SEED;
 function uid(){ return Math.random().toString(36).slice(2,9); }
-
-function seed(){
-  var m = monday(new Date());
-  function d(n){ return iso(addDays(m,n)); }
-  var ex = [
-    [0,"ig","Reels","reach","Жизненные ситуации","«Переехали — и с тех пор всё не так»: что проверить в новой квартире в первую неделю","","ready"],
-    [0,"tg","Голосовое","trust","Лариса и личный бренд","Голосовое Ларисы: почему мы начинаем с наблюдения, а не с совета","","ready"],
-    [0,"pin","Пин-гайд","act","Практическое васту","Сектора дома по васту: шпаргалка","","ready"],
-    [1,"ig","Карусель","sub","Практическое васту","Васту-тайминг: что делать по дням недели. Часть 2","ВАСТУ","prod"],
-    [1,"vk","Клип","reach","Жизненные ситуации","«Дома не отдыхается»: 3 вещи, которые можно проверить самой","","prod"],
-    [1,"max","Пост","trust","Кейсы и доказательства","Кейс ученицы: однушка в панельке без ремонта","","idea"],
-    [2,"ig","Reels","trust","Лариса и личный бренд","Лариса разбирает реальную планировку подписчицы","","idea"],
-    [2,"tg","Пост","act","Практическое васту","Мини-диагностика «Что не так с моим домом» в боте","ДОМ","idea"],
-    [2,"pin","Пин-статья","act","Практическое васту","Васту-коррекции без ремонта","","idea"],
-    [3,"vk","Карусель","act","Практическое васту","Чек-лист «Переезд» — кодовое слово в комментариях","ПЕРЕЕЗД","idea"],
-    [3,"ig","Карусель","warm","Обучение и школа","Как устроена программа: что ученик умеет через 3 месяца","","idea"],
-    [4,"ig","Reels","act","Практическое васту","Ремонт без ошибок: 5 решений, которые потом не переделать","РЕМОНТ","idea"],
-    [4,"tg","Подборка","sub","Практическое васту","Подборка: 7 постов, с которых стоит начать","","idea"],
-    [5,"ig","Stories","trust","Вовлечение","Закулисье съёмки + опрос: какую комнату разобрать следующей","","idea"],
-    [6,"vk","Клип","trust","Лариса и личный бренд","Лариса о том, где заканчивается влияние коррекции","","idea"]
-  ];
+function rowsFromSeed(table){
+  var out=[];
+  SHEETS[table].forEach(function(sh){
+    var src = table==="cp" ? SEED.cp[sh[0]] : SEED.repack[sh[0]];
+    var cols = COLS[sh[2]];
+    (src||[]).forEach(function(arr){ var r={id:uid(),sheet:sh[0]}; cols.forEach(function(c,i){ r[c[0]]=arr[i]==null?"":arr[i]; }); out.push(r); });
+  });
+  return out;
+}
+function freshParts(){
   return {
-    v:1,
-    plan: ex.map(function(e){ return {id:uid(),date:d(e[0]),net:e[1],format:e[2],fn:e[3],dir:e[4],title:e[5],code:e[6],status:e[7],link:"",note:"",example:true}; }),
-    checks:{},
-    reports:[{id:uid(),month:"2026-09",title:"Сентябрь 2026 · точка А",
-      vals:{ig_clicks:27,ig_leads:46,tg_churn:88,tg_leads:92,vk_leads:458,max_churn:83,pin_clicks:315,vk_ads_lm:"",smm_regs:""},
-      cont:"Сильную механику дешёвой подписки в VK\nФормат «Васту-тайминг» в Instagram (153 подписки и 1 300 сохранений с одной карусели)",
-      change:"Плотность Telegram и MAX: 1–2 поста в день вместо 4–5\nДоля Ларисы в контенте",
-      test:"Кодовые слова и Telegram-бот\nПины-гайды с метками",
-      stop:"Дублирование запусковых сообщений в MAX\nОбезличенный нейровизуал в ленте",
-      note:"Исходные данные из SMM-стратегии (слайды 5 и 89)", base:true}]
+    decomp: SEED.decomp.map(function(r){ return {id:uid(), block:r[0], cells:[1,2,3].map(function(i){ return {text:r[i]||"", st:""}; })}; }),
+    cp: rowsFromSeed("cp"),
+    rp: rowsFromSeed("rp"),
+    tz: SEED.tz.map(function(t){ var o=JSON.parse(JSON.stringify(t)); o.id=uid(); return o; })
   };
 }
+function baseReport(){
+  return {id:uid(),month:"2026-09",title:"Сентябрь 2026 · точка А",
+    vals:{ig_clicks:27,ig_leads:46,tg_churn:88,tg_leads:92,vk_leads:458,max_churn:83,pin_clicks:315,vk_ads_lm:"",smm_regs:""},
+    cont:"Механику дешёвой подписки в VK\nФормат «Васту-тайминг» в Instagram",
+    change:"Плотность Telegram и MAX: 1–2 поста в день вместо 4–5\nДолю Ларисы в контенте",
+    test:"Кодовые слова и Telegram-бот\nПины-гайды с метками",
+    stop:"Дублирование запусковых сообщений в MAX\nОбезличенный нейровизуал",
+    note:"Исходные данные из SMM-стратегии", base:true};
+}
 function load(){
-  try{ var raw=localStorage.getItem(KEY); if(raw){ var o=JSON.parse(raw); if(o&&o.plan) return o; } }catch(e){}
-  return seed();
+  var o=null;
+  try{ var raw=localStorage.getItem(KEY); if(raw) o=JSON.parse(raw); }catch(e){}
+  if(o && o.v===2) return o;
+  var f=freshParts();
+  return {v:2, decomp:f.decomp, cp:f.cp, rp:f.rp, tz:f.tz,
+    reports:(o&&o.reports&&o.reports.length)?o.reports:[baseReport()],
+    utmLog:(o&&o.utmLog)||[], landingsCustom:(o&&o.landingsCustom)||[]};
 }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
-S = load();
+var S = load(); save();
 
 /* ============================================================
    УТИЛИТЫ
    ============================================================ */
 function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
 function fmt(n){ return n==null||n===""||isNaN(n)?"—":Number(n).toLocaleString("ru-RU"); }
-var MONTHS=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
 var MONTHS_N=["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
-var WD=["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
-function human(d){ return d.getDate()+" "+MONTHS[d.getMonth()]; }
-var $page = document.getElementById("page");
+function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function dshort(s){ if(!s||!/^\d{4}-\d\d-\d\d$/.test(s)) return s||""; var p=s.split("-"); return p[2]+"."+p[1]; }
+var $page=document.getElementById("page");
 var toastT;
 function toast(msg){ var t=document.getElementById("toast"); t.textContent=msg; t.classList.add("on"); clearTimeout(toastT); toastT=setTimeout(function(){t.classList.remove("on");},2200); }
 function copy(text, ok){
@@ -501,98 +509,292 @@ function copy(text, ok){
 var I = {
   home:'<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/>',
   dash:'<path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/>',
-  strat:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+  slides:'<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>',
+  grid:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/>',
   plan:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
   repack:'<path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/>',
-  funnel:'<path d="M3 4h18l-7 8v6l-4 2v-8z"/>',
-  report:'<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
-  road:'<path d="M4 6h10M4 12h16M4 18h7"/><circle cx="18" cy="6" r="2"/><circle cx="15" cy="18" r="2"/>',
-  voice:'<path d="M4 5h16v11H9l-5 4z"/>',
+  doc:'<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
+  report:'<path d="M4 20V4M4 20h16"/><path d="M8 16l4-5 3 3 5-6"/>',
   link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
   tools:'<path d="M14 7a4 4 0 0 0 5 5l-8 8a2.8 2.8 0 0 1-4-4z"/>',
-  plus:'<path d="M12 5v14M5 12h14"/>',
-  left:'<path d="M15 6l-6 6 6 6"/>', right:'<path d="M9 6l6 6-6 6"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>', left:'<path d="M15 6l-6 6 6 6"/>', right:'<path d="M9 6l6 6-6 6"/>',
   check:'<path d="M5 12l5 5 9-10"/>', copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/>',
-  ext:'<path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/>'
+  ext:'<path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/>', full:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>'
 };
 function ico(n){ return '<svg viewBox="0 0 24 24" aria-hidden="true">'+I[n]+'</svg>'; }
 function chipNet(k){ var n=NETS[k]; return n?'<span class="chip"><i style="background:'+n.c+'"></i>'+n.name+'</span>':""; }
-function chipFn(k){ var f=FNS[k]; return f?'<span class="chip"><i style="background:'+f.c+'"></i>'+f.name+'</span>':""; }
-
-/* состояние чек-листов: пусто → в работе → готово */
-var ST_NEXT={"":"wip",wip:"done",done:""}, ST_LBL={"":"не начато",wip:"в работе",done:"готово"};
-function checkItem(id, text, sub){
-  var st=S.checks[id]||"";
-  return '<button class="check" type="button" data-check="'+id+'" data-st="'+st+'"><span class="box"><svg viewBox="0 0 24 24">'+I.check+'</svg></span><span class="txt">'+esc(text)+(sub?'<small>'+esc(sub)+'</small>':'')+'</span><span class="st">'+ST_LBL[st]+'</span></button>';
+function stChip(s){ return '<span class="chip '+(ST_CLASS[s]||"s-gray")+'">'+esc(s||"—")+'</span>'; }
+function head(eyebrow, title, lead, right){
+  return '<div class="page-head"><div><div class="eyebrow">'+eyebrow+'</div><h1>'+title+'</h1>'+(lead?'<p class="lead">'+lead+'</p>':'')+'</div>'+(right||'')+'</div>';
 }
-function progressOf(ids){ var done=0, wip=0; ids.forEach(function(id){ if(S.checks[id]==="done")done++; else if(S.checks[id]==="wip")wip++; }); return {done:done,wip:wip,total:ids.length,pct:ids.length?Math.round(done/ids.length*100):0}; }
-function meter(p){ return '<div class="meter"><div class="track"><div class="fill" style="width:'+p.pct+'%"></div></div><span>'+p.done+' из '+p.total+(p.wip?' · в работе '+p.wip:'')+'</span></div>'; }
+function closeModal(){ document.getElementById("modal-root").innerHTML=""; }
+function armBtn(id,confirmText,fn){
+  var b=document.getElementById(id); if(!b) return;
+  b.addEventListener("click",function(){ if(b.dataset.armed){ fn(); } else { b.dataset.armed="1"; b.textContent=confirmText; b.style.borderColor="var(--terra)"; b.style.color="var(--terra)"; } });
+}
 
 /* ============================================================
    НАВИГАЦИЯ
    ============================================================ */
 var ROUTES = [
-  ["home","Обзор","home"],["dashboard","Дашборд","dash"],["strategy","Стратегия","strat"],["plan","Контент-план","plan"],
-  ["repack","Переупаковка","repack"],["funnel","Воронка","funnel"],["reports","Отчёты","report"],["roadmap","План внедрения","road"],
-  ["voice","Голос бренда","voice"],["utm","UTM-метки","link"],["tools","Инструменты","tools"]
+  ["home","Обзор","home"],["dashboard","Дашборд","dash"],["strategy","Стратегия","slides"],["decomp","Декомпозиция","grid"],
+  ["plan","Контент-план","plan"],["repack","Переупаковка","repack"],["tz","ТЗ Ларисе","doc"],
+  ["reports","Отчёты","report"],["utm","UTM-метки","link"],["tools","Инструменты","tools"]
 ];
+var VIEWS = {}, AFTER = {};
+function curRoute(){ var h=(location.hash||"#home").slice(1); return VIEWS[h]?h:"home"; }
 function renderNav(cur){
-  document.getElementById("nav").innerHTML = ROUTES.map(function(r){
-    return '<a href="#'+r[0]+'"'+(r[0]===cur?' aria-current="page"':'')+'>'+ico(r[2])+r[1]+'</a>';
-  }).join("");
-  var a=document.querySelector('.nav a[aria-current]'); if(a&&a.scrollIntoView&&window.innerWidth<=860){ try{a.scrollIntoView({inline:"center",block:"nearest"});}catch(e){} }
+  document.getElementById("nav").innerHTML = ROUTES.map(function(r){ return '<a href="#'+r[0]+'"'+(r[0]===cur?' aria-current="page"':'')+'>'+ico(r[2])+r[1]+'</a>'; }).join("");
+  var a=document.querySelector('.nav a[aria-current]'); if(a&&window.innerWidth<=860){ try{a.scrollIntoView({inline:"center",block:"nearest"});}catch(e){} }
 }
-function route(){
-  var h=(location.hash||"#home").slice(1); if(!VIEWS[h]) h="home";
-  renderNav(h);
-  $page.innerHTML = VIEWS[h]();
-  if(AFTER[h]) AFTER[h]();
-  window.scrollTo(0,0);
+function route(keepScroll){
+  var h=curRoute(), y=window.scrollY;
+  renderNav(h); $page.innerHTML=VIEWS[h](); if(AFTER[h]) AFTER[h]();
+  window.scrollTo(0, keepScroll?y:0);
 }
-function head(eyebrow, title, lead, right){
-  return '<div class="page-head"><div><div class="eyebrow">'+eyebrow+'</div><h1>'+title+'</h1>'+(lead?'<p class="lead">'+lead+'</p>':'')+'</div>'+(right||'')+'</div>';
-}
-var AFTER = {};
 
 /* ============================================================
-   ВИДЫ
+   ОБЗОР
    ============================================================ */
-var VIEWS = {};
-
-/* ---------- Обзор ---------- */
+function curMonthIdx(){ var n=new Date(); return n<new Date(2026,11,1)?0:n<new Date(2027,0,1)?1:2; }
+function monthProgress(i){ var t=0,d=0; S.decomp.forEach(function(r){ if(r.cells[i].text.trim()){ t++; if(r.cells[i].st==="done") d++; } }); return {t:t,d:d,pct:t?Math.round(d/t*100):0}; }
 VIEWS.home = function(){
-  var now=new Date(), m=monday(now), wk=iso(m), wkEnd=iso(addDays(m,6));
-  var week=S.plan.filter(function(p){return p.date>=wk&&p.date<=wkEnd;});
-  var pub=week.filter(function(p){return p.status==="pub";}).length, ready=week.filter(function(p){return p.status==="ready";}).length;
-  var allRoad=[]; ROADMAP.forEach(function(r){r.items.forEach(function(i){allRoad.push(i[0]);});});
-  var allRep=[]; REPACK.forEach(function(g){g.items.forEach(function(i){allRep.push(i[0]);});});
-  var pr=progressOf(allRoad), pp=progressOf(allRep), pf=progressOf(FIRST.map(function(f){return f[0];}));
-  var monthIdx = now < new Date(2026,11,1) ? 0 : now < new Date(2027,0,1) ? 1 : 2;
+  var mi=curMonthIdx(), m=SEED.months[mi], mp=monthProgress(mi), today=iso(new Date());
+  var next=S.cp.filter(function(r){return r.sheet!=="ideas" && r.date>=today && r.status!=="Опубликовано";}).sort(function(a,b){return a.date<b.date?-1:1;}).slice(0,6);
+  var tzOpen=S.tz.filter(function(t){return t.status!=="Опубликовано";}).slice(0,4);
   return ''+
-  '<section class="band"><div><div class="eyebrow">SMM-стратегия · октябрь 2026 — март 2027</div><h1>VASTU HOME</h1>'+
-    '<p>Рабочее пространство SMM: стратегия, контент-план, упаковка, воронка и отчёты в одном месте. Всё, что нужно команде, чтобы вести соцсети по стратегии без отдельных созвонов.</p>'+
-    '<div class="row" style="margin-top:14px"><a class="btn primary" style="background:var(--paper);color:var(--green-deep);border-color:var(--paper)" href="#plan">'+ico("plan")+'Открыть контент-план</a><a class="btn ghost" style="color:var(--on-green);border-color:rgba(255,255,255,.35)" href="#strategy">Читать стратегию</a></div></div>'+
-    '<div class="band-stats"><div><small>Сейчас идёт</small><b>'+ROADMAP[monthIdx].title.split(" · ")[0]+' · '+ROADMAP[monthIdx].sub.toLowerCase()+'</b></div><div><small>Главный принцип</small><b>Контента меньше, функции больше</b></div><div><small>Ключевой запуск для SMM</small><b>один в месяц</b></div></div>'+
-  '</section>'+
-  '<div class="grid g4">'+
-    statCard("Контент на этой неделе", week.length, pub+" опубликовано · "+ready+" готово")+
-    statCard("Первые две недели", pf.done+" / "+pf.total, "решений принято")+
-    statCard("Переупаковка", pp.pct+"%", pp.done+" из "+pp.total+" пунктов")+
-    statCard("План внедрения", pr.pct+"%", pr.done+" из "+pr.total+" задач")+
-  '</div>'+
+  '<section class="band"><div><div class="eyebrow">SMM · октябрь 2026 — март 2027</div><h1>VASTU HOME</h1><p>Стратегия, контент-план, упаковка и ТЗ в одном месте.</p></div>'+
+   '<div class="band-stats"><div><small>Сейчас</small><b>'+m.t+' · '+m.sub.split(" · ")[1]+'</b></div><div><small>Выполнено за месяц</small><b>'+mp.d+' из '+mp.t+' блоков</b></div></div></section>'+
   '<div class="grid g2">'+
-    '<section class="card"><div class="card-head"><h2>Ориентиры на третий месяц</h2><a class="small" href="#reports">все отчёты →</a></div>'+kpiProgress()+'</section>'+
-    '<section class="card"><div class="card-head"><h2>Решить в первые две недели</h2>'+'<span class="small muted">нажмите, чтобы отметить</span></div><div class="checks">'+FIRST.map(function(f){return checkItem(f[0],f[1],f[2]);}).join("")+'</div></section>'+
-  '</div>'+
-  '<div class="grid g3">'+
-    quick("plan","Контент-план","Неделя по дням, ритм площадок и функции каждой публикации")+
-    quick("voice","Проверить текст","Вставьте текст поста — платформа подсветит обещания и запугивание")+
-    quick("utm","UTM-метки","Ссылка с метками по методике школы: лендинг, источник, канал, тип контента")+
+   '<section class="card"><div class="card-head"><h2>Ближайшие публикации</h2><a class="small" href="#plan">контент-план →</a></div>'+
+    (next.length?'<div class="checks">'+next.map(function(r){return '<a class="check" style="text-decoration:none;color:inherit;grid-template-columns:56px minmax(0,1fr) auto" href="#plan"><b class="small">'+dshort(r.date)+'</b><span class="txt">'+esc(r.unit)+(r.topic?' · '+esc(r.topic):'')+'<small>'+NETS[r.sheet].name+'</small></span>'+stChip(r.status)+'</a>';}).join("")+'</div>':'<p class="muted small">Запланированных публикаций нет.</p>')+
+   '</section>'+
+   '<section class="card"><div class="card-head"><h2>ТЗ Ларисе</h2><a class="small" href="#tz">все ТЗ →</a></div>'+
+    (tzOpen.length?'<div class="checks">'+tzOpen.map(function(t){return '<a class="check" style="text-decoration:none;color:inherit;grid-template-columns:minmax(0,1fr) auto" href="#tz" data-tzopen="'+t.id+'"><span class="txt">'+esc(t.title)+'<small>дедлайн Ларисы '+dshort(t.deadline)+' · выход '+dshort(t.date)+'</small></span>'+stChip(t.status)+'</a>';}).join("")+'</div>':'<p class="muted small">Открытых ТЗ нет.</p>')+
+   '</section>'+
   '</div>';
 };
-function statCard(l,v,s){ return '<section class="card stat"><small>'+l+'</small><b>'+v+'</b><em>'+s+'</em></section>'; }
-function quick(h,t,s){ return '<a class="card" href="#'+h+'" style="text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:6px"><h3>'+t+' <span style="color:var(--green)">→</span></h3><span class="small muted">'+s+'</span></a>'; }
 
+/* ============================================================
+   ДАШБОРД
+   ============================================================ */
+VIEWS.dashboard = function(){
+  return head("Аналитика","Дашборд","",'<a class="btn" href="dashboard.html" target="_blank" rel="noopener">'+ico("ext")+'На весь экран</a>')+
+  '<iframe class="frame" src="dashboard.html#embed" title="Дашборд VASTU" loading="lazy"></iframe>';
+};
+
+/* ============================================================
+   СТРАТЕГИЯ — ПРЕЗЕНТАЦИЯ
+   ============================================================ */
+var SL = window.SLIDES || {count:0, sections:[]};
+var slide = 1;
+try{ slide = Math.min(SL.count, Math.max(1, +(localStorage.getItem(KEY+":slide")||1))) || 1; }catch(e){}
+function slideSrc(n){ return "slides/s-"+String(n).padStart(3,"0")+".jpg"; }
+function curSection(){ var s=null; SL.sections.forEach(function(x){ if(x[2]<=slide) s=x; }); return s; }
+VIEWS.strategy = function(){
+  if(!SL.count) return head("Стратегия","SMM-стратегия VASTU HOME","Слайды не найдены. Соберите их скриптом tools/build_slides.py.");
+  var cs=curSection();
+  var thumbs=""; for(var i=1;i<=SL.count;i++) thumbs+='<button type="button" data-slide="'+i+'"'+(i===slide?' aria-current="true"':'')+' aria-label="Слайд '+i+'"><img loading="lazy" src="'+slideSrc(i)+'" alt=""><span>'+i+'</span></button>';
+  return head("Октябрь 2026 — март 2027","SMM-стратегия","")+
+  '<div class="deck">'+
+   '<div class="chips"><button type="button" data-slide="1" aria-pressed="'+(!cs)+'">Начало</button>'+SL.sections.map(function(s){return '<button type="button" data-slide="'+s[2]+'" aria-pressed="'+(cs&&cs[2]===s[2])+'"><b>'+s[0]+'</b>'+esc(s[1])+'</button>';}).join("")+'</div>'+
+   '<div class="stage" id="stage"><img id="slide-img" src="'+slideSrc(slide)+'" alt="Слайд '+slide+'">'+
+    '<button type="button" class="nav-btn prev" data-step="-1" aria-label="Назад">'+ico("left")+'</button><button type="button" class="nav-btn next" data-step="1" aria-label="Вперёд">'+ico("right")+'</button></div>'+
+   '<div class="deck-bar"><span class="counter">'+slide+' / '+SL.count+'</span><span class="small muted">стрелки ← → на клавиатуре</span><button class="btn" type="button" id="fs">'+ico("full")+'Полный экран</button></div>'+
+   '<div class="thumbs" id="thumbs">'+thumbs+'</div>'+
+  '</div>';
+};
+function goSlide(n){
+  slide=Math.min(SL.count,Math.max(1,n));
+  try{ localStorage.setItem(KEY+":slide",slide); }catch(e){}
+  var img=document.getElementById("slide-img"); if(!img) return;
+  img.src=slideSrc(slide); img.alt="Слайд "+slide;
+  document.querySelector(".counter").textContent=slide+" / "+SL.count;
+  var cs=curSection();
+  document.querySelectorAll(".chips button").forEach(function(b){ var p=+b.dataset.slide; b.setAttribute("aria-pressed", String(cs ? p===cs[2] : p===1)); });
+  document.querySelectorAll("#thumbs button").forEach(function(b){ b.setAttribute("aria-current", String(+b.dataset.slide===slide)); });
+  var t=document.querySelector('#thumbs button[data-slide="'+slide+'"]'); if(t){ var w=document.getElementById("thumbs"); w.scrollLeft = t.offsetLeft - w.clientWidth/2 + t.clientWidth/2; }
+  if(slide<SL.count){ var pre=new Image(); pre.src=slideSrc(slide+1); }
+}
+AFTER.strategy = function(){
+  if(!SL.count) return;
+  goSlide(slide);
+  var fs=document.getElementById("fs");
+  fs.addEventListener("click",function(){ var st=document.getElementById("stage"); try{ var p=st.requestFullscreen?st.requestFullscreen():null; if(p&&p.catch) p.catch(function(){ toast("Полный экран недоступен в этом окне"); }); }catch(e){ toast("Полный экран недоступен в этом окне"); } });
+  var sx=null, stg=document.getElementById("stage");
+  stg.addEventListener("touchstart",function(e){ sx=e.touches[0].clientX; },{passive:true});
+  stg.addEventListener("touchend",function(e){ if(sx==null) return; var dx=e.changedTouches[0].clientX-sx; if(Math.abs(dx)>40) goSlide(slide+(dx<0?1:-1)); sx=null; });
+};
+document.addEventListener("keydown",function(e){
+  if(curRoute()!=="strategy" || /INPUT|TEXTAREA|SELECT/.test((e.target||{}).tagName||"")) return;
+  if(e.key==="ArrowRight"||e.key==="PageDown"){ goSlide(slide+1); e.preventDefault(); }
+  if(e.key==="ArrowLeft"||e.key==="PageUp"){ goSlide(slide-1); e.preventDefault(); }
+});
+
+/* ============================================================
+   ДЕКОМПОЗИЦИЯ
+   ============================================================ */
+var CELL_ST = {"":"не начато", wip:"в работе", done:"готово"};
+VIEWS.decomp = function(){
+  return head("План работ","Декомпозиция по месяцам","Нажмите на ячейку, чтобы отметить статус или поправить текст.",'<button class="btn primary" type="button" id="dc-add">'+ico("plus")+'Блок</button>')+
+  '<div class="sheet-wrap"><table class="sheet decomp"><thead><tr><th>Блок</th>'+SEED.months.map(function(m,i){ var p=monthProgress(i); return '<th class="mhead">'+m.t+'<small>'+m.sub+'</small><span class="mprog"><i style="width:'+p.pct+'%"></i></span></th>'; }).join("")+'</tr></thead><tbody>'+
+  S.decomp.map(function(r){
+    return '<tr><td class="first" data-dcrow="'+r.id+'">'+esc(r.block)+'</td>'+r.cells.map(function(c,i){
+      if(!c.text.trim()) return '<td data-dc="'+r.id+'" data-m="'+i+'"><span class="muted small">—</span></td>';
+      return '<td data-dc="'+r.id+'" data-m="'+i+'" class="'+(c.st==="done"?"done":"")+'"><div class="clamp">'+esc(c.text).replace(/;\s*/g,"\n")+'</div><span class="cell-st '+ST_CLASS[c.st]+'">'+CELL_ST[c.st]+'</span></td>';
+    }).join("")+'</tr>';
+  }).join("")+'</tbody></table></div>';
+};
+function openDecomp(r, mi){
+  var isRow = mi==null;
+  var root=document.getElementById("modal-root");
+  var body = isRow
+    ? '<div class="field"><label for="dc-block">Блок</label><input id="dc-block" value="'+esc(r.block)+'"></div>'+SEED.months.map(function(m,i){return '<div class="field"><label for="dc-t'+i+'">'+m.t+' · '+m.sub+'</label><textarea id="dc-t'+i+'">'+esc(r.cells[i].text)+'</textarea></div>';}).join("")
+    : '<div class="field"><label for="dc-text">Что делаем</label><textarea id="dc-text" style="min-height:160px">'+esc(r.cells[mi].text)+'</textarea><span class="hint">Пункты разделяйте точкой с запятой</span></div>'+
+      '<div class="field"><label for="dc-st">Статус</label><select id="dc-st">'+Object.keys(CELL_ST).map(function(k){return '<option value="'+k+'"'+(r.cells[mi].st===k?' selected':'')+'>'+CELL_ST[k]+'</option>';}).join("")+'</select></div>';
+  root.innerHTML='<div class="overlay" data-close="1"><form class="modal" id="dc-form"><div class="card-head" style="margin:0"><h2>'+esc(r.block||"Новый блок")+(isRow?'':' · '+SEED.months[mi].t)+'</h2><button type="button" class="btn ghost" data-close="1">Закрыть</button></div>'+body+
+   '<div class="modal-foot">'+(isRow&&r.id?'<button type="button" class="btn danger" id="dc-del">Удалить блок</button>':'<span></span>')+'<button class="btn primary" type="submit">'+ico("check")+'Сохранить</button></div></form></div>';
+  var f=document.getElementById("dc-form");
+  f.addEventListener("submit",function(e){ e.preventDefault();
+    if(isRow){ r.block=f.querySelector("#dc-block").value.trim()||"Блок"; r.cells.forEach(function(c,i){ c.text=f.querySelector("#dc-t"+i).value; }); if(!r.id){ r.id=uid(); S.decomp.push(r); } }
+    else { r.cells[mi].text=f.querySelector("#dc-text").value; r.cells[mi].st=f.querySelector("#dc-st").value; }
+    save(); closeModal(); route(true); toast("Сохранено"); });
+  armBtn("dc-del","Точно удалить?",function(){ S.decomp=S.decomp.filter(function(x){return x.id!==r.id;}); save(); closeModal(); route(true); });
+}
+AFTER.decomp = function(){ document.getElementById("dc-add").addEventListener("click",function(){ openDecomp({block:"",cells:[{text:"",st:""},{text:"",st:""},{text:"",st:""}]}); }); };
+
+/* ============================================================
+   ЛИСТЫ: КОНТЕНТ-ПЛАН И ПЕРЕУПАКОВКА
+   ============================================================ */
+var cur = {cp:"ig", rp:"ig"};
+var cpMonth = iso(new Date()).slice(0,7);
+try{ var _c=JSON.parse(localStorage.getItem(KEY+":tabs")||"{}"); if(_c.cp) cur.cp=_c.cp; if(_c.rp) cur.rp=_c.rp; }catch(e){}
+function rememberTabs(){ try{ localStorage.setItem(KEY+":tabs",JSON.stringify(cur)); }catch(e){} }
+function shiftMonth(ym,n){ var p=ym.split("-"), d=new Date(+p[0],+p[1]-1+n,1); return iso(d).slice(0,7); }
+function monthName(ym){ var p=ym.split("-"); return MONTHS_N[+p[1]-1]+" "+p[0]; }
+
+function sheetTable(table, sheet, rows){
+  var cols=colsOf(table,sheet);
+  if(!rows.length) return '<div class="sheet-wrap"><div class="empty-state">Здесь пока пусто. Нажмите «Добавить строку».</div></div>';
+  var prevBlock=null;
+  return '<div class="sheet-wrap"><table class="sheet"><thead><tr>'+cols.map(function(c){return '<th>'+c[1]+'</th>';}).join("")+'</tr></thead><tbody>'+
+   rows.map(function(r){
+     var gs = (cols[0][0]==="block" && r.block && prevBlock!==null && r.block!==prevBlock) ? ' class="group-start"' : '';
+     if(cols[0][0]==="block" && r.block) prevBlock=r.block; else if(prevBlock===null) prevBlock="";
+     return '<tr data-row="'+r.id+'" data-table="'+table+'"'+gs+'>'+cols.map(function(c){
+       var v=r[c[0]], cls=c[3]||"";
+       if(c[2].indexOf("status:")===0){ var list=ST[c[2].split(":")[1]]; if(list.indexOf(v)<0 && v) list=list.concat([v]); return '<td class="'+cls+'"><select class="stsel '+(ST_CLASS[v]||"s-gray")+'" data-st-row="'+r.id+'" data-st-table="'+table+'" aria-label="Статус">'+list.map(function(s){return '<option'+(s===v?' selected':'')+'>'+s+'</option>';}).join("")+'</select></td>'; }
+       if(c[2]==="date") return '<td class="'+cls+'"><b>'+esc(dshort(v))+'</b></td>';
+       return '<td class="'+cls+'"><div class="clamp">'+esc(v)+'</div></td>';
+     }).join("")+'</tr>';
+   }).join("")+'</tbody></table></div>';
+}
+VIEWS.plan = function(){
+  var sh=cur.cp, isIdeas=sh==="ideas";
+  var rows=S.cp.filter(function(r){return r.sheet===sh;});
+  if(!isIdeas){ rows=rows.filter(function(r){ return !r.date || r.date.slice(0,7)===cpMonth; }).sort(function(a,b){ return (a.date||"9")<(b.date||"9")?-1:1; }); }
+  return head("Контент","Контент-план","",
+    '<div class="row">'+(isIdeas?'':'<div class="month-nav"><button class="btn" type="button" data-cpm="-1" aria-label="Прошлый месяц">'+ico("left")+'</button><b>'+monthName(cpMonth)+'</b><button class="btn" type="button" data-cpm="1" aria-label="Следующий месяц">'+ico("right")+'</button></div>')+
+    '<button class="btn primary" type="button" data-addrow="cp">'+ico("plus")+'Добавить строку</button></div>')+
+  subtabs("cp")+sheetTable("cp",sh,rows);
+};
+VIEWS.repack = function(){
+  var rows=S.rp.filter(function(r){return r.sheet===cur.rp;});
+  return head("Упаковка","План переупаковки","",'<button class="btn primary" type="button" data-addrow="rp">'+ico("plus")+'Добавить строку</button>')+
+  subtabs("rp")+sheetTable("rp",cur.rp,rows);
+};
+function subtabs(table){
+  return '<div class="subtabs" role="tablist">'+SHEETS[table].map(function(s){
+    var n=S[table].filter(function(r){return r.sheet===s[0];}).length;
+    return '<button type="button" role="tab" data-sub="'+table+':'+s[0]+'" aria-pressed="'+(cur[table]===s[0])+'">'+s[1]+'<span>'+n+'</span></button>';
+  }).join("")+'</div>';
+}
+function openRow(table, r, isNew){
+  var cols=colsOf(table, r.sheet);
+  var root=document.getElementById("modal-root");
+  var fields=cols.map(function(c){
+    var id="rf-"+c[0], v=r[c[0]]==null?"":r[c[0]], full=(c[2]==="long")?' full':'';
+    var inp;
+    if(c[2]==="long") inp='<textarea id="'+id+'">'+esc(v)+'</textarea>';
+    else if(c[2]==="date") inp='<input type="date" id="'+id+'" value="'+esc(v)+'">';
+    else if(c[2].indexOf("status:")===0||c[2].indexOf("select:")===0){ var list=c[2].indexOf("status:")===0?ST[c[2].split(":")[1]]:c[2].split(":")[1].split("|"); inp='<select id="'+id+'">'+list.map(function(s){return '<option'+(s===v?' selected':'')+'>'+s+'</option>';}).join("")+'</select>'; }
+    else inp='<input id="'+id+'" value="'+esc(v)+'">';
+    return '<div class="field'+full+'"><label for="'+id+'">'+c[1]+'</label>'+inp+'</div>';
+  }).join("");
+  var sheetName=SHEETS[table].filter(function(s){return s[0]===r.sheet;})[0][1];
+  var canTz = table==="cp" && r.sheet!=="ideas";
+  root.innerHTML='<div class="overlay" data-close="1"><form class="modal" id="row-form" style="max-width:760px" autocomplete="off"><div class="card-head" style="margin:0"><h2>'+(isNew?"Новая строка":"Строка")+' · '+sheetName+'</h2><button type="button" class="btn ghost" data-close="1">Закрыть</button></div>'+
+   '<div class="form-grid">'+fields+'</div><div id="row-warn"></div>'+
+   '<div class="modal-foot"><div class="row">'+(isNew?'':'<button type="button" class="btn danger" id="row-del">Удалить</button>')+(canTz?'<button type="button" class="btn" id="row-tz">'+ico("doc")+'Сделать ТЗ Ларисе</button>':'')+'</div><button class="btn primary" type="submit">'+ico("check")+'Сохранить</button></div></form></div>';
+  var f=document.getElementById("row-form");
+  function collect(){ cols.forEach(function(c){ r[c[0]]=f.querySelector("#rf-"+c[0]).value; }); }
+  function warn(){ var txt=cols.map(function(c){return f.querySelector("#rf-"+c[0]).value;}).join(" "); var h=scanText(txt);
+    document.getElementById("row-warn").innerHTML = h.length ? '<div class="warn-note">Проверьте формулировки: '+h.map(function(x){return "«"+esc(x.word)+"»";}).filter(function(v,i,a){return a.indexOf(v)===i;}).join(", ")+'. '+esc(h[0].tip)+'</div>' : ''; }
+  f.addEventListener("input",warn); warn();
+  f.addEventListener("submit",function(e){ e.preventDefault(); collect(); if(isNew){ S[table].push(r); } if(table==="cp"&&r.date) cpMonth=r.date.slice(0,7); save(); closeModal(); route(true); toast(isNew?"Строка добавлена":"Сохранено"); });
+  armBtn("row-del","Точно удалить?",function(){ S[table]=S[table].filter(function(x){return x.id!==r.id;}); save(); closeModal(); route(true); toast("Удалено"); });
+  var tzb=document.getElementById("row-tz");
+  if(tzb) tzb.addEventListener("click",function(){ collect(); if(isNew){ S[table].push(r); }
+    var t={id:uid(),title:(r.unit?r.unit+" «":"«")+(r.topic||"Без темы")+"»",status:"Черновик",date:r.date,deadline:"",shoot:"",format:NETS[r.sheet].name+" · "+(r.prod||""),context:r.tz||"",todo:"",hooks:"",speech:"",text:"",scenario:"",cta:r.cta||""};
+    S.tz.unshift(t); tzOpen=t.id; save(); closeModal(); location.hash="#tz"; toast("ТЗ создано — дополните его"); });
+}
+
+/* ============================================================
+   ТЗ ЛАРИСЕ
+   ============================================================ */
+var tzOpen = null;
+var TZ_FIELDS = [
+  ["title","Название","text"],["status","Статус","status"],["date","Дата выхода","date"],["deadline","Дедлайн Ларисы","date"],
+  ["shoot","Съёмочный день","text"],["format","Площадка и формат","text"],
+  ["context","Задача и контекст","long"],["todo","Что нужно сделать Ларисе","lines"],["hooks","Варианты хуков","lines"],
+  ["speech","Как строим речь","long"],["text","Ориентир / текст","long"],["scenario","Сценарий","lines"],["cta","CTA","long"]
+];
+function tzText(t){
+  var out=t.title+"\nДата выхода: "+dshort(t.date)+"  |  Дедлайн Ларисы: "+dshort(t.deadline)+(t.shoot?"  |  "+t.shoot:"")+(t.format?"\nФормат: "+t.format:"");
+  TZ_FIELDS.slice(6).forEach(function(f){ var v=(t[f[0]]||"").trim(); if(!v) return; out+="\n\n"+f[1].toUpperCase()+"\n"+(f[2]==="lines"?v.split("\n").filter(Boolean).map(function(l,i){return (f[0]==="scenario"?(i+1)+". ":"• ")+l;}).join("\n"):v); });
+  return out;
+}
+VIEWS.tz = function(){
+  if(!S.tz.length) return head("Контент","ТЗ Ларисе","",'<button class="btn primary" type="button" id="tz-new">'+ico("plus")+'Новое ТЗ</button>')+'<div class="card empty-state">ТЗ пока нет. Создайте новое или сделайте его из строки контент-плана.</div>';
+  var t=S.tz.filter(function(x){return x.id===tzOpen;})[0]||S.tz[0]; tzOpen=t.id;
+  function sec(f){ var v=(t[f[0]]||"").trim(); if(!v) return "";
+    var inner = f[2]==="lines" ? (f[0]==="scenario"?'<ol>':'<ul>')+v.split("\n").filter(Boolean).map(function(l){return '<li>'+esc(l)+'</li>';}).join("")+(f[0]==="scenario"?'</ol>':'</ul>')
+      : (f[0]==="text"||f[0]==="cta") ? '<div class="say">'+esc(v)+'</div>' : '<p>'+esc(v)+'</p>';
+    return '<div class="tz-sec"><h3>'+f[1]+'</h3>'+inner+'</div>'; }
+  return head("Контент","ТЗ Ларисе","",'<button class="btn primary" type="button" id="tz-new">'+ico("plus")+'Новое ТЗ</button>')+
+  '<div class="tz-layout"><div class="tz-list">'+S.tz.map(function(x){return '<button type="button" class="tz-item" data-tz="'+x.id+'" aria-current="'+(x.id===t.id)+'"><b>'+esc(x.title)+'</b><small>выход '+dshort(x.date)+(x.deadline?' · дедлайн '+dshort(x.deadline):'')+'</small>'+stChip(x.status)+'</button>';}).join("")+'</div>'+
+  '<article class="tz-doc"><div class="row" style="justify-content:space-between"><div>'+stChip(t.status)+'</div><div class="row"><button class="btn" type="button" id="tz-copy">'+ico("copy")+'Скопировать для Ларисы</button><button class="btn primary" type="button" id="tz-edit">Редактировать</button></div></div>'+
+   '<h2>'+esc(t.title)+'</h2><div class="tz-meta"><span>Дата выхода: <b>'+esc(dshort(t.date)||"—")+'</b></span><span>Дедлайн Ларисы: <b>'+esc(dshort(t.deadline)||"—")+'</b></span>'+(t.shoot?'<span>'+esc(t.shoot)+'</span>':'')+'</div>'+
+   (t.format?'<div class="tz-meta">'+esc(t.format)+'</div>':'')+
+   TZ_FIELDS.slice(6).map(sec).join("")+
+  '</article></div>';
+};
+function openTz(t,isNew){
+  var root=document.getElementById("modal-root");
+  root.innerHTML='<div class="overlay" data-close="1"><form class="modal" id="tz-form" style="max-width:760px" autocomplete="off"><div class="card-head" style="margin:0"><h2>'+(isNew?"Новое ТЗ":"ТЗ")+'</h2><button type="button" class="btn ghost" data-close="1">Закрыть</button></div><div class="form-grid">'+
+   TZ_FIELDS.map(function(f){ var id="tf-"+f[0], v=t[f[0]]||"", inp;
+     if(f[2]==="long"||f[2]==="lines") inp='<textarea id="'+id+'">'+esc(v)+'</textarea>'+(f[2]==="lines"?'<span class="hint">каждый пункт с новой строки</span>':'');
+     else if(f[2]==="date") inp='<input type="date" id="'+id+'" value="'+esc(v)+'">';
+     else if(f[2]==="status") inp='<select id="'+id+'">'+ST.tz.map(function(s){return '<option'+(s===v?' selected':'')+'>'+s+'</option>';}).join("")+'</select>';
+     else inp='<input id="'+id+'" value="'+esc(v)+'">';
+     return '<div class="field'+(f[2]==="long"||f[2]==="lines"||f[0]==="title"||f[0]==="format"?' full':'')+'"><label for="'+id+'">'+f[1]+'</label>'+inp+'</div>'; }).join("")+
+   '</div><div id="tz-warn"></div><div class="modal-foot">'+(isNew?'<span></span>':'<button type="button" class="btn danger" id="tz-del">Удалить ТЗ</button>')+'<button class="btn primary" type="submit">'+ico("check")+'Сохранить</button></div></form></div>';
+  var f=document.getElementById("tz-form");
+  function warn(){ var h=scanText(TZ_FIELDS.map(function(x){return f.querySelector("#tf-"+x[0]).value;}).join(" ")); document.getElementById("tz-warn").innerHTML=h.length?'<div class="warn-note">Проверьте формулировки: '+h.map(function(x){return "«"+esc(x.word)+"»";}).filter(function(v,i,a){return a.indexOf(v)===i;}).join(", ")+'. '+esc(h[0].tip)+'</div>':''; }
+  f.addEventListener("input",warn); warn();
+  f.addEventListener("submit",function(e){ e.preventDefault(); TZ_FIELDS.forEach(function(x){ t[x[0]]=f.querySelector("#tf-"+x[0]).value; }); if(!t.title.trim()) t.title="Без названия"; if(isNew){ t.id=uid(); S.tz.unshift(t); } tzOpen=t.id; save(); closeModal(); route(true); toast("ТЗ сохранено"); });
+  armBtn("tz-del","Точно удалить?",function(){ S.tz=S.tz.filter(function(x){return x.id!==t.id;}); tzOpen=null; save(); closeModal(); route(true); });
+}
+AFTER.tz = function(){
+  document.getElementById("tz-new").addEventListener("click",function(){ openTz({status:"Черновик"},true); });
+  var t=S.tz.filter(function(x){return x.id===tzOpen;})[0]; if(!t) return;
+  document.getElementById("tz-edit").addEventListener("click",function(){ openTz(t,false); });
+  document.getElementById("tz-copy").addEventListener("click",function(){ copy(tzText(t),"ТЗ скопировано — можно отправлять Ларисе"); });
+};
+
+/* ============================================================
+   ОТЧЁТЫ
+   ============================================================ */
 function latestReport(){ var r=S.reports.slice().sort(function(a,b){return a.month<b.month?1:-1;}); return r[0]; }
 function kpiProgress(rep){
   rep = rep || latestReport();
@@ -614,286 +816,6 @@ function kpiProgress(rep){
   }).join("")+'</div>'+(rep?'<p class="small muted" style="margin:14px 0 0">Факт из отчёта «'+esc(rep.title)+'». Шкала идёт от точки А к цели.</p>':'');
 }
 
-/* ---------- Дашборд ---------- */
-VIEWS.dashboard = function(){
-  return head("Аналитика","Дашборд","Живые цифры по пяти площадкам. Кнопка «обновить» внутри дашборда подтягивает данные из рабочей таблицы.",
-    '<a class="btn" href="dashboard.html" target="_blank" rel="noopener">'+ico("ext")+'Открыть на весь экран</a>')+
-  '<iframe class="frame" src="dashboard.html#embed" title="Дашборд VASTU" loading="lazy"></iframe>';
-};
-
-/* ---------- Стратегия ---------- */
-var SECTIONS = [
- {t:"Аудит текущего SMM", b:function(){ return ''+
-  '<section class="card"><h2>Точка А · сентябрь 2026</h2><div class="sub">аудитория, динамика за месяц и лиды по SMM-статистике</div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Площадка</th><th class="num">Аудитория</th><th class="num">Динамика</th><th>Активность</th><th class="num">Лиды</th></tr></thead><tbody>'+
-   [["ig","164 885","−235","173,6 тыс просмотров · 1,2 тыс визитов в профиль · 27 кликов по ссылке","46"],
-    ["vk","17 254","+3 390","34 млн просмотров · 1,1 млн охвата · 10,5 тыс визитов","458"],
-    ["max","3 352","+659","активный рост аудитории","179"],
-    ["tg","21 603","−102","средний охват поста 840 · ER 5,3% · 127 постов","92"],
-    ["pin","576","+24","56,9 тыс просмотров · 4 990 взаимодействий · 315 переходов на сайт","0"]].map(function(r){
-     return '<tr><td>'+chipNet(r[0])+'</td><td class="num"><b>'+r[1]+'</b></td><td class="num '+(r[2][0]==="+"?"up":"down")+'">'+r[2]+'</td><td class="small">'+r[3]+'</td><td class="num"><b>'+r[4]+'</b></td></tr>';
-   }).join("")+'</tbody></table></div><p class="small muted" style="margin:12px 0 0">Сравнивать площадки только по лидам некорректно: у них разные источники трафика и разный объём рекламы.</p></section>'+
-  '<div class="grid g2">'+
-   card("Instagram","Большая база, маленькое активное ядро",'<div class="grid g3" style="gap:12px">'+mini("Подписчики","165 120 → 164 885")+mini("Просмотры","228,7 → 173,6 тыс")+mini("Вовлечения","7 873 → 5 690")+mini("Визиты","1 500 → 1 200")+mini("Клики","64 → 27")+mini("Лиды","86 → 46")+'</div><p class="small muted">Август → сентябрь. Просмотры stories низкие для базы в 165 тыс: реальное активное ядро значительно меньше.</p>')+
-   card("Telegram","Канал удерживает меньше половины купленных подписчиков",'<div class="grid g2" style="gap:12px">'+mini("Потрачено за 13 мес.","2,44 млн ₽")+mini("Пришло по рекламе","≈ 13 000")+mini("Реальный прирост","+4 930")+mini("За удержанного","≈ 500 ₽")+'</div><p class="small muted">Цена подписчика выросла со 128 ₽ в январе до 364 ₽ в сентябре. Канал работает в режиме постоянного запуска.</p>')+
-   card("MAX","Растёт за счёт рекламы и быстро теряет пришедших",'<div class="grid g3" style="gap:12px">'+mini("Бюджет","169 364 ₽")+mini("Пришло","1 051")+mini("Прирост","+659")+'</div><p class="small muted">За неделю 5–11 октября 176 подписок и 146 отписок. Площадка во многом дублирует Telegram.</p>')+
-   card("VK","Самая сильная динамика, реклама даёт только часть роста",'<div class="grid g3" style="gap:12px">'+mini("Прирост","+3 390")+mini("Цена подписчика","6,61 ₽")+mini("Лиды","458")+'</div><p class="small muted">Реклама на подписку дала ≈1 270 человек, ещё ≈2 100 пришли из других источников. Воронка «Новички»: 3 человека по 596 ₽.</p>')+
-  '</div>'+
-  '<section class="card"><h2>Главные выводы аудита</h2><div class="sub">семь наблюдений, на которых строится стратегия</div><ol class="list" style="list-style:none">'+
-   ["Контента много, но у значительной части нет понятной функции","Лариса используется слабее, чем могла бы: много нейровизуала и обезличенной подачи","Постоянный SMM слишком сильно смешан с запусками, особенно в Telegram и MAX","Рост части площадок поддерживается рекламой, и это не отделяется от результата контента","Большие базы не всегда означают большую активную аудиторию","Упаковка и путь пользователя перегружены","Нет отдельного ответственного за обработку входящих"].map(function(x,i){return '<li><b>'+(i+1)+'.</b> '+x+'</li>';}).join("")+
-  '</ol></section>'+
-  '<section class="card"><h2>Что меняем на уровне всей системы</h2><div class="grid g3" style="margin-top:12px">'+
-   [["Сокращаем объём ради объёма","Меньше слабых публикаций и дублирования"],["Усиливаем Ларису","Живые reels, реальные фото, кейсы, разборы"],["Разводим постоянный контент и запуски","Плотные прогревы — внутри запусковых сценариев"],["Пересобираем роль каждой площадки","Пять площадок — пять разных задач"],["Связываем контент с воронками","Кодовые слова, лид-магниты, боты, чек-листы"],["Пересобираем аналитику","Отдельно реклама и результат самого контента"]].map(function(x){return '<div><h3>'+x[0]+'</h3><p class="small muted" style="margin:4px 0 0">'+x[1]+'</p></div>';}).join("")+
-  '</div></section>';
- }},
- {t:"Целевая аудитория", b:function(){ return ''+
-  '<section class="card"><h2>Основной ориентир: женщина 35–54 лет</h2><div class="sub">95,5% аудитории Instagram — женщины · 35–44 лет 33,7% · 45–54 лет 31%</div>'+
-   '<ul class="list"><li>уже с опытом самостоятельной жизни, с домом или квартирой</li><li>с семейными и финансовыми задачами, часто в периоде изменений</li><li>готова вкладываться в обучение, если понимает ценность и доверяет эксперту</li></ul></section>'+
-  '<section class="card"><h2>Приходят с жизненной ситуацией, а не с запросом «изучить васту»</h2><div class="grid g2" style="margin-top:12px"><div><h3>Ситуации входа</h3><div class="tagline" style="margin-top:8px">'+["переезд","покупка квартиры или дома","стройка","ремонт","кризис в отношениях","финансовая нестабильность","рождение или взросление детей","смена работы","смена страны"].map(function(x){return '<span class="pill">'+x+'</span>';}).join("")+'</div></div>'+
-   '<div><h3>Как формулируют сами</h3><ul class="list" style="margin-top:8px">'+["«дома не отдыхается»","«деньги приходят и сразу уходят»","«переехали и с тех пор всё не так»","«хочу понять, что не так с моим домом»","«ребёнок тревожный, плохо учится»"].map(function(x){return '<li>'+x+'</li>';}).join("")+'</ul></div></div></section>'+
-  '<div class="grid g2">'+
-   [["Хочу разобраться со своим домом","Только знакомится с васту, дома некомфортно","простые диагностики · чек-листы · разборы ошибок · короткие reels · «с чего начать»"],
-    ["Хочу решить конкретный жизненный запрос","Деньги, отношения, дети, работа, переезд, ремонт","кейсы · разборы ситуаций · контент про зоны и сектора · лид-магниты под запрос"],
-    ["Хочу глубже изучить васту для себя","Понимает ценность, хочет строить карту дома сама","обучающие reels · разборы карт · фрагменты уроков · кейсы учеников"],
-    ["Хочу профессию и работу с клиентами","Нужны система, практика, диплом, сопровождение","ведём во флагманскую школу"]].map(function(s,i){return '<section class="card"><div class="num-badge">СЕГМЕНТ '+(i+1)+'</div><h2 style="margin-top:4px">«'+s[0]+'»</h2><p class="small muted">'+s[1]+'</p><div class="small"><b>Подходят:</b> '+s[2]+'</div></section>';}).join("")+
-  '</div>'+
-  '<section class="card"><h2>Готовность к покупке</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Аудитория</th><th>Кто это</th><th>Что нужно в контенте</th></tr></thead><tbody>'+
-   '<tr><td><b>Холодная</b></td><td class="small">не знает Ларису, может относиться скептически</td><td class="small">простота · узнавание себя · конкретный пример · понятный первый шаг</td></tr>'+
-   '<tr><td><b>Тёплая</b></td><td class="small">читает проект, понимает базовую логику</td><td class="small">разборы · кейсы · методика Ларисы · карты · истории учеников</td></tr>'+
-   '<tr><td><b>Горячая</b></td><td class="small">смотрит программу и стоимость</td><td class="small">программа · результат обучения · поддержка · условия · ответы на возражения</td></tr>'+
-  '</tbody></table></div></section>'+
-  '<section class="card"><h2>Возражения и что с ними делать</h2><div class="tbl-wrap"><table class="tbl"><tbody>'+
-   [["«Я не понимаю, что такое васту»","Простой вход без сложных терминов"],["«Не верю, что пространство может так влиять»","Реальные примеры, кейсы, планировки, спокойное объяснение механики"],["«Я сама не разберусь»","Маленькие понятные действия и демонстрация процесса обучения"],["«Мне нужен готовый ответ»","Такому человеку больше подойдёт консультация"],["«Это слишком эзотерично»","Показываем систему, методику и границы подхода"],["«У меня обычная квартира»","Решения для панелек, новостроек, небольших квартир и без ремонта"],["«Это дорого»","Доверие к Ларисе, кейсы, программа, сопровождение, понятный результат"]].map(function(r){return '<tr><td><b>'+r[0]+'</b></td><td class="small">'+r[1]+'</td></tr>';}).join("")+
-  '</tbody></table></div></section>';
- }},
- {t:"Анализ конкурентов", b:function(){ return '<div class="grid g2">'+
-   [["Юлия Морозова","Telegram · t.me/astrovastuschool","Очень близка к текущей модели VASTU HOME: много публикаций, советы по дому, «куда поставить кровать». Охваты и вовлечённость слабые.","На эту модель ориентироваться не стоит: много контента само по себе не даёт результата"],
-    ["Анастасия Верховозина","Instagram · @dom_zhizni_vastu","Живое лицо эксперта, короткие reels на понятные темы, длинные видео и интервью. Telegram ведётся заметно хуже.","Эксперт в кадре · понятная широкая тема · личная подача · связь с методом"],
-    ["Сергей Давыдов","VK · vk.ru/sahasramahavaastu","Глубокий профессиональный контент, много терминологии. Новичку тяжело войти.","Глубину и системность — но подавать проще"],
-    ["Наталья Васильева","Instagram · @vastu.expertum","Самый полезный ориентир по живому контенту: лицо эксперта, реальные дома и ситуации, структурный Telegram.","Реальные объекты · живые разборы · больше лица эксперта · меньше обезличенных карточек"]].map(function(c){
-     return '<section class="card"><h2>'+c[0]+'</h2><div class="small muted" style="margin:2px 0 10px">'+c[1]+'</div><p style="margin:0 0 12px">'+c[2]+'</p><div class="quote" style="font-weight:500">'+c[3]+'</div></section>';
-   }).join("")+'</div>';
- }},
- {t:"Позиционирование", b:function(){ return ''+
-  '<div class="quote" style="font-size:18px">VASTU HOME помогает человеку понимать пространство и осознанно с ним взаимодействовать</div>'+
-  '<section class="card"><h2>Основа позиционирования</h2><div class="grid g3" style="margin-top:12px">'+
-   [["Человек в центре","дом рассматриваем через жизнь конкретного человека"],["Пространство как среда","создаёт условия, но не определяет результат"],["Понимание вместо магии","человек учится видеть закономерности"],["Система вместо отдельных советов","васту не сводится к перестановке мебели"],["Самостоятельность","главный результат — человек сам понимает своё пространство"]].map(function(x){return '<div><h3>'+x[0]+'</h3><p class="small muted" style="margin:4px 0 0">'+x[1]+'</p></div>';}).join("")+
-  '</div></section>'+
-  '<section class="card"><h2>Основная отстройка</h2><div class="sub">понятное и системное васту без мистики, запугивания и обещаний чудес</div><div class="compare"><div>Не</div><div>А</div>'+
-   '<div>отдельный совет</div><div>понимание пространства как системы</div><div>зависимость от постоянных консультаций</div><div>способность самостоятельно видеть и анализировать свой дом</div><div>обещание, что квартира изменит жизнь</div><div>среда, в которой легче отдыхать, работать, общаться и принимать решения</div></div></section>'+
-  '<section class="card"><h2>Роль Ларисы</h2><div class="sub">главный носитель позиции. Через несколько месяцев человек должен думать: «Лариса глубоко разбирается в теме, объясняет понятно, и ей можно доверять»</div><div class="grid g3">'+
-   [["Профессионал с фундаментальными знаниями","не эксперт одного лайфхака"],["Сложное объясняет понятно","без мистики и перегруза терминами"],["Показывает на реальных примерах","дома, планировки, кейсы учеников, свой опыт"],["Не пугает","не говорит, что квартира «сломала жизнь»"],["Даёт больше самостоятельности","объясняет, как смотреть и принимать решения"]].map(function(x){return '<div><h3>'+x[0]+'</h3><p class="small muted" style="margin:4px 0 0">'+x[1]+'</p></div>';}).join("")+
-  '</div></section>'+
-  '<section class="card"><h2>Смысловой баланс контента</h2><div class="sub">жизненная тема привлекает внимание, но дальше человек приходит к пониманию метода</div><div class="flowline"><span>кто такая Лариса</span><i>→</i><span>что такое VASTU HOME</span><i>→</i><span>как работает метод</span><i>→</i><span>что можно сделать дальше</span></div></section>'+
-  '<p class="small muted">Тон голоса, обещания и примеры «было → стало» — во вкладке <a href="#voice">Голос бренда</a>.</p>';
- }},
- {t:"Контентная стратегия", b:function(){ return ''+
-  '<div class="quote">Начинаем не с вопроса «что опубликовать сегодня», а с вопроса «что должен сделать или понять человек после этого контента»</div>'+
-  '<section class="card"><h2>Пять функций и форматы под них</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Функция</th><th>Задача</th><th>Форматы</th></tr></thead><tbody>'+
-   [["reach","короткие reels · жизненные заходы · неожиданные наблюдения · разборы популярных ошибок · реальные объекты"],["sub","серии · чек-листы · практические материалы · рубрики · то, что хочется сохранить"],["trust","разговорные reels · разборы · кейсы · истории из практики · мнение Ларисы · живые фото и видео"],["warm","разбор проблемы глубже · истории учеников · процесс обучения · возражения · фрагменты уроков"],["act","кодовые слова · лид-магниты · регистрация · бот · мини-диагностика · переход на продукт"]].map(function(r){return '<tr><td>'+chipFn(r[0])+'</td><td class="small">'+FNS[r[0]].hint+'</td><td class="small">'+r[1]+'</td></tr>';}).join("")+
-  '</tbody></table></div></section>'+
-  '<section class="card"><h2>Семь контентных направлений</h2><div class="grid g3" style="margin-top:10px">'+
-   [["Лариса и личный бренд","мнение · наблюдения · истории из практики · рабочий процесс"],["Практическое васту","карты · сектора · планировки · коррекции · разборы квартир"],["Жизненные ситуации","деньги · отношения · работа · дети · переезд · ремонт — с возвратом к методу"],["Кейсы и доказательства","ученики · клиенты · до и после, без обещания гарантий"],["Обучение и школа","программа · практика · кураторы · работы учеников · диплом"],["Вовлечение","вопросы · тесты · мини-диагностики · реакции Ларисы"],["Продажи","конкретный продукт · кому подходит · следующий шаг"]].map(function(x){return '<div><h3>'+x[0]+'</h3><p class="small muted" style="margin:4px 0 0">'+x[1]+'</p></div>';}).join("")+
-  '</div></section>';
- }},
- {t:"Стратегия по площадкам", b:function(){ return ''+
-  '<section class="card"><h2>У каждой площадки своя задача</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Площадка</th><th>Роль</th><th>Целевое действие</th><th>Ритм</th><th>Главная метрика</th></tr></thead><tbody>'+
-   [["ig","Витрина эксперта и охват новой аудитории","Кодовое слово в директ, переход в Telegram-бот","3 reels и 3 карусели в неделю, stories раз в неделю","Подписки с публикаций, лиды по кодовым словам"],
-    ["tg","Постоянный экспертный канал, доверие и удержание","Материал из бота, регистрация на ключевой запуск","1–2 поста в день","Отписки к подпискам, охват поста"],
-    ["vk","Масштаб: дешёвая подписка и клипы","Кодовое слово, путь до лид-магнита","3 клипа и 3 карусели в неделю","Доля подписчиков, дошедших до лид-магнита"],
-    ["max","Канал для тех, кто не в Telegram, без дублирования запусков","Лид-магнит, регистрация","1–2 поста в день","Отписки к подпискам"],
-    ["pin","Поисковый трафик на гайды и статьи","Переход на посадочную с меткой","5 пинов в неделю","Переходы и лиды по меткам"]].map(function(r){return '<tr><td>'+chipNet(r[0])+'</td><td class="small">'+r[1]+'</td><td class="small">'+r[2]+'</td><td class="small">'+r[3]+'</td><td class="small">'+r[4]+'</td></tr>';}).join("")+
-  '</tbody></table></div></section>'+
-  '<section class="card"><h2>Одна съёмка работает на пять площадок</h2><div class="sub">съёмочный день с Ларисой раз в 10 дней, 2–3 часа: 6–8 роликов, фото и голосовые</div><div class="grid g4">'+
-   [["Reels и клипы","Instagram и VK","3 в неделю на каждой"],["Карусели-шпаргалки","Instagram и VK","3 в неделю на каждой"],["Посты, цитаты, голосовые","Telegram и MAX","1–2 в день"],["Пины-гайды","Pinterest","5 в неделю"]].map(function(x){return '<div class="stat"><small>'+x[1]+'</small><b style="font-size:18px">'+x[0]+'</b><em>'+x[2]+'</em></div>';}).join("")+
-  '</div><p class="small muted" style="margin:14px 0 0">Адаптация, а не копирование: у каждой площадки своя подводка, длина и следующий шаг.</p></section>'+
-  '<section class="card"><h2>Pinterest: гайды переводят на сайт в 7 раз лучше охватных пинов</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Доска · 12 сен – 12 окт</th><th class="num">Показы</th><th class="num">Переходы</th><th class="num">Доля</th></tr></thead><tbody>'+
-   [["Сектора дома по васту","2 628","42","1,6%"],["Статьи и гайды по васту","24 469","247","1,0%"],["Васту-коррекции без ремонта","3 800","22","0,6%"],["Дни недели по васту","39 168","56","0,14%"]].map(function(r){return '<tr><td>'+r[0]+'</td><td class="num">'+r[1]+'</td><td class="num">'+r[2]+'</td><td class="num"><b>'+r[3]+'</b></td></tr>';}).join("")+
-  '</tbody></table></div></section>';
- }},
- {t:"Продвижение и воронки", b:function(){ return ''+
-  '<section class="card"><h2>SMM ведёт одну воронку и один ключевой запуск в месяц</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Уровень</th><th>Что входит</th><th>Что делает SMM</th></tr></thead><tbody>'+
-   '<tr class="hl"><td><b>Ведём полностью</b></td><td class="small">Основная SMM-воронка и один ключевой запуск в месяц, который ведёт к школе</td><td class="small">Контент, прогрев, stories, кодовые слова</td></tr>'+
-   '<tr><td><b>Анонсируем</b></td><td class="small">Вебинары и курсы для тёплой аудитории: «Здоровье», «Цели», «Бизнес или деньги», «Деньги в дом»</td><td class="small">1–2 анонса в Telegram и MAX</td></tr>'+
-   '<tr><td><b>Без SMM</b></td><td class="small">Пакеты практик, астрологические и праздничные даты, ярмарка, Чёрная пятница, дожимы</td><td class="small">Ничего. Это рассылки, закрытые каналы и реклама</td></tr>'+
-  '</tbody></table></div></section>'+
-  '<p class="small muted">Подробная схема воронки, лид-магниты и дополнительные источники — во вкладке <a href="#funnel">Воронка</a>.</p>';
- }},
- {t:"Аналитика и KPI", b:function(){ return ''+
-  '<section class="card"><h2>Смотрим на три уровня</h2><div class="grid g3" style="margin-top:10px">'+
-   [["Площадки · каждую неделю","подписки и отписки · охват и просмотры · сохранения и репосты · переходы по ссылкам"],["Воронка · каждый месяц","лиды по кодовым словам и меткам · подписки из Telegram-бота · регистрации на ключевой запуск"],["Деньги · зона маркетинга","SMM передаёт лиды с метками, оплаты и окупаемость считает маркетинг"]].map(function(x){return '<div><h3>'+x[0]+'</h3><p class="small muted" style="margin:4px 0 0">'+x[1]+'</p></div>';}).join("")+
-  '</div><div class="quote" style="margin-top:14px">Каждый отчёт заканчивается решениями: что продолжаем, что меняем, что тестируем, что останавливаем</div></section>'+
-  '<section class="card"><h2>Ориентиры на третий месяц</h2><div class="sub">SMM отвечает за лиды и регистрации. Ориентиры пересматриваем после первого месяца</div>'+kpiProgress()+'</section>'+
-  '<section class="card"><h2>Ритм отчётности</h2><div class="grid g4" style="margin-top:10px">'+
-   [["Понедельник · 9:30","Статистика прошлой недели и план на неделю"],["Пятница · 9:30","Итоги недели: что сработало, что убираем"],["Раз в месяц","Полный отчёт с выводами по площадкам, воронкам и оплатам"],["Каждую неделю","Обновляем дашборд"]].map(function(x){return '<div><h3>'+x[0]+'</h3><p class="small muted" style="margin:4px 0 0">'+x[1]+'</p></div>';}).join("")+
-  '</div></section>';
- }},
- {t:"План внедрения", b:function(){ return '<p>Три месяца: фундамент, запуск системы, оценка. Отмечайте задачи во вкладке <a href="#roadmap">План внедрения</a> — прогресс виден на главной.</p>'+
-   '<div class="grid g3">'+ROADMAP.map(function(r){return '<section class="card"><div class="num-badge">'+r.title.toUpperCase()+'</div><h2 style="margin:4px 0 10px">'+r.sub+'</h2><ul class="list">'+r.items.map(function(i){return '<li>'+i[1]+'</li>';}).join("")+'</ul><p class="small muted" style="margin:12px 0 0"><b>Итог:</b> '+r.result+'</p></section>';}).join("")+'</div>';
- }}
-];
-function card(eb,t,body){ return '<section class="card"><div class="eyebrow">'+eb+'</div><h2 style="margin:4px 0 12px">'+t+'</h2>'+body+'</section>'; }
-function mini(l,v){ return '<div class="stat"><small>'+l+'</small><b style="font-size:17px">'+v+'</b></div>'; }
-var stratIdx = 0;
-try{ stratIdx = +(localStorage.getItem(KEY+":sec")||0) || 0; }catch(e){}
-VIEWS.strategy = function(){
-  var s=SECTIONS[stratIdx];
-  return head("SMM-стратегия · 9 разделов","Стратегия VASTU HOME","Октябрь 2026 — март 2027. Основана на статистике соцсетей, контенте, рекламных данных, воронках и ДНК бренда.")+
-  '<div class="strat"><nav class="toc" aria-label="Разделы стратегии">'+SECTIONS.map(function(x,i){return '<button type="button" data-sec="'+i+'" aria-pressed="'+(i===stratIdx)+'"><b>'+String(i+1).padStart(2,"0")+'</b>'+x.t+'</button>';}).join("")+'</nav>'+
-  '<div class="sec-body"><div><div class="num-badge">РАЗДЕЛ '+String(stratIdx+1).padStart(2,"0")+'</div><h2 style="font-size:24px;margin-top:2px">'+s.t+'</h2></div>'+s.b()+
-  '<div class="pager">'+(stratIdx>0?'<button class="btn" type="button" data-sec="'+(stratIdx-1)+'">'+ico("left")+SECTIONS[stratIdx-1].t+'</button>':'<span></span>')+(stratIdx<SECTIONS.length-1?'<button class="btn primary" type="button" data-sec="'+(stratIdx+1)+'">'+SECTIONS[stratIdx+1].t+ico("right")+'</button>':'')+'</div></div></div>';
-};
-
-/* ---------- Контент-план ---------- */
-var planWeek = monday(new Date());
-var planView = "week";
-var planFilter = {net:"all", fn:"all", status:"all"};
-function filtered(list){
-  return list.filter(function(p){
-    return (planFilter.net==="all"||p.net===planFilter.net)&&(planFilter.fn==="all"||p.fn===planFilter.fn)&&(planFilter.status==="all"||p.status===planFilter.status);
-  });
-}
-VIEWS.plan = function(){
-  var wk=iso(planWeek), wkEnd=iso(addDays(planWeek,6));
-  var weekAll=S.plan.filter(function(p){return p.date>=wk&&p.date<=wkEnd;});
-  var week=filtered(weekAll);
-  var hasEx=S.plan.some(function(p){return p.example;});
-  var sel=function(id,obj,cur,all){ return '<div class="field" style="min-width:150px"><label for="'+id+'">'+all+'</label><select id="'+id+'"><option value="all">все</option>'+Object.keys(obj).map(function(k){return '<option value="'+k+'"'+(cur===k?' selected':'')+'>'+(obj[k].name||obj[k])+'</option>';}).join("")+'</select></div>'; };
-  return head("Контент-план","Неделя "+human(planWeek)+" — "+human(addDays(planWeek,6)),"Каждая публикация получает функцию до того, как попадёт в план. Ритм недели сверяется со стратегией автоматически.",
-    '<div class="row"><button class="btn" type="button" data-wk="-1" aria-label="Прошлая неделя">'+ico("left")+'</button><button class="btn" type="button" data-wk="0">Эта неделя</button><button class="btn" type="button" data-wk="1" aria-label="Следующая неделя">'+ico("right")+'</button><button class="btn primary" type="button" data-new="'+wk+'">'+ico("plus")+'Добавить</button></div>')+
-  (hasEx?'<div class="warn-note">Сейчас в плане примерные публикации, они помечены «пример». Отредактируйте их или удалите все разом во вкладке <a href="#tools">Инструменты</a>.</div>':'')+
-  '<section><div class="card-head"><h2>Ритм недели</h2><span class="small muted">по стратегии · фильтры не влияют</span></div><div class="rhythm">'+Object.keys(NETS).map(function(k){return rhythmCard(k,weekAll);}).join("")+'</div></section>'+
-  '<section class="card"><div class="card-head"><h2>Функции контента на неделе</h2><span class="small muted">'+weekAll.length+' '+plural(weekAll.length,"публикация","публикации","публикаций")+'</span></div>'+fnMix(weekAll)+'</section>'+
-  '<div class="toolbar"><div class="row" style="align-items:flex-end">'+sel("f-net",NETS,planFilter.net,"Площадка")+sel("f-fn",FNS,planFilter.fn,"Функция")+sel("f-st",STATUSES,planFilter.status,"Статус")+'</div>'+
-   '<div class="seg" role="group" aria-label="Вид"><button type="button" data-view="week" aria-pressed="'+(planView==="week")+'">По дням</button><button type="button" data-view="list" aria-pressed="'+(planView==="list")+'">Список</button></div></div>'+
-  (planView==="week"?weekGrid(week):listView(week));
-};
-function plural(n,a,b,c){ n=Math.abs(n)%100; var n1=n%10; if(n>10&&n<20)return c; if(n1>1&&n1<5)return b; if(n1===1)return a; return c; }
-function rhythmCard(k,week){
-  var n=NORMS[k], items=week.filter(function(p){return p.net===k;});
-  var lines="";
-  if(n.parts){ lines=Object.keys(n.parts).map(function(f){ var c=items.filter(function(p){return p.format===f;}).length; return '<div class="rh-line"><span>'+f+'</span><b class="'+(c>=n.parts[f]?"ok":"low")+'">'+c+' / '+n.parts[f]+'</b></div>'; }).join(""); }
-  else { var c=items.length; var cls=c>=n.total[0]&&c<=n.total[1]?"ok":"low"; lines='<div class="rh-line"><span>Всего</span><b class="'+cls+'">'+c+' / '+(n.total[0]===n.total[1]?n.total[0]:n.total[0]+"–"+n.total[1])+'</b></div>'+(c>n.total[1]?'<div class="small down">больше нормы: риск перегрева</div>':''); }
-  return '<div class="rh"><h3><i style="width:9px;height:9px;border-radius:50%;background:'+NETS[k].c+';display:inline-block"></i>'+NETS[k].name+'</h3><div class="small muted">'+n.label+'</div>'+lines+'</div>';
-}
-function fnMix(week){
-  var total=week.length||1, counts={};
-  Object.keys(FNS).forEach(function(k){counts[k]=week.filter(function(p){return p.fn===k;}).length;});
-  return '<div class="fn-mix">'+Object.keys(FNS).map(function(k){return counts[k]?'<span style="width:'+(counts[k]/total*100)+'%;background:'+FNS[k].c+'" title="'+FNS[k].name+': '+counts[k]+'"></span>':'';}).join("")+'</div>'+
-   '<div class="legend" style="margin-top:10px">'+Object.keys(FNS).map(function(k){return '<span><i style="background:'+FNS[k].c+'"></i>'+FNS[k].name+' · <b>'+counts[k]+'</b></span>';}).join("")+'</div>'+
-   (week.length && !counts.act ? '<p class="small down" style="margin:10px 0 0">На неделе нет ни одной публикации с целевым действием: контент не ведёт в воронку.</p>':'')+
-   (week.length && !counts.trust ? '<p class="small down" style="margin:6px 0 0">Нет публикаций на доверие: Ларисы в контенте должно быть больше.</p>':'');
-}
-function postCard(p){
-  return '<button type="button" class="post" data-edit="'+p.id+'" style="--c:'+NETS[p.net].c+'"><div class="p-top"><span>'+NETS[p.net].name+' · '+esc(p.format)+'</span>'+(p.example?'<span class="example-mark">пример</span>':'')+'</div><div class="p-title">'+esc(p.title||"Без темы")+'</div><div class="p-meta">'+chipFn(p.fn)+'<span class="chip st-'+p.status+'">'+STATUSES[p.status]+'</span>'+(p.code?'<span class="chip">слово: '+esc(p.code)+'</span>':'')+'</div></button>';
-}
-function weekGrid(week){
-  var today=iso(new Date());
-  var html='<div class="week">';
-  for(var i=0;i<7;i++){
-    var d=addDays(planWeek,i), ds=iso(d);
-    var items=week.filter(function(p){return p.date===ds;});
-    html+='<div class="day'+(ds===today?' today':'')+'"><div class="day-h"><b>'+WD[i]+'</b><span>'+human(d)+'</span></div>'+items.map(postCard).join("")+'<button class="add" type="button" data-new="'+ds+'">+ добавить</button></div>';
-  }
-  return html+'</div>';
-}
-function listView(week){
-  if(!week.length) return '<section class="card"><p class="muted" style="margin:0">На этой неделе по выбранным фильтрам ничего нет. Нажмите «Добавить», чтобы запланировать публикацию.</p></section>';
-  week=week.slice().sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:0;});
-  return '<section class="card"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Дата</th><th>Площадка</th><th>Формат</th><th>Тема</th><th>Функция</th><th>Направление</th><th>Статус</th></tr></thead><tbody>'+
-    week.map(function(p){ var d=parseISO(p.date); return '<tr style="cursor:pointer" data-edit="'+p.id+'"><td class="small" style="white-space:nowrap">'+WD[(d.getDay()+6)%7]+', '+human(d)+'</td><td>'+chipNet(p.net)+'</td><td class="small">'+esc(p.format)+'</td><td><b>'+esc(p.title)+'</b>'+(p.code?'<div class="small muted">кодовое слово: '+esc(p.code)+'</div>':'')+(p.example?' <span class="example-mark">пример</span>':'')+'</td><td>'+chipFn(p.fn)+'</td><td class="small">'+esc(p.dir)+'</td><td><span class="chip st-'+p.status+'">'+STATUSES[p.status]+'</span></td></tr>'; }).join("")+
-  '</tbody></table></div></section>';
-}
-function openPost(p, isNew){
-  var opt=function(obj,cur){ return Object.keys(obj).map(function(k){return '<option value="'+k+'"'+(cur===k?' selected':'')+'>'+(obj[k].name||obj[k])+'</option>';}).join(""); };
-  var fmts=function(net,cur){ return NETS[net].formats.map(function(f){return '<option'+(f===cur?' selected':'')+'>'+f+'</option>';}).join(""); };
-  var root=document.getElementById("modal-root");
-  root.innerHTML='<div class="overlay" data-close="1"><form class="modal" id="post-form" autocomplete="off"><div class="card-head" style="margin:0"><h2>'+(isNew?'Новая публикация':'Публикация')+'</h2><button type="button" class="btn ghost" data-close="1">Закрыть</button></div>'+
-   '<div class="form-grid">'+
-    '<div class="field"><label for="pf-date">Дата</label><input type="date" id="pf-date" required value="'+p.date+'"></div>'+
-    '<div class="field"><label for="pf-status">Статус</label><select id="pf-status">'+opt(STATUSES,p.status)+'</select></div>'+
-    '<div class="field"><label for="pf-net">Площадка</label><select id="pf-net">'+opt(NETS,p.net)+'</select></div>'+
-    '<div class="field"><label for="pf-format">Формат</label><select id="pf-format">'+fmts(p.net,p.format)+'</select></div>'+
-    '<div class="field full"><label for="pf-title">Тема</label><input id="pf-title" required value="'+esc(p.title)+'" placeholder="Например: «Дома не отдыхается»: 3 вещи, которые можно проверить самой"></div>'+
-    '<div class="field"><label for="pf-fn">Функция</label><select id="pf-fn">'+opt(FNS,p.fn)+'</select><span class="hint" id="pf-fn-hint">'+FNS[p.fn].hint+'</span></div>'+
-    '<div class="field"><label for="pf-dir">Направление</label><select id="pf-dir">'+DIRS.map(function(d){return '<option'+(d===p.dir?' selected':'')+'>'+d+'</option>';}).join("")+'</select></div>'+
-    '<div class="field"><label for="pf-code">Кодовое слово</label><input id="pf-code" value="'+esc(p.code)+'" placeholder="для функции «Целевое действие»"></div>'+
-    '<div class="field"><label for="pf-link">Ссылка на публикацию или макет</label><input id="pf-link" value="'+esc(p.link)+'" placeholder="https://"></div>'+
-    '<div class="field full"><label for="pf-note">Заметки: текст, подводка, следующий шаг</label><textarea id="pf-note">'+esc(p.note)+'</textarea></div>'+
-   '</div><div id="pf-warn"></div>'+
-   '<div class="modal-foot">'+(isNew?'<span></span>':'<div class="row"><button type="button" class="btn danger" id="pf-del">Удалить</button><button type="button" class="btn" id="pf-dup">Дублировать на другую площадку</button></div>')+'<button class="btn primary" type="submit">'+ico("check")+'Сохранить</button></div></form></div>';
-  var f=document.getElementById("post-form");
-  function warn(){
-    var w=[]; var fn=f.querySelector("#pf-fn").value, code=f.querySelector("#pf-code").value.trim(), title=f.querySelector("#pf-title").value;
-    if(fn==="act"&&!code) w.push("У публикации с целевым действием нет кодового слова или следующего шага.");
-    var hits=scanText(title+" "+f.querySelector("#pf-note").value);
-    if(hits.length) w.push("Проверьте формулировки: "+hits.map(function(h){return h.group.toLowerCase();}).filter(function(v,i,a){return a.indexOf(v)===i;}).join(", ")+". Правила — во вкладке «Голос бренда».");
-    document.getElementById("pf-warn").innerHTML=w.map(function(x){return '<div class="warn-note" style="margin-top:6px">'+x+'</div>';}).join("");
-    f.querySelector("#pf-fn-hint").textContent=FNS[fn].hint;
-  }
-  f.addEventListener("input",warn); warn();
-  f.querySelector("#pf-net").addEventListener("change",function(e){ f.querySelector("#pf-format").innerHTML=fmts(e.target.value,""); });
-  f.addEventListener("submit",function(e){
-    e.preventDefault();
-    var d={date:f.querySelector("#pf-date").value,status:f.querySelector("#pf-status").value,net:f.querySelector("#pf-net").value,format:f.querySelector("#pf-format").value,title:f.querySelector("#pf-title").value.trim(),fn:f.querySelector("#pf-fn").value,dir:f.querySelector("#pf-dir").value,code:f.querySelector("#pf-code").value.trim(),link:f.querySelector("#pf-link").value.trim(),note:f.querySelector("#pf-note").value};
-    if(!d.date){ toast("Укажите дату"); return; }
-    if(isNew){ d.id=uid(); S.plan.push(d); } else { Object.assign(p,d); p.example=false; }
-    save(); closeModal(); planWeek=monday(parseISO(d.date)); route(); toast(isNew?"Публикация добавлена":"Сохранено");
-  });
-  var del=document.getElementById("pf-del");
-  if(del) del.addEventListener("click",function(){
-    if(del.dataset.armed){ S.plan=S.plan.filter(function(x){return x.id!==p.id;}); save(); closeModal(); route(); toast("Публикация удалена"); }
-    else { del.dataset.armed="1"; del.textContent="Точно удалить?"; del.style.borderColor="var(--terra)"; del.style.color="var(--terra)"; }
-  });
-  var dup=document.getElementById("pf-dup");
-  if(dup) dup.addEventListener("click",function(){
-    var nets=Object.keys(NETS), next=nets[(nets.indexOf(p.net)+1)%nets.length];
-    var c=Object.assign({},p,{id:uid(),net:next,format:NETS[next].formats[0],status:"idea",link:"",example:false});
-    closeModal(); openPost(c,true); toast("Адаптируйте подводку под площадку");
-  });
-  setTimeout(function(){ var t=f.querySelector("#pf-title"); if(t&&isNew) t.focus(); },30);
-}
-function closeModal(){ document.getElementById("modal-root").innerHTML=""; }
-
-/* ---------- Переупаковка ---------- */
-VIEWS.repack = function(){
-  var all=[]; REPACK.forEach(function(g){g.items.forEach(function(i){all.push(i[0]);});});
-  return head("Упаковка соцсетей","План переупаковки","Новому человеку сейчас приходится самому разбираться, кто такая Лариса, что такое VASTU HOME и с чего начать. Задача упаковки — ответить на это за несколько секунд.")+
-  '<section class="card"><div class="card-head"><h2>Новая логика упаковки</h2></div><div class="flowline"><span>Кто мы</span><i>→</i><span>Почему нам можно доверять</span><i>→</i><span>Чем можем помочь</span><i>→</i><span>С чего начать</span><i>→</i><span>Куда идти дальше</span></div><div style="margin-top:16px">'+meter(progressOf(all))+'</div><p class="small muted" style="margin:10px 0 0">Нажмите на пункт: не начато → в работе → готово.</p></section>'+
-  '<div class="grid g2">'+REPACK.map(function(g){
-    var ids=g.items.map(function(i){return i[0];});
-    return '<section class="card"><div class="card-head"><h2>'+(g.net==="common"?g.title:chipNet(g.net))+'</h2></div>'+meter(progressOf(ids))+'<div class="checks" style="margin-top:10px">'+g.items.map(function(i){return checkItem(i[0],i[1],i[2]);}).join("")+'</div></section>';
-  }).join("")+'</div>'+
-  '<section class="card"><h2>Визуальная система</h2><div class="sub">что закрепляем в соцсетях</div><ul class="list"><li>Лицо проекта: реальные фото и видео Ларисы, без сильной ретуши и фильтров</li><li>Реальные квартиры, планировки и работы учеников вместо обезличенных интерьеров</li><li>Каждая карточка: крупный текст, одна мысль, без мандал, чакр и мистики</li><li>Форматы: 4:5 для ленты, 9:16 для stories, в Telegram чередуем 16:9 и 1:1</li></ul><p class="small muted" style="margin:12px 0 0">Палитра и шрифты — во вкладке <a href="#voice">Голос бренда</a>.</p></section>';
-};
-
-/* ---------- Воронка ---------- */
-VIEWS.funnel = function(){
-  return head("Продвижение","Основная SMM-воронка","Один понятный путь через Telegram-бот вместо множества событий одновременно. Канал растёт за счёт органики.")+
-  '<div class="funnel">'+
-   [["Reels или карусель","Тема из жизни аудитории, в конце кодовое слово","охват, комментарии и сообщения с кодовым словом","SMM"],
-    ["Кодовое слово в директ","Salebot отвечает ссылкой на Telegram-бот","лиды по кодовым словам","SMM"],
-    ["Telegram-бот","Проверяет подписку на канал и выдаёт материал","новые подписчики канала из бота","SMM"],
-    ["Мягкий прогрев","2–3 сообщения: польза, кейс, знакомство с Ларисой","клики и ответы","SMM и маркетинг"],
-    ["Бесплатное событие","Практикум или вебинар ключевого запуска","регистрации с меткой SMM","Маркетинг"]].map(function(s,i){
-     return '<div class="fstep"><span class="n">ШАГ '+(i+1)+'</span><h3>'+s[0]+'</h3><p>'+s[1]+'</p><div class="m">Метрика: '+s[2]+'</div><span class="who">'+s[3]+'</span></div>';
-   }).join("")+'</div>'+
-  '<div class="grid g2"><section class="card"><h2>VK и MAX</h2><p style="margin:8px 0 0">Та же логика: кодовое слово в комментариях или сообщениях, бот выдаёт материал и ведёт в канал или на событие.</p></section>'+
-   '<section class="card"><h2>После события</h2><p style="margin:8px 0 0">Человек идёт в воронку ключевого запуска и школу. Это зона маркетинга и продаж.</p></section></div>'+
-  '<section class="card"><h2>Лид-магниты под новое позиционирование</h2><div class="grid g3" style="margin-top:12px">'+
-   '<div><h3>Подходят уже сейчас</h3><ul class="list pos" style="margin-top:8px"><li>Инструкция по построению васту-карты</li><li>15 приёмов декорирования по васту</li><li>9 чек-листов осознанного дизайна</li><li>Румтур по квартире</li><li>Подборка «Всё не по васту»</li></ul></div>'+
-   '<div><h3>Только для тёплой аудитории</h3><ul class="list" style="margin-top:8px"><li>Практики на новолуние и полнолуние</li><li>Практика разрыва связей</li><li>Вебинары с астрологом</li></ul><p class="small muted">Не используем как первый вход для холодной аудитории.</p></div>'+
-   '<div><h3>Создаём</h3><div class="checks" style="margin-top:4px">'+checkItem("lm-1","Мини-диагностика в боте «Что не так с моим домом»","7 вопросов и разбор")+checkItem("lm-2","Чек-лист «Переезд»","")+checkItem("lm-3","Чек-лист «Ремонт без ошибок»","")+'</div></div>'+
-  '</div></section>'+
-  '<section class="card"><h2>Что тестируем помимо органики</h2><div class="sub">отдельного бюджета нет, начинаем с бартерных механик</div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Источник</th><th>Как</th><th>Чем платим</th><th>Как оцениваем</th></tr></thead><tbody>'+
-   [["Коллаборации в Instagram","Совместные reels с дизайнерами интерьера, риелторами, организаторами пространства","Бартер, съёмка","Подписки с публикации"],["Взаимные рекомендации в Telegram","Обмен постами с каналами о доме, интерьере, семье","Бартер","Подписки по пригласительной ссылке"],["Гостевые эфиры Ларисы","Эфиры у блогеров и экспертов смежных тем","Время Ларисы","Регистрации и подписки по метке"],["Ученики и выпускники","Кейсы, отзывы, реферальная ссылка","Бонусы и подарки","Лиды по реферальным ссылкам"],["Другие площадки","Reels в YouTube Shorts, Rutube, Дзен и ОК","Время на выгрузку","Просмотры и переходы"]].map(function(r){return '<tr><td><b>'+r[0]+'</b></td><td class="small">'+r[1]+'</td><td class="small">'+r[2]+'</td><td class="small">'+r[3]+'</td></tr>';}).join("")+
-  '</tbody></table></div></section>'+
-  '<div class="grid g2"><section class="card"><h2>Два режима с разными правилами</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th></th><th>Основные каналы</th><th>Запусковые</th></tr></thead><tbody>'+
-   [["Задача","Доверие и удержание","Прогрев и продажа"],["Плотность","По ритму площадки","Сколько нужно запуску"],["О запуске","Только ключевой: 3–4 касания","Полный прогрев и дожимы"],["Кто там","Все подписчики","Те, кто сам зарегистрировался"],["Тон","Спокойный, без давления","Активнее, но в рамках ДНК"]].map(function(r){return '<tr><td class="small muted">'+r[0]+'</td><td class="small">'+r[1]+'</td><td class="small">'+r[2]+'</td></tr>';}).join("")+
-  '</tbody></table></div></section>'+
-  '<section class="card"><h2>Обработка входящих</h2><div class="sub">тёплый человек не должен теряться после сообщения</div><div class="checks">'+checkItem("in-1","Назначить ответственного за сообщения, комментарии и вопросы по продуктам","Решение за командой")+checkItem("in-2","Стандарт времени ответа в рабочие часы","")+checkItem("in-3","Шаблоны ответов на частые вопросы","")+checkItem("in-4","Горячие обращения передаём в продажи с меткой источника","")+'</div><p class="small muted" style="margin:10px 0 0">Каждую неделю считаем: сколько обращений пришло, сколько передано в продажи, сколько оплат.</p></section></div>';
-};
-
-/* ---------- Отчёты ---------- */
 var repOpen = null;
 VIEWS.reports = function(){
   var reps=S.reports.slice().sort(function(a,b){return a.month<b.month?1:-1;});
@@ -940,39 +862,17 @@ function openReport(r,isNew){
   });
 }
 
-/* ---------- План внедрения ---------- */
-VIEWS.roadmap = function(){
-  var all=[]; ROADMAP.forEach(function(r){r.items.forEach(function(i){all.push(i[0]);});});
-  return head("План внедрения","Три месяца: фундамент, запуск, оценка","Отмечайте задачи по мере выполнения. Прогресс виден на главной.")+
-  '<section class="card">'+meter(progressOf(all))+'</section>'+
-  '<div class="grid g3">'+ROADMAP.map(function(r){ var ids=r.items.map(function(i){return i[0];}); return '<section class="card"><div class="num-badge">'+r.title.toUpperCase()+'</div><h2 style="margin:4px 0 10px">'+r.sub+'</h2>'+meter(progressOf(ids))+'<div class="checks" style="margin-top:10px">'+r.items.map(function(i){return checkItem(i[0],i[1]);}).join("")+'</div><p class="small muted" style="margin:12px 0 0"><b>Итог:</b> '+r.result+'</p></section>'; }).join("")+'</div>'+
-  '<div class="grid g2"><section class="card"><h2>Первые две недели</h2><div class="checks" style="margin-top:10px">'+FIRST.map(function(f){return checkItem(f[0],f[1],f[2]);}).join("")+'</div></section>'+
-  '<section class="card"><h2>Кто за что отвечает</h2><div class="tbl-wrap"><table class="tbl"><tbody>'+TEAM.map(function(t){return '<tr><td style="white-space:nowrap"><b>'+t[0]+'</b></td><td class="small'+(t[0]==="Входящие"?' down':'')+'">'+t[1]+'</td></tr>';}).join("")+'</tbody></table></div></section></div>';
-};
 
-/* ---------- Голос бренда ---------- */
+/* ============================================================
+   ПРОВЕРКА ТЕКСТА (правила tone of voice)
+   ============================================================ */
 function scanText(text){
   var hits=[];
   STOP.forEach(function(s){ s[0].lastIndex=0; var m; while((m=s[0].exec(text))){ hits.push({word:m[0],group:s[1],tip:s[2],i:m.index,len:m[0].length}); if(m[0].length===0) s[0].lastIndex++; } });
   return hits;
 }
 var checkerText = "Узнайте, какие зоны крадут деньги и энергию, и почему дети часто болеют. Гарантированный результат за 21 день — успейте записаться!";
-VIEWS.voice = function(){
-  var pal=[["Молочный","#FAF8F5"],["Кремовый","#F5E6D3"],["Песочный","#EFE9DF"],["Терракота","#C96F4A"],["Олива","#5F6D31"],["Охра","#D4A06A"]];
-  return head("Коммуникация","Голос бренда","Спокойно, уверенно и по-взрослому: без давления, мистики и запугивания. Правила действуют и в SMM, и в запусках, письмах, Salebot.")+
-  '<section class="card"><h2>Проверка текста</h2><div class="sub">вставьте пост, письмо или сообщение бота — платформа подсветит формулировки, которые расходятся с ДНК бренда</div>'+
-   '<div class="field"><label for="tc-in">Текст</label><textarea id="tc-in" style="min-height:120px">'+esc(checkerText)+'</textarea></div><div class="grid g2" style="margin-top:12px"><div><h3 style="margin-bottom:8px">Подсветка</h3><div class="checker-out" id="tc-out"></div></div><div><h3 style="margin-bottom:8px">Что поправить</h3><div class="found" id="tc-found"></div></div></div></section>'+
-  '<div class="grid g2"><section class="card"><h2>Как говорим</h2><ul class="list pos" style="margin-top:10px">'+["на «вы»","понятно и уважительно, без высокомерия","без перегруза сложными терминами","с опорой на реальные примеры","с объяснением логики рекомендаций","достаточно тепло, чтобы чувствовался человек","достаточно профессионально, чтобы сохранялась экспертность"].map(function(x){return '<li>'+x+'</li>';}).join("")+'</ul></section>'+
-   '<section class="card"><h2>Чего избегаем</h2><ul class="list neg" style="margin-top:10px">'+["категоричных обещаний","«ваш дом разрушает вашу жизнь»","«этот сектор блокирует деньги»","«сделайте это, и отношения наладятся»","запугивания последствиями","чрезмерной эзотерической лексики","агрессивных продаж через боли"].map(function(x){return '<li>'+x+'</li>';}).join("")+'</ul></section></div>'+
-  '<section class="card"><h2>Было → как можно сказать</h2><div class="sub">сильные жизненные темы оставляем, убираем необоснованную причинность и обещания</div><div class="compare"><div>Было</div><div>Стало</div>'+
-   [["«деньги уходят, потому что сектор дома работает неправильно»","«если дома неудобно организована конкретная зона, это может влиять на привычки — показываем, что проверить»"],["«поставьте предмет, и желаемое придёт»","«показываем, зачем используется коррекция и где заканчивается её влияние»"],["«ваш дом мешает вам быть счастливой»","«дом может подсказать, на какие привычки и особенности пространства стоит обратить внимание»"],["«Почему дети часто болеют и как создать пространство, в котором они будут расти здоровыми» · Salebot","«Как устроить детскую, чтобы ребёнку было проще засыпать и сосредоточиться на занятиях»"],["«Какие зоны отвечают за определённые органы» · Salebot","Убираем совсем. Связи между зонами дома и здоровьем не используем"],["«Свои зоны, которые крадут деньги, энергию и покой» · письмо","«Какие зоны в квартире чаще всего организованы неудобно и как это проверить самой»"],["«Чтобы деньги не утекали, а мужчина был опорой» · письмо","«Чтобы дома было спокойно и удобно всей семье»"]].map(function(r){return '<div>'+r[0]+'</div><div>'+r[1]+'</div>';}).join("")+
-  '</div></section>'+
-  '<div class="grid g2"><section class="card"><h2>Можно уверенно обещать</h2><ul class="list pos" style="margin-top:10px">'+["научиться строить васту-карту","понимать сектора пространства","видеть особенности своего дома","составлять план коррекций","получать поддержку во время обучения","получить диплом при выполнении условий программы"].map(function(x){return '<li>'+x+'</li>';}).join("")+'</ul></section>'+
-   '<section class="card"><h2>Не обещаем</h2><ul class="list neg" style="margin-top:10px">'+["гарантированный рост дохода","замужество","исцеление и здоровье детей","изменение судьбы","решение всех жизненных проблем через дом"].map(function(x){return '<li>'+x+'</li>';}).join("")+'</ul><div class="quote" style="margin-top:14px;font-weight:500">Пространство может создавать более благоприятные условия, но решения всё равно принимает человек</div></section></div>'+
-  '<section class="card"><h2>Ключевые смыслы бренда</h2><div class="grid g3" style="margin-top:10px">'+[["Дом может быть опорой","больше спокойствия, порядка и комфорта"],["Дом не управляет вашей судьбой","пространство создаёт условия, решения принимает человек"],["Васту можно понять","человека можно научить видеть пространство самостоятельно"],["Не обязательно делать ремонт","без перестройки и больших вложений"],["Васту шире перестановки мебели","за коррекциями стоит система"],["Сначала наблюдение, потом решение","смотрим, что происходит в конкретном доме"]].map(function(x){return '<div><h3>'+x[0]+'</h3><p class="small muted" style="margin:4px 0 0">'+x[1]+'</p></div>';}).join("")+'</div></section>'+
-  '<section class="card"><h2>Палитра соцсетей</h2><div class="sub">нажмите на цвет, чтобы скопировать код</div><div class="swatches">'+pal.map(function(p){return '<button type="button" class="sw" data-copy="'+p[1]+'"><div class="c" style="background:'+p[1]+'"></div><div><b>'+p[0]+'</b><span class="mono">'+p[1]+'</span></div></button>';}).join("")+'</div>'+
-   '<div class="grid g2" style="margin-top:16px"><div><h3>Гайды и документы</h3><p class="small muted" style="margin:4px 0 0">Шрифт Manrope, медный акцент. Только реальные фото. Минимализм, одна мысль на странице. Проверка: «Стало ли на этой странице спокойнее?»</p></div><div><h3>Карточки в соцсетях</h3><p class="small muted" style="margin:4px 0 0">Заголовки Comfortaa, текст Geologica. Реалистичный жилой интерьер, крупный текст, акварельные плашки. Космос только для астрологических тем.</p></div></div></section>';
-};
+
 function runChecker(){
   var ta=document.getElementById("tc-in"); if(!ta) return;
   var text=ta.value; checkerText=text;
@@ -985,7 +885,7 @@ function runChecker(){
   var keys=Object.keys(groups);
   document.getElementById("tc-found").innerHTML = keys.length ? keys.map(function(g){return '<div><b>'+esc(g)+'</b> · '+groups[g].words.map(esc).join(", ")+'<br><span class="small">'+esc(groups[g].tip)+'</span></div>';}).join("") : '<div style="background:var(--green-soft)">Спорных формулировок не найдено. Перечитайте текст глазами человека, который впервые видит проект.</div>';
 }
-AFTER.voice = function(){ runChecker(); document.getElementById("tc-in").addEventListener("input",runChecker); };
+
 
 /* ---------- UTM-метки (методика таблицы «Генератор UTM VASTU HOME») ----------
    ссылка лендинга ?utm_source=источник &utm_medium=канал &utm_campaign=тип контента
@@ -1072,71 +972,72 @@ AFTER.utm = function(){
   });
 };
 
-/* ---------- Инструменты ---------- */
+
+/* ============================================================
+   ИНСТРУМЕНТЫ
+   ============================================================ */
 var SHEET_URL = "https://docs.google.com/spreadsheets/d/13g6C4C53GXcmBibUeaEqvL4i7CsjDA1SVy1S2GwhfnE";
 VIEWS.tools = function(){
-  return head("Инструменты","Инструменты и данные","Резервная копия данных и всё, что нужно новому человеку в команде.")+
-  '<div class="grid g2"><section class="card"><h2>Резервная копия</h2><p class="small muted">Контент-план, чек-листы и отчёты хранятся в этом браузере. Раз в неделю сохраняйте копию — например, в общую папку команды. Чтобы перенести данные на другой компьютер, вставьте копию там.</p>'+
+  return head("Сервис","Инструменты","")+
+  '<section class="card"><h2>Проверка текста</h2><div class="sub">подсвечивает обещания здоровья и денег, запугивание и давление — то, что расходится с ДНК бренда</div>'+
+   '<div class="field"><label for="tc-in">Текст поста, письма или сообщения бота</label><textarea id="tc-in" style="min-height:110px">'+esc(checkerText)+'</textarea></div><div class="grid g2" style="margin-top:12px"><div class="checker-out" id="tc-out"></div><div class="found" id="tc-found"></div></div></section>'+
+  '<div class="grid g2"><section class="card"><h2>Данные платформы</h2><p class="small muted">Всё, что вы вносите, хранится в этом браузере. Раз в неделю сохраняйте копию в общую папку; на другом компьютере её можно вставить обратно.</p>'+
    '<div class="row"><button class="btn primary" type="button" id="b-copy">'+ico("copy")+'Скопировать данные</button><button class="btn" type="button" id="b-show">Вставить копию</button></div>'+
-   '<div id="b-import" hidden style="margin-top:12px"><div class="field"><label for="b-text">Вставьте сюда скопированные данные</label><textarea id="b-text" style="min-height:120px" class="mono"></textarea></div><div class="row" style="margin-top:8px"><button class="btn primary" type="button" id="b-apply">Загрузить</button></div></div>'+
-   '<hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><div class="row"><button class="btn danger" type="button" id="b-clear-ex">Удалить примеры из плана</button><button class="btn danger" type="button" id="b-reset">Сбросить всё</button></div></section>'+
+   '<div id="b-import" hidden style="margin-top:12px"><div class="field"><label for="b-text">Вставьте скопированные данные</label><textarea id="b-text" class="mono" style="min-height:110px"></textarea></div><div class="row" style="margin-top:8px"><button class="btn primary" type="button" id="b-apply">Загрузить</button></div></div>'+
+   '<hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><button class="btn danger" type="button" id="b-reset">Вернуть стартовое наполнение</button></section>'+
   '<section class="card"><h2>Для нового человека в команде</h2><dl class="kv" style="margin-top:12px">'+
-   '<dt>Таблица данных</dt><dd><a href="'+SHEET_URL+'" target="_blank" rel="noopener">Рабочая таблица SMM</a><div class="small muted">листы «еженедельно», «ежемесячно», «Контент» — их читает дашборд</div></dd>'+
-   '<dt>Обновить дашборд</dt><dd class="small">Внесите цифры в таблицу и нажмите «обновить» во вкладке «Дашборд»</dd>'+
-   '<dt>Отчёты</dt><dd class="small">Пн 9:30 — статистика и план недели · Пт 9:30 — итоги · раз в месяц — отчёт во вкладке «Отчёты»</dd>'+
-   '<dt>UTM-метки</dt><dd class="small">Только через вкладку «UTM-метки» — по методике таблицы генератора школы</dd>'+
-   '<dt>Съёмки</dt><dd class="small">Раз в 10 дней с Ларисой, 2–3 часа, 6–8 роликов</dd>'+
+   '<dt>Дашборд</dt><dd class="small"><a href="'+SHEET_URL+'" target="_blank" rel="noopener">Таблица для дашборда</a> — внесите цифры и нажмите «обновить» во вкладке «Дашборд»</dd>'+
+   '<dt>Отчёты</dt><dd class="small">Пн 9:30 — статистика и план недели · Пт 9:30 — итоги · раз в месяц — отчёт</dd>'+
+   '<dt>Съёмки</dt><dd class="small">Раз в 10 дней с Ларисой, 2–3 часа, 6–8 роликов. ТЗ — во вкладке «ТЗ Ларисе»</dd>'+
+   '<dt>Метки</dt><dd class="small">Только через вкладку «UTM-метки»</dd>'+
    '<dt>Маркетинг</dt><dd class="small">Ксения: реклама, оплаты, воронки запусков</dd>'+
    '<dt>Продукт</dt><dd class="small">Наталья: лид-магниты и продуктовая линейка</dd>'+
   '</dl></section></div>';
 };
 AFTER.tools = function(){
-  document.getElementById("b-copy").addEventListener("click",function(){ copy(JSON.stringify(S),"Данные скопированы — сохраните их в файл или документ"); });
+  runChecker(); document.getElementById("tc-in").addEventListener("input",runChecker);
+  document.getElementById("b-copy").addEventListener("click",function(){ copy(JSON.stringify(S),"Данные скопированы — сохраните их в документ"); });
   document.getElementById("b-show").addEventListener("click",function(){ var b=document.getElementById("b-import"); b.hidden=!b.hidden; });
   document.getElementById("b-apply").addEventListener("click",function(){
-    try{ var o=JSON.parse(document.getElementById("b-text").value); if(!o||!Array.isArray(o.plan)) throw 0; o.checks=o.checks||{}; o.reports=o.reports||[]; S=o; save(); toast("Данные загружены"); route(); }
+    try{ var o=JSON.parse(document.getElementById("b-text").value); if(!o||o.v!==2||!Array.isArray(o.cp)) throw 0; S=o; save(); toast("Данные загружены"); route(); }
     catch(e){ toast("Не получилось прочитать данные. Скопируйте их целиком ещё раз"); }
   });
-  armBtn("b-clear-ex","Удалить примеры?",function(){ S.plan=S.plan.filter(function(p){return !p.example;}); save(); toast("Примеры удалены"); route(); });
-  armBtn("b-reset","Точно сбросить всё?",function(){ S=seed(); save(); toast("Платформа сброшена к исходному виду"); route(); });
+  armBtn("b-reset","Точно вернуть? Ваши правки пропадут",function(){ var f=freshParts(); S.decomp=f.decomp; S.cp=f.cp; S.rp=f.rp; S.tz=f.tz; save(); toast("Стартовое наполнение возвращено"); route(); });
 };
-function armBtn(id,confirmText,fn){
-  var b=document.getElementById(id);
-  b.addEventListener("click",function(){ if(b.dataset.armed){ fn(); } else { b.dataset.armed="1"; b.textContent=confirmText; b.style.borderColor="var(--terra)"; b.style.color="var(--terra)"; } });
-}
 
 /* ============================================================
    СОБЫТИЯ
    ============================================================ */
 document.addEventListener("click",function(e){
   var t=e.target;
-  var c=t.closest("[data-check]");
-  if(c){ var id=c.dataset.check, st=S.checks[id]||"", nx=ST_NEXT[st]; if(nx) S.checks[id]=nx; else delete S.checks[id]; save();
-    var y=window.scrollY; $page.innerHTML=VIEWS[(location.hash||"#home").slice(1)]?VIEWS[(location.hash||"#home").slice(1)]():VIEWS.home(); var h=(location.hash||"#home").slice(1); if(AFTER[h])AFTER[h](); window.scrollTo(0,y); return; }
-  var s=t.closest("[data-sec]"); if(s){ stratIdx=+s.dataset.sec; try{localStorage.setItem(KEY+":sec",stratIdx);}catch(err){} route(); return; }
-  var w=t.closest("[data-wk]"); if(w){ var n=+w.dataset.wk; planWeek = n===0?monday(new Date()):addDays(planWeek,7*n); route(); return; }
-  var v=t.closest("[data-view]"); if(v){ planView=v.dataset.view; route(); return; }
-  var nw=t.closest("[data-new]"); if(nw){ openPost({date:nw.dataset.new,status:"idea",net:"ig",format:"Reels",title:"",fn:"reach",dir:DIRS[0],code:"",link:"",note:""},true); return; }
-  var ed=t.closest("[data-edit]"); if(ed){ var p=S.plan.filter(function(x){return x.id===ed.dataset.edit;})[0]; if(p) openPost(p,false); return; }
+  if(t.closest("select")) return;
+  var sl=t.closest("[data-slide]"); if(sl){ goSlide(+sl.dataset.slide); return; }
+  var stp=t.closest("[data-step]"); if(stp){ goSlide(slide+(+stp.dataset.step)); return; }
+  var sub=t.closest("[data-sub]"); if(sub){ var p=sub.dataset.sub.split(":"); cur[p[0]]=p[1]; rememberTabs(); route(true); return; }
+  var cm=t.closest("[data-cpm]"); if(cm){ cpMonth=shiftMonth(cpMonth,+cm.dataset.cpm); route(true); return; }
+  var ad=t.closest("[data-addrow]"); if(ad){ var tb=ad.dataset.addrow, r={id:uid(),sheet:cur[tb]}; colsOf(tb,r.sheet).forEach(function(c){ r[c[0]] = c[2].indexOf("status:")===0 ? ST[c[2].split(":")[1]][0] : c[2].indexOf("select:")===0 ? c[2].split(":")[1].split("|")[0] : (c[2]==="date" ? (cpMonth===iso(new Date()).slice(0,7)?iso(new Date()):cpMonth+"-01") : ""); }); openRow(tb,r,true); return; }
+  var rw=t.closest("[data-row]"); if(rw){ var tb2=rw.dataset.table, row=S[tb2].filter(function(x){return x.id===rw.dataset.row;})[0]; if(row) openRow(tb2,row,false); return; }
+  var dc=t.closest("[data-dc]"); if(dc){ var r2=S.decomp.filter(function(x){return x.id===dc.dataset.dc;})[0]; if(r2) openDecomp(r2,+dc.dataset.m); return; }
+  var dcr=t.closest("[data-dcrow]"); if(dcr){ var r3=S.decomp.filter(function(x){return x.id===dcr.dataset.dcrow;})[0]; if(r3) openDecomp(r3); return; }
+  var tz=t.closest("[data-tz]"); if(tz){ tzOpen=tz.dataset.tz; route(true); return; }
+  var tzo=t.closest("[data-tzopen]"); if(tzo){ tzOpen=tzo.dataset.tzopen; return; }
   if(t.closest("[data-close]") && (t.dataset.close || t.closest("button[data-close]"))){ closeModal(); return; }
-  var rp=t.closest("[data-rep]"); if(rp){ repOpen=rp.dataset.rep; route(); return; }
+  var rp=t.closest("[data-rep]"); if(rp){ repOpen=rp.dataset.rep; route(true); return; }
   var re=t.closest("[data-rep-edit]"); if(re){ openReport(S.reports.filter(function(x){return x.id===re.dataset.repEdit;})[0],false); return; }
   var rc=t.closest("[data-rep-copy]"); if(rc){ copy(reportText(S.reports.filter(function(x){return x.id===rc.dataset.repCopy;})[0]),"Текст отчёта скопирован"); return; }
-  if(t.closest("#rep-new")){ var d=new Date(), m=iso(d).slice(0,7); openReport({id:uid(),month:m,title:MONTHS_N[d.getMonth()]+" "+d.getFullYear(),vals:{},cont:"",change:"",test:"",stop:"",note:""},true); return; }
+  if(t.closest("#rep-new")){ var d=new Date(); openReport({id:uid(),month:iso(d).slice(0,7),title:MONTHS_N[d.getMonth()]+" "+d.getFullYear(),vals:{},cont:"",change:"",test:"",stop:"",note:""},true); return; }
   var uc=t.closest("[data-uch]"); if(uc){ U.ch=uc.dataset.uch; document.getElementById("ug-ch").value=U.ch; document.querySelectorAll("[data-uch]").forEach(function(x){ x.style.borderColor=x===uc?"var(--green)":"transparent"; }); utmRender(); return; }
-  var ulc=t.closest("[data-ulcopy]"); if(ulc){ var r=(S.utmLog||[]).filter(function(x){return x.id===ulc.dataset.ulcopy;})[0]; if(r) copy(r.link,"Ссылка скопирована"); return; }
-  var uld=t.closest("[data-uldel]"); if(uld){ if(uld.dataset.armed){ S.utmLog=S.utmLog.filter(function(x){return x.id!==uld.dataset.uldel;}); save(); route(); toast("Удалено"); } else { uld.dataset.armed="1"; uld.textContent="Точно?"; } return; }
-  var cp=t.closest("[data-copy]"); if(cp){ copy(cp.dataset.copy,"Цвет "+cp.dataset.copy+" скопирован"); return; }
+  var ulc=t.closest("[data-ulcopy]"); if(ulc){ var lr=(S.utmLog||[]).filter(function(x){return x.id===ulc.dataset.ulcopy;})[0]; if(lr) copy(lr.link,"Ссылка скопирована"); return; }
+  var uld=t.closest("[data-uldel]"); if(uld){ if(uld.dataset.armed){ S.utmLog=S.utmLog.filter(function(x){return x.id!==uld.dataset.uldel;}); save(); route(true); toast("Удалено"); } else { uld.dataset.armed="1"; uld.textContent="Точно?"; } return; }
 });
 document.addEventListener("change",function(e){
-  var id=e.target.id;
-  if(id==="f-net"||id==="f-fn"||id==="f-st"){ planFilter[{"f-net":"net","f-fn":"fn","f-st":"status"}[id]]=e.target.value; route(); }
+  var s=e.target;
+  if(s.dataset && s.dataset.stRow){ var tb=s.dataset.stTable, r=S[tb].filter(function(x){return x.id===s.dataset.stRow;})[0]; if(r){ r.status=s.value; save(); s.className="stsel "+(ST_CLASS[s.value]||"s-gray"); toast("Статус: "+s.value); } }
 });
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") closeModal(); });
-window.addEventListener("hashchange",route);
+window.addEventListener("hashchange",function(){ closeModal(); route(); });
 route();
 })();
 </script>
-
 </body>
 </html>
