@@ -20,6 +20,9 @@
   .brand span{color:var(--accent)}
   .updated{color:var(--ink-2);font-size:14px;margin-top:2px}
   .period-label{color:var(--ink-2);font-size:14px;margin-left:4px}
+  .pick{display:inline-flex;flex-wrap:wrap;align-items:center;gap:8px;color:var(--ink-2);font-size:14px}
+  .pick select{border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:14px;padding:8px 12px;border-radius:999px;cursor:pointer;max-width:100%}
+  .pick select:hover{border-color:var(--accent)}
   .note{color:var(--ink-3);font-size:12px;margin-top:6px;line-height:1.35}
   .post-note{color:var(--ink-2);font-size:13px;border-top:1px solid var(--line);padding-top:10px}
   .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:22px}
@@ -159,9 +162,10 @@
     <div class="seg" id="period" role="group" aria-label="Период">
       <button data-v="week" aria-pressed="true">неделя</button>
       <button data-v="month" aria-pressed="false">месяц</button>
+      <button data-v="custom" aria-pressed="false">свой период</button>
       <button data-v="all" aria-pressed="false">все время</button>
     </div>
-    <span class="period-label" id="period-label"></span>
+    <span class="pick" id="period-pick"></span>
     <div class="spacer"></div>
     <button class="refresh" id="refresh" type="button">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
@@ -513,7 +517,7 @@ function contentTable(text){
 
 /* ===== Состояние ===== */
 var DATA = { weekly:[], monthly:[], content:[] };
-var state = { net:"all", period:"week", stamp:null, live:false };
+var state = { net:"all", period:"week", stamp:null, live:false, pickW:null, pickM:null, cFrom:null, cTo:null };
 
 function applyCSV(csv, at, live){
   var w=wide(csv.weekly||"","weekly"), m=wide(csv.monthly||"","monthly"), ct=contentTable(csv.content||"");
@@ -636,18 +640,28 @@ function periodSel(){
   var W=DATA.weekly, M=DATA.monthly, P=state.period, s={};
   if (P==="week"){
     if (!W.length) return null;
-    var w=W[W.length-1];
-    s.cur=[w]; s.prev=W.length>1?[W[W.length-2]]:null;
+    var wi = state.pickW!=null && state.pickW<W.length ? state.pickW : W.length-1, w=W[wi];
+    s.cur=[w]; s.prev=wi>0?[W[wi-1]]:null;
     s.ctx="к прошлой неделе"; s.noPrev="первая неделя в таблице";
     s.title=dayRange(w.start, w.end);
     s.from=w.start; s.to=w.end;
   } else if (P==="month"){
     if (!M.length) return null;
-    var m=M[M.length-1];
-    s.cur=[m]; s.prev=M.length>1?[M[M.length-2]]:null;
+    var mi = state.pickM!=null && state.pickM<M.length ? state.pickM : M.length-1, m=M[mi];
+    s.cur=[m]; s.prev=mi>0?[M[mi-1]]:null;
     s.ctx=s.prev ? "к "+MON_DAT[s.prev[0].start.getMonth()] : ""; s.noPrev="первый месяц в таблице";
     s.title=MON_NOM[m.start.getMonth()]+" "+m.start.getFullYear();
     s.from=m.start; s.to=m.end;
+  } else if (P==="custom"){
+    if (!W.length) return null;
+    var a = state.cFrom!=null && state.cFrom<W.length ? state.cFrom : Math.max(0, W.length-4);
+    var z = state.cTo!=null && state.cTo<W.length ? state.cTo : W.length-1;
+    if (a>z){ var t=a; a=z; z=t; }
+    var len=z-a+1;
+    s.cur=W.slice(a, z+1); s.prev = a-len>=0 ? W.slice(a-len, a) : null;
+    s.ctx="к предыдущим "+len+" "+plural(len,"неделе","неделям","неделям"); s.noPrev="раньше в таблице данных нет";
+    s.title=dayRange(W[a].start, W[z].end);
+    s.from=W[a].start; s.to=W[z].end; s.range=[a,z];
   } else {
     var lastEnd = M.length ? M[M.length-1].end : null;
     s.cur=M.concat(W.filter(function(w){ return !lastEnd || w.start>=lastEnd; }));
@@ -800,7 +814,7 @@ function render(){
   else up.textContent = st ? "обновлено "+st.getDate()+" "+MON_GEN[st.getMonth()] : "обновлено сегодня";
 
   var s=periodSel();
-  document.getElementById("period-label").textContent = s ? s.title : "";
+  renderPick(s);
   var ids=["followers","leads","reach","er"];
   if (!s){
     ids.forEach(function(id){ document.getElementById("kpi-"+id).innerHTML=kpiHTML("—","—",'<div class="delta flat"><span class="ctx">нет данных за период</span></div>'); });
@@ -954,14 +968,14 @@ function b(s){ return "<b>"+s+"</b>"; }
 function words(s){
   var P=state.period, c=s.cur[s.cur.length-1], pv=s.prev&&s.prev[0];
   return {
-    during: P==="week" ? "за неделю" : P==="month" ? "за "+MON_NOM[c.start.getMonth()] : s.since,
-    thanPrev: !pv ? "" : P==="week" ? "чем на прошлой неделе" : "чем в "+MON_PREP[pv.start.getMonth()],
-    streak: function(k){ return P==="week" ? k+"-ю неделю подряд" : k+"-й месяц подряд"; }
+    during: P==="week" ? "за неделю" : P==="month" ? "за "+MON_NOM[c.start.getMonth()] : P==="custom" ? "за период" : s.since,
+    thanPrev: !pv ? "" : P==="week" ? "чем на прошлой неделе" : P==="custom" ? "чем за такой же период до этого" : "чем в "+MON_PREP[pv.start.getMonth()],
+    streak: function(k){ return P==="month" ? k+"-й месяц подряд" : k+"-ю неделю подряд"; }
   };
 }
 /* История показателя сети по периодам той же длины — для «N-й месяц подряд» */
 function hist(n, m){
-  var G = state.period==="week" ? DATA.weekly : DATA.monthly;
+  var G = (state.period==="week"||state.period==="custom") ? DATA.weekly : DATA.monthly;
   return G.map(function(p){ return val([p],n,m); });
 }
 /* Сколько последних значений подряд снижается (возвращает сами значения) */
@@ -977,7 +991,7 @@ function risingTail(a){
 }
 /* Сколько последних периодов подряд сеть теряла подписчиков */
 function lossStreak(n){
-  var G = state.period==="week" ? DATA.weekly : DATA.monthly, k=0;
+  var G = (state.period==="week"||state.period==="custom") ? DATA.weekly : DATA.monthly, k=0;
   for (var i=G.length-1; i>=0; i--){
     var g=val([G[i]],n,"growth");
     if (!ok(g) && i>0){ var a=val([G[i]],n,"followers"), c=val([G[i-1]],n,"followers"); if (ok(a)&&ok(c)) g=a-c; }
@@ -1118,6 +1132,32 @@ function renderInsights(s, contentCount){
     return '<div class="flag '+f.level+'"><span class="dot"></span><div><div class="f-title">'+f.title+'</div>'+(f.hint?'<div class="f-hint">'+f.hint+'</div>':"")+'</div></div>';
   }).join("") : '<div class="flag ok-flag"><span class="dot"></span><div><div class="f-title">Тревожных сигналов нет</div></div></div>';
 }
+
+/* ===== Выбор периода ===== */
+function renderPick(s){
+  var el=document.getElementById("period-pick"), W=DATA.weekly, M=DATA.monthly, P=state.period;
+  function opts(list, sel, label){ return list.map(function(p,i){ return '<option value="'+i+'"'+(i===sel?' selected':'')+'>'+esc(label(p))+'</option>'; }).reverse().join(""); }
+  var wLabel=function(p){ return dayRange(p.start,p.end); }, mLabel=function(p){ return MON_NOM[p.start.getMonth()]+" "+p.start.getFullYear(); };
+  if (P==="week" && W.length){
+    var wi = W.indexOf(s && s.cur[0]);
+    el.innerHTML='<select data-pick="pickW" aria-label="Неделя">'+opts(W, wi, wLabel)+'</select>';
+  } else if (P==="month" && M.length){
+    var mi = M.indexOf(s && s.cur[0]);
+    el.innerHTML='<select data-pick="pickM" aria-label="Месяц">'+opts(M, mi, mLabel)+'</select>';
+  } else if (P==="custom" && W.length && s){
+    el.innerHTML='с <select data-pick="cFrom" aria-label="С недели">'+opts(W, s.range[0], function(p){ return p.start.getDate()+" "+MON_GEN[p.start.getMonth()]; })+'</select>'+
+      ' по <select data-pick="cTo" aria-label="По неделю">'+opts(W, s.range[1], function(p){ var e=new Date(p.end-86400000); return e.getDate()+" "+MON_GEN[e.getMonth()]; })+'</select>';
+  } else {
+    el.textContent = s ? s.title : "";
+  }
+}
+document.getElementById("period-pick").addEventListener("change", function(e){
+  var k=e.target.getAttribute("data-pick"); if (!k) return;
+  state[k]=+e.target.value;
+  if (k==="cFrom" && state.cTo==null) state.cTo=DATA.weekly.length-1;
+  if (k==="cTo" && state.cFrom==null) state.cFrom=Math.max(0, DATA.weekly.length-4);
+  render();
+});
 
 /* ===== Управление ===== */
 function seg(id, field){
