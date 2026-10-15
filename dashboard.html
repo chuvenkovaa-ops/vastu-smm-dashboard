@@ -1137,6 +1137,11 @@ window.addEventListener("resize", function(){ if (window.innerWidth===lastW) ret
 loadEmbedded();
 render();
 refresh(); // при открытии тихо пробуем подтянуть свежие цифры из таблицы
+// автообновление: каждые 10 минут, пока вкладка открыта, и сразу при возвращении на неё
+var lastRefresh=Date.now();
+function autoRefresh(){ if (document.hidden) return; lastRefresh=Date.now(); refresh(); }
+setInterval(autoRefresh, 10*60*1000);
+document.addEventListener("visibilitychange", function(){ if (!document.hidden && Date.now()-lastRefresh>60*1000) autoRefresh(); });
 })();
 </script>
 </body>
