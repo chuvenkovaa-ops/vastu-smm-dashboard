@@ -579,8 +579,8 @@ VIEWS.home = function(){
    ДАШБОРД
    ============================================================ */
 VIEWS.dashboard = function(){
-  return head("Аналитика","Дашборд","",'<a class="btn" href="dashboard.html" target="_blank" rel="noopener">'+ico("ext")+'На весь экран</a>')+
-  '<iframe class="frame" src="dashboard.html#embed" title="Дашборд VASTU" loading="lazy"></iframe>';
+  return head("Аналитика","Дашборд","",'<a class="btn" href="dashboard.html?v='+Date.now()+'" target="_blank" rel="noopener">'+ico("ext")+'На весь экран</a>')+
+  '<iframe class="frame" src="dashboard.html?v='+Date.now()+'#embed" title="Дашборд VASTU" loading="lazy"></iframe>';
 };
 
 /* ============================================================
