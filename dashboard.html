@@ -507,6 +507,7 @@ function contentTable(text){
   var out=[];
   rows.slice(h+1).forEach(function(r, idx){
     var net=netKey(r[c.net]); if (!net) return;
+    if (c.topic>=0 && /\bpinned an? (photo|video|message|poll|album|file|post)\b/i.test(r[c.topic]||"")) return;  // служебное «закрепил» из Telegram
     function g(k){ return c[k]>=0 ? num(r[c[k]]) : NaN; }
     var o={ net:net, order:idx, date:parseDate(r[c.date]), views:g("views"), reach:g("reach"),
       likes:g("likes"), comments:g("comments"), saves:g("saves"), reactions:g("reactions"),
@@ -638,12 +639,18 @@ function erPost(rows){
   return b>0 ? a/b*100 : NaN;
 }
 
+/* Последняя закончившаяся неделя: текущую, ещё не заполненную целиком, по умолчанию не показываем. */
+function lastDoneWeek(W){
+  var t=new Date(); t=new Date(t.getFullYear(), t.getMonth(), t.getDate()+1);
+  for (var i=W.length-1;i>=0;i--) if (W[i].end<=t) return i;
+  return W.length-1;
+}
 /* Текущий и прошлый период. */
 function periodSel(){
   var W=DATA.weekly, M=DATA.monthly, P=state.period, s={};
   if (P==="week"){
     if (!W.length) return null;
-    var wi = state.pickW!=null && state.pickW<W.length ? state.pickW : W.length-1, w=W[wi];
+    var wi = state.pickW!=null && state.pickW<W.length ? state.pickW : lastDoneWeek(W), w=W[wi];
     s.cur=[w]; s.prev=wi>0?[W[wi-1]]:null;
     s.ctx="к прошлой неделе"; s.noPrev="первая неделя в таблице";
     s.title=dayRange(w.start, w.end);
@@ -657,8 +664,8 @@ function periodSel(){
     s.from=m.start; s.to=m.end;
   } else if (P==="custom"){
     if (!W.length) return null;
-    var a = state.cFrom!=null && state.cFrom<W.length ? state.cFrom : Math.max(0, W.length-4);
-    var z = state.cTo!=null && state.cTo<W.length ? state.cTo : W.length-1;
+    var a = state.cFrom!=null && state.cFrom<W.length ? state.cFrom : Math.max(0, lastDoneWeek(W)-3);
+    var z = state.cTo!=null && state.cTo<W.length ? state.cTo : lastDoneWeek(W);
     if (a>z){ var t=a; a=z; z=t; }
     var len=z-a+1;
     s.cur=W.slice(a, z+1); s.prev = a-len>=0 ? W.slice(a-len, a) : null;
@@ -1157,8 +1164,8 @@ function renderPick(s){
 document.getElementById("period-pick").addEventListener("change", function(e){
   var k=e.target.getAttribute("data-pick"); if (!k) return;
   state[k]=+e.target.value;
-  if (k==="cFrom" && state.cTo==null) state.cTo=DATA.weekly.length-1;
-  if (k==="cTo" && state.cFrom==null) state.cFrom=Math.max(0, DATA.weekly.length-4);
+  if (k==="cFrom" && state.cTo==null) state.cTo=lastDoneWeek(DATA.weekly);
+  if (k==="cTo" && state.cFrom==null) state.cFrom=Math.max(0, lastDoneWeek(DATA.weekly)-3);
   render();
 });
 
