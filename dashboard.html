@@ -158,6 +158,7 @@
       <button data-v="max" aria-pressed="false">MAX</button>
       <button data-v="pin" aria-pressed="false">Pinterest</button>
       <button data-v="vk" aria-pressed="false">ВКонтакте</button>
+      <button data-v="yt" aria-pressed="false">YouTube</button>
     </div>
     <div class="seg" id="period" role="group" aria-label="Период">
       <button data-v="week" aria-pressed="true">неделя</button>
@@ -351,7 +352,7 @@ var SHEET_NAMES = {
 var CACHE_KEY = "vastu-dashboard-cache-v2";
 
 /* ===== Справочники ===== */
-var NETS = { ig:"Instagram", tg:"Telegram", max:"MAX", pin:"Pinterest", vk:"ВКонтакте" };
+var NETS = { ig:"Instagram", tg:"Telegram", max:"MAX", pin:"Pinterest", vk:"ВКонтакте", yt:"YouTube" };
 var NET_IDS = Object.keys(NETS);
 function netKey(s){
   s = String(s||"").toLowerCase().replace(/[^a-zа-яё]/g,"");
@@ -361,10 +362,11 @@ function netKey(s){
   if (/^(max$|макс$)/.test(s)) return "max";
   if (/^(tg$|тг$|telegr|телегр)/.test(s)) return "tg";
   if (/^(pinterest|пинтерест)/.test(s)) return "pin";
+  if (/^(youtube|ютуб|yt$)/.test(s)) return "yt";
   return null; // другие сети в таблице игнорируем
 }
 var FORMATS = [
-  { key:"reels",   label:"Рилс",    color:"#3e6d65" },
+  { key:"reels",   label:"Видео и рилс",    color:"#3e6d65" },
   { key:"posts",   label:"Посты",   color:"#d4a06a" },
   { key:"stories", label:"Stories", color:"#c96f4a" }
 ];
@@ -431,11 +433,12 @@ function metricKey(name){
   if (l.indexOf("охват")===0) return "reach";
   if (l.indexOf("просмотр")===0) return "views";
   if (l.indexOf("вовлеч")>=0) return (/%|er/.test(l)) ? "erPct" : "engagement";
-  if (/лид|заявк/.test(l)) return "leads";
+  if (/getcourse|выручк|регистрац|оплат/.test(l)) return null;   // строки GetCourse дашборд пока не показывает
+  if (/^лиды|^заявки\s*\/\s*лиды/.test(l)) return "leads";
   if (/переход|нажати/.test(l)) return "clicks";
   if (/истори|stories|сторис/.test(l)) return "stories";
   if (l.indexOf("количество постов")>=0) return "posts";
-  if (l.indexOf("количество публикаций")>=0) return "pubs";
+  if (l.indexOf("количество публикаций")>=0 || l.indexOf("количество видео")>=0) return "pubs";
   return null;
 }
 function wide(text, kind){
