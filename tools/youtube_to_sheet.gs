@@ -15,6 +15,10 @@
  * 4. Выбрать функцию installYouTubeTrigger → Выполнить → войти в Google-аккаунт,
  *    к которому привязан YouTube-канал школы, и разрешить доступ.
  * 5. Чтобы заполнить таблицу сразу, выполнить функцию updateYouTube.
+ *
+ * Если канал школы — аккаунт бренда и скрипт пишет «нет своего YouTube-канала»:
+ * Настройки проекта → Свойства скрипта → добавить YT_CHANNEL_ID = ID канала
+ * (YouTube Studio → Настройки → Канал → Расширенные настройки, начинается с UC).
  */
 
 /* Запуск вручную или по расписанию */
@@ -38,12 +42,30 @@ var YT_ = (function () {
 
   function run() {
     var ss = SpreadsheetApp.getActive();
-    var subscribersNow = Number(YouTube.Channels.list('statistics', { mine: true }).items[0].statistics.subscriberCount);
+    var channel = findChannel_();
+    CHANNEL_ID = channel.id;
+    ANALYTICS_IDS = channel.own ? 'channel==MINE' : 'channel==' + channel.id;
+    var subscribersNow = Number(channel.statistics.subscriberCount);
     fillSheet_(ss.getSheetByName(WEEKLY_SHEET), weekPeriod_, subscribersNow);
     fillSheet_(ss.getSheetByName(MONTHLY_SHEET), monthPeriod_, subscribersNow);
   }
 
   /* Заполняет все прошедшие и текущий период листа. */
+  var CHANNEL_ID = '', ANALYTICS_IDS = 'channel==MINE';
+
+  /* Канал: свой канал аккаунта, а если его нет — канал из свойства скрипта YT_CHANNEL_ID. */
+  function findChannel_() {
+    var mine = YouTube.Channels.list('id,statistics', { mine: true });
+    if (mine.items && mine.items.length) return { id: mine.items[0].id, statistics: mine.items[0].statistics, own: true };
+    var id = String(PropertiesService.getScriptProperties().getProperty('YT_CHANNEL_ID') || '').trim();
+    if (!id) throw new Error('У Google-аккаунта ' + Session.getActiveUser().getEmail() + ' нет своего YouTube-канала. ' +
+      'Если канал школы — аккаунт бренда, добавьте в Настройки проекта → Свойства скрипта свойство YT_CHANNEL_ID ' +
+      'с ID канала (YouTube Studio → Настройки → Канал → Расширенные настройки, начинается с UC).');
+    var byId = YouTube.Channels.list('id,statistics', { id: id });
+    if (!byId.items || !byId.items.length) throw new Error('Канал с ID ' + id + ' не найден. Проверьте YT_CHANNEL_ID.');
+    return { id: id, statistics: byId.items[0].statistics, own: false };
+  }
+
   function fillSheet_(sheet, parsePeriod, subscribersNow) {
     if (!sheet) return;
     var data = sheet.getDataRange().getDisplayValues();
@@ -95,12 +117,19 @@ var YT_ = (function () {
 
   function analytics_(start, end) {
     var metrics = ['views', 'estimatedMinutesWatched', 'likes', 'comments', 'shares', 'subscribersGained', 'subscribersLost'];
-    var res = YouTubeAnalytics.Reports.query({
-      ids: 'channel==MINE',
-      startDate: ymd_(start),
-      endDate: ymd_(end),
-      metrics: metrics.join(',')
-    });
+    var res;
+    try {
+      res = YouTubeAnalytics.Reports.query({
+        ids: ANALYTICS_IDS,
+        startDate: ymd_(start),
+        endDate: ymd_(end),
+        metrics: metrics.join(',')
+      });
+    } catch (e) {
+      throw new Error('YouTube не отдал статистику канала ' + CHANNEL_ID + ' аккаунту ' + Session.getActiveUser().getEmail() +
+        '. Статистику видит только владелец или менеджер канала: дайте этому аккаунту доступ в YouTube Studio → Настройки → Разрешения ' +
+        'или запустите скрипт из аккаунта владельца. Текст ошибки: ' + e.message);
+    }
     var out = {};
     var row = (res.rows && res.rows[0]) || [];
     metrics.forEach(function (m, i) { out[m] = Number(row[i] || 0); });
@@ -112,7 +141,7 @@ var YT_ = (function () {
     var after = new Date(start), before = new Date(end.getTime() + 86400000);
     do {
       var res = YouTube.Search.list('id', {
-        forMine: true, type: 'video', maxResults: 50, pageToken: token,
+        channelId: CHANNEL_ID, type: 'video', maxResults: 50, pageToken: token,
         publishedAfter: after.toISOString(), publishedBefore: before.toISOString()
       });
       n += (res.items || []).length;
