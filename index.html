@@ -391,7 +391,7 @@ table.sheet{border-collapse:separate;border-spacing:0;width:100%;font-size:13.5p
    ============================================================ */
 var NETS = {
   ig:{name:"Instagram", c:"#c96f4a"}, tg:{name:"Telegram", c:"#3e6d65"}, vk:{name:"VK", c:"#5f6d31"},
-  max:{name:"MAX", c:"#d4a06a"}, pin:{name:"Pinterest", c:"#9a7650"}
+  max:{name:"MAX", c:"#d4a06a"}, pin:{name:"Pinterest", c:"#9a7650"}, yt:{name:"YouTube", c:"#7a5a3a"}
 };
 var KPIS = [
   {id:"ig_clicks", label:"Instagram · клики по ссылке", unit:"в месяц", base:27,  target:150, dir:"up"},
@@ -442,7 +442,7 @@ var COLS = {
   fun:[["block","Источник / контент","text","w-m first"],["think","Что человек думает на входе","long","w-m"],["cta","CTA в контенте","long","w-m"],["entry","Точка входа","long","w-m"],["s1","Шаг 1","long","w-m"],["s2","Шаг 2","long","w-m"],["s3","Шаг 3","long","w-m"],["target","Целевое действие","long","w-m"],["measure","Что измеряем","long","w-m"],["status","Статус","status:rp","w-s"]]
 };
 var SHEETS = {
-  cp:[["ig","Instagram","cp"],["tg","Telegram","cp"],["vk","VK","cp"],["max","MAX","cp"],["pin","Pinterest","cp"],["ideas","Идеи","ideas"]],
+  cp:[["ig","Instagram","cp"],["tg","Telegram","cp"],["vk","VK","cp"],["max","MAX","cp"],["pin","Pinterest","cp"],["yt","YouTube","cp"],["ideas","Идеи","ideas"]],
   rp:[["ig","Instagram","rp"],["hl","Highlights","hl"],["tg","Telegram","rptg"],["vk","VK","rp"],["max","MAX","rp"],["pin","Pinterest","rp"],["funnels","Воронки и CTA","fun"]]
 };
 function colsOf(table, sheet){ var s=SHEETS[table].filter(function(x){return x[0]===sheet;})[0]; return COLS[s[2]]; }
@@ -579,8 +579,8 @@ VIEWS.home = function(){
    ДАШБОРД
    ============================================================ */
 VIEWS.dashboard = function(){
-  return head("Аналитика","Дашборд","",'<a class="btn" href="dashboard.html" target="_blank" rel="noopener">'+ico("ext")+'На весь экран</a>')+
-  '<iframe class="frame" src="dashboard.html#embed" title="Дашборд VASTU" loading="lazy"></iframe>';
+  return head("Аналитика","Дашборд","",'<a class="btn" href="dashboard.html?v='+Date.now()+'" target="_blank" rel="noopener">'+ico("ext")+'На весь экран</a>')+
+  '<iframe class="frame" src="dashboard.html?v='+Date.now()+'#embed" title="Дашборд VASTU" loading="lazy"></iframe>';
 };
 
 /* ============================================================
@@ -891,7 +891,7 @@ function runChecker(){
    ссылка лендинга ?utm_source=источник &utm_medium=канал &utm_campaign=тип контента
    &utm_content=уникальное поле &utm_term=ID лендинга                                  */
 var UD = window.UTM_DATA || {sources:[],channels:[],types:[],landings:[]};
-var SMM_CHANNELS = [["Instagram","Инстаграм"],["Telegram","ТГ канал основной"],["VK","ВК сообщество"],["MAX","Канал Макс"],["Pinterest","Пинтерест"],["ТГ-бот","ТГ бот"],["Дзен","Дзен"],["RuTube","RuTube"]];
+var SMM_CHANNELS = [["Instagram","Инстаграм"],["Telegram","ТГ канал основной"],["VK","ВК сообщество"],["MAX","Канал Макс"],["Pinterest","Пинтерест"],["YouTube","YouTube"],["ТГ-бот","ТГ бот"],["Дзен","Дзен"],["RuTube","RuTube"]];
 var U = {page:"", src:"SMM", ch:"ТГ канал основной", type:"Пост", uniq:"", comment:""};
 function ddmmyyyy(d){ return String(d.getDate()).padStart(2,"0")+String(d.getMonth()+1).padStart(2,"0")+d.getFullYear(); }
 function allLandings(){ return (S.landingsCustom||[]).concat(UD.landings); }
