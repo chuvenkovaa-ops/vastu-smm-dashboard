@@ -36,8 +36,11 @@ function installDailyTrigger() {
 
 function updateVK() {
   var props = PropertiesService.getScriptProperties();
-  var token = props.getProperty('VK_TOKEN'), groupName = props.getProperty('VK_GROUP');
+  var token = String(props.getProperty('VK_TOKEN') || '').replace(/\s+/g, '').replace(/^["']|["']$/g, '');
+  var groupName = String(props.getProperty('VK_GROUP') || '').trim()
+    .replace(/^https?:\/\/(m\.)?vk\.(com|ru)\//, '').replace(/^@/, '').replace(/\/.*$/, '');
   if (!token || !groupName) throw new Error('Добавьте свойства скрипта VK_TOKEN и VK_GROUP (Настройки проекта → Свойства скрипта).');
+  if (token.length < 50) throw new Error('VK_TOKEN слишком короткий (' + token.length + ' символов): похоже, скопирован не весь ключ. Ключ VK — это длинная строка из 80+ символов.');
 
   var group = groupInfo_(token, groupName);
   var ss = SpreadsheetApp.getActive();
@@ -98,7 +101,9 @@ function vk_(method, params, token) {
   var res = JSON.parse(UrlFetchApp.fetch('https://api.vk.com/method/' + method + '?' + q, { muteHttpExceptions: true }).getContentText());
   if (res.error) {
     var e = res.error;
-    var hint = (e.error_code === 15 || e.error_code === 27 || e.error_code === 7)
+    var hint = e.error_code === 5
+      ? ' VK не принял ключ. Создайте ключ заново (Управление → Работа с API → Ключи доступа), скопируйте его целиком кнопкой «Показать» и вставьте в VK_TOKEN без пробелов.'
+      : (e.error_code === 15 || e.error_code === 27 || e.error_code === 7)
       ? ' У ключа нет доступа к этому методу. Нужен ключ администратора сообщества с доступом к статистике (см. README).'
       : '';
     throw new Error('VK ' + method + ': ' + e.error_code + ' ' + e.error_msg + '.' + hint);
