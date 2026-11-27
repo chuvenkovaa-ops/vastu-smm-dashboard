@@ -795,7 +795,7 @@ AFTER.tz = function(){
 /* ============================================================
    ОТЧЁТЫ
    ============================================================ */
-function latestReport(){ var r=S.reports.slice().sort(function(a,b){return a.month<b.month?1:-1;}); return r[0]; }
+function latestReport(){ var r=S.reports.filter(function(x){return !x.kind||x.kind==="month";}).sort(function(a,b){return a.month<b.month?1:-1;}); return r[0]; }
 function kpiProgress(rep){
   rep = rep || latestReport();
   return '<div class="prog">'+KPIS.map(function(k){
@@ -816,52 +816,118 @@ function kpiProgress(rep){
   }).join("")+'</div>'+(rep?'<p class="small muted" style="margin:14px 0 0">Факт из отчёта «'+esc(rep.title)+'». Шкала идёт от точки А к цели.</p>':'');
 }
 
-var repOpen = null;
+var repOpen = null, repMonth = null;
+/* Отчёты по месяцам: итог месяца (kind "month") и планерки (Пн — статистика и план недели, Пт — итоги недели). */
+var MONTHS_G=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+var WD_SHORT=["Вс","Пн","Вт","Ср","Чт","Пт","Сб"];
+var REP_FIELDS=[["cont","Продолжаем","pos"],["change","Меняем",""],["test","Тестируем",""],["stop","Останавливаем","neg"]];
+var MEET_KIND={mon:"статистика прошлой недели и план", fri:"итоги недели", meet:"планерка"};
+function pDate(s){ var p=s.split("-"); return new Date(+p[0],+p[1]-1,+p[2]); }
+function kindOf(d){ var w=d.getDay(); return w===1?"mon":w===5?"fri":"meet"; }
+function meetTitle(ds){ var d=pDate(ds); return WD_SHORT[d.getDay()]+" "+d.getDate()+" "+MONTHS_G[d.getMonth()]; }
+function monthLabel(ym){ var p=ym.split("-"); return MONTHS_N[+p[1]-1]+" "+p[0].slice(2); }
+function parseRepDate(r){
+  var m=((r.title||"")+" "+(r.note||"")).match(/(\d{1,2})[.\/](\d{1,2})(?:[.\/](\d{2,4}))?/);
+  if(!m) return null;
+  var y=m[3]?(m[3].length===2?2000+ +m[3]:+m[3]):(r.month?+r.month.slice(0,4):2026);
+  var d=new Date(y,+m[2]-1,+m[1]);
+  return d.getMonth()===+m[2]-1 ? d : null;
+}
+function addMeetings(ym){
+  var p=ym.split("-"), y=+p[0], mo=+p[1]-1, n=0;
+  for(var d=new Date(y,mo,1); d.getMonth()===mo; d.setDate(d.getDate()+1)){
+    var w=d.getDay(); if(w!==1&&w!==5) continue;
+    var ds=iso(d);
+    if(S.reports.some(function(r){return r.date===ds;})) continue;
+    S.reports.push({id:uid(),kind:kindOf(d),date:ds,month:ym,title:meetTitle(ds),vals:{},cont:"",change:"",test:"",stop:"",note:""}); n++;
+  }
+  return n;
+}
+/* Раскладываем старые записи: дата в названии — это планерка своего месяца, без даты — отчёт за месяц. */
+function normalizeReports(){
+  var changed=false;
+  S.reports.forEach(function(r){
+    if(r.kind) return;
+    var d = r.base ? null : parseRepDate(r);
+    if(d){ r.date=iso(d); r.month=r.date.slice(0,7); r.kind=kindOf(d); }
+    else r.kind = /планерк|понедельн|пятниц|(^|\s)(пн|пт)(\s|$)/i.test(r.title||"") ? "meet" : "month";
+    r.vals=r.vals||{}; changed=true;
+  });
+  S.seeded=S.seeded||{};
+  if(!S.seeded["2026-12"]){ addMeetings("2026-12"); S.seeded["2026-12"]=true; changed=true; }
+  if(changed) save();
+}
+function repMonths(){
+  var set={}, now=iso(new Date()).slice(0,7);
+  S.reports.forEach(function(r){ if(r.month) set[r.month]=1; });
+  ["2026-10","2026-11","2026-12",now].forEach(function(m){ set[m]=1; });
+  return Object.keys(set).sort();
+}
 VIEWS.reports = function(){
-  var reps=S.reports.slice().sort(function(a,b){return a.month<b.month?1:-1;});
-  var cur = repOpen ? S.reports.filter(function(r){return r.id===repOpen;})[0] : reps[0];
-  return head("Аналитика и KPI","Отчёты","Раз в месяц фиксируем цифры по ориентирам и решения: что продолжаем, что меняем, что тестируем, что останавливаем.",
-    '<button class="btn primary" type="button" id="rep-new">'+ico("plus")+'Новый отчёт</button>')+
-  '<div class="row">'+reps.map(function(r){return '<button type="button" class="btn'+(cur&&r.id===cur.id?' primary':'')+'" data-rep="'+r.id+'">'+esc(r.title)+'</button>';}).join("")+'</div>'+
-  (cur?reportView(cur):'<section class="card"><p class="muted" style="margin:0">Отчётов пока нет. Нажмите «Новый отчёт».</p></section>');
+  normalizeReports();
+  var months=repMonths(), now=iso(new Date()).slice(0,7);
+  if(!repMonth || months.indexOf(repMonth)<0) repMonth = months.indexOf(now)>=0 ? now : months[months.length-1];
+  var list=S.reports.filter(function(r){return r.month===repMonth;});
+  var monthly=list.filter(function(r){return r.kind==="month";});
+  var meets=list.filter(function(r){return r.kind!=="month";}).sort(function(a,b){ return (a.date||"9")<(b.date||"9")?-1:1; });
+  var mName=MONTHS_N[+repMonth.slice(5)-1].toLowerCase();
+  return head("Аналитика","Отчёты","",
+    '<div class="row"><button class="btn" type="button" id="meet-new">'+ico("plus")+'Планерка</button><button class="btn primary" type="button" id="rep-new">'+ico("plus")+'Отчёт за месяц</button></div>')+
+  '<div class="subtabs" role="tablist">'+months.map(function(m){ var n=S.reports.filter(function(r){return r.month===m;}).length; return '<button type="button" role="tab" data-repm="'+m+'" aria-pressed="'+(m===repMonth)+'">'+monthLabel(m)+(n?'<span>'+n+'</span>':'')+'</button>'; }).join("")+'</div>'+
+  (monthly.length ? monthly.map(reportView).join("") :
+    '<section class="card"><div class="card-head" style="margin:0"><h2>Итог месяца</h2><button class="btn" type="button" id="rep-new-2">'+ico("plus")+'Создать отчёт за '+mName+'</button></div></section>')+
+  '<section class="card"><div class="card-head"><h2>Планерки</h2><span class="small muted">Пн — статистика прошлой недели и план · Пт — итоги недели</span></div>'+
+   (meets.length ? '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Дата</th><th>Планерка</th><th>Решения</th><th></th></tr></thead><tbody>'+meets.map(function(r){
+      var filled=REP_FIELDS.some(function(f){return (r[f[0]]||"").trim();}) || (r.note||"").trim();
+      var prev=REP_FIELDS.map(function(f){ var l=(r[f[0]]||"").split("\n").filter(Boolean); return l.length?'<div class="small"><b>'+f[1]+':</b> '+esc(l.join("; "))+'</div>':''; }).join("");
+      return '<tr style="cursor:pointer" data-meet="'+r.id+'"><td style="white-space:nowrap"><b>'+esc(r.date?meetTitle(r.date):r.title)+'</b></td><td class="small">'+esc(MEET_KIND[r.kind]||"планерка")+(r.date&&r.title&&r.title!==meetTitle(r.date)?'<div class="muted">'+esc(r.title)+'</div>':'')+'</td><td>'+(filled?prev+(r.note?'<div class="small muted">'+esc(r.note)+'</div>':''):'<span class="chip s-gray">не заполнена</span>')+'</td><td><button class="btn" type="button" data-meet="'+r.id+'">Открыть</button></td></tr>';
+    }).join("")+'</tbody></table></div>' :
+    '<div class="row"><span class="muted small">Планерок в этом месяце нет.</span><button class="btn" type="button" data-rep-fill="'+repMonth+'">'+ico("plus")+'Создать на все Пн и Пт</button></div>')+
+  '</section>';
 };
 function reportView(r){
-  var cols=[["cont","Продолжаем","pos"],["change","Меняем",""],["test","Тестируем",""],["stop","Останавливаем","neg"]];
   return '<div class="grid g2"><section class="card"><div class="card-head"><h2>'+esc(r.title)+'</h2><div class="row"><button class="btn" type="button" data-rep-edit="'+r.id+'">Редактировать</button><button class="btn" type="button" data-rep-copy="'+r.id+'">'+ico("copy")+'Текст отчёта</button></div></div>'+kpiProgress(r)+(r.note?'<p class="small muted" style="margin:12px 0 0">'+esc(r.note)+'</p>':'')+'</section>'+
-   '<section class="card"><h2>Решения месяца</h2><div class="grid g2" style="margin-top:12px;gap:18px">'+cols.map(function(c){ var lines=(r[c[0]]||"").split("\n").filter(Boolean); return '<div><h3>'+c[1]+'</h3>'+(lines.length?'<ul class="list '+c[2]+'" style="margin-top:8px">'+lines.map(function(l){return '<li class="small">'+esc(l)+'</li>';}).join("")+'</ul>':'<p class="small muted">—</p>')+'</div>'; }).join("")+'</div></section></div>';
+   '<section class="card"><h2>Решения месяца</h2><div class="grid g2" style="margin-top:12px;gap:18px">'+REP_FIELDS.map(function(c){ var lines=(r[c[0]]||"").split("\n").filter(Boolean); return '<div><h3>'+c[1]+'</h3>'+(lines.length?'<ul class="list '+c[2]+'" style="margin-top:8px">'+lines.map(function(l){return '<li class="small">'+esc(l)+'</li>';}).join("")+'</ul>':'<p class="small muted">—</p>')+'</div>'; }).join("")+'</div></section></div>';
 }
 function reportText(r){
-  var t=r.title+"\n\nОриентиры:\n"+KPIS.map(function(k){var v=r.vals[k.id]; return "— "+k.label+": "+(v===""||v==null?"нет данных":v+(k.unit==="%"?"%":""))+(k.target!=null?" (цель "+(k.dir==="down"?"ниже "+k.target+"%":k.target)+")":"");}).join("\n");
-  [["cont","Продолжаем"],["change","Меняем"],["test","Тестируем"],["stop","Останавливаем"]].forEach(function(c){ var l=(r[c[0]]||"").split("\n").filter(Boolean); t+="\n\n"+c[1]+":\n"+(l.length?l.map(function(x){return "— "+x;}).join("\n"):"—"); });
+  var isMeet=r.kind && r.kind!=="month";
+  var t=(isMeet&&r.date?"Планерка "+meetTitle(r.date)+" — "+(MEET_KIND[r.kind]||""):r.title);
+  if(!isMeet) t+="\n\nОриентиры:\n"+KPIS.map(function(k){var v=r.vals[k.id]; return "— "+k.label+": "+(v===""||v==null?"нет данных":v+(k.unit==="%"?"%":""))+(k.target!=null?" (цель "+(k.dir==="down"?"ниже "+k.target+"%":k.target)+")":"");}).join("\n");
+  REP_FIELDS.forEach(function(c){ var l=(r[c[0]]||"").split("\n").filter(Boolean); t+="\n\n"+c[1]+":\n"+(l.length?l.map(function(x){return "— "+x;}).join("\n"):"—"); });
+  if((r.note||"").trim()) t+="\n\n"+r.note;
   return t;
 }
 function openReport(r,isNew){
+  var isMeet=r.kind && r.kind!=="month";
   var root=document.getElementById("modal-root");
-  root.innerHTML='<div class="overlay" data-close="1"><form class="modal" id="rep-form" autocomplete="off"><div class="card-head" style="margin:0"><h2>'+(isNew?'Новый отчёт':'Отчёт')+'</h2><button type="button" class="btn ghost" data-close="1">Закрыть</button></div>'+
-   '<div class="form-grid"><div class="field"><label for="rf-month">Месяц</label><input type="month" id="rf-month" required value="'+r.month+'"></div><div class="field"><label for="rf-title">Название</label><input id="rf-title" value="'+esc(r.title)+'"></div></div>'+
-   '<h3>Факт за месяц</h3><div class="form-grid">'+KPIS.map(function(k){return '<div class="field"><label for="rf-'+k.id+'">'+k.label+(k.unit==="%"?", %":"")+'</label><input type="number" step="any" id="rf-'+k.id+'" value="'+(r.vals[k.id]==null?"":r.vals[k.id])+'" placeholder="'+(k.base!=null?"точка А: "+k.base:"")+'"></div>';}).join("")+'</div>'+
+  root.innerHTML='<div class="overlay" data-close="1"><form class="modal" id="rep-form" autocomplete="off"><div class="card-head" style="margin:0"><h2>'+(isMeet?(isNew?'Новая планерка':'Планерка'):(isNew?'Новый отчёт за месяц':'Отчёт за месяц'))+'</h2><button type="button" class="btn ghost" data-close="1">Закрыть</button></div>'+
+   (isMeet
+     ? '<div class="form-grid"><div class="field"><label for="rf-date">Дата</label><input type="date" id="rf-date" required value="'+esc(r.date||"")+'"></div><div class="field"><label for="rf-title">Название</label><input id="rf-title" value="'+esc(r.title)+'"></div></div>'
+     : '<div class="form-grid"><div class="field"><label for="rf-month">Месяц</label><input type="month" id="rf-month" required value="'+r.month+'"></div><div class="field"><label for="rf-title">Название</label><input id="rf-title" value="'+esc(r.title)+'"></div></div>'+
+       '<h3>Факт за месяц</h3><div class="form-grid">'+KPIS.map(function(k){return '<div class="field"><label for="rf-'+k.id+'">'+k.label+(k.unit==="%"?", %":"")+'</label><input type="number" step="any" id="rf-'+k.id+'" value="'+(r.vals[k.id]==null?"":r.vals[k.id])+'" placeholder="'+(k.base!=null?"точка А: "+k.base:"")+'"></div>';}).join("")+'</div>')+
    '<h3>Решения</h3><p class="hint" style="margin:-8px 0 0">Каждый пункт с новой строки</p><div class="form-grid">'+
-    [["cont","Продолжаем"],["change","Меняем"],["test","Тестируем"],["stop","Останавливаем"]].map(function(c){return '<div class="field"><label for="rf-'+c[0]+'">'+c[1]+'</label><textarea id="rf-'+c[0]+'">'+esc(r[c[0]])+'</textarea></div>';}).join("")+
-    '<div class="field full"><label for="rf-note">Комментарий</label><input id="rf-note" value="'+esc(r.note)+'"></div></div>'+
-   '<div class="modal-foot">'+(isNew?'<span></span>':'<button type="button" class="btn danger" id="rf-del">Удалить отчёт</button>')+'<button class="btn primary" type="submit">'+ico("check")+'Сохранить</button></div></form></div>';
+    REP_FIELDS.map(function(c){return '<div class="field"><label for="rf-'+c[0]+'">'+c[1]+'</label><textarea id="rf-'+c[0]+'">'+esc(r[c[0]])+'</textarea></div>';}).join("")+
+    '<div class="field full"><label for="rf-note">Комментарий</label><textarea id="rf-note" style="min-height:60px">'+esc(r.note)+'</textarea></div></div>'+
+   '<div class="modal-foot"><div class="row">'+(isNew?'':'<button type="button" class="btn danger" id="rf-del">Удалить</button>')+(isNew?'':'<button type="button" class="btn" id="rf-copy">'+ico("copy")+'Скопировать текст</button>')+'</div><button class="btn primary" type="submit">'+ico("check")+'Сохранить</button></div></form></div>';
   var f=document.getElementById("rep-form");
-  f.querySelector("#rf-month").addEventListener("change",function(e){ var t=f.querySelector("#rf-title"); var p=e.target.value.split("-"); if(p.length===2 && (!t.value||/^\S+ \d{4}$/.test(t.value))) t.value=MONTHS_N[+p[1]-1]+" "+p[0]; });
+  if(!isMeet) f.querySelector("#rf-month").addEventListener("change",function(e){ var t=f.querySelector("#rf-title"); var p=e.target.value.split("-"); if(p.length===2 && (!t.value||/^\S+ \d{4}$/.test(t.value))) t.value=MONTHS_N[+p[1]-1]+" "+p[0]; });
+  else f.querySelector("#rf-date").addEventListener("change",function(e){ var t=f.querySelector("#rf-title"); if(e.target.value && (!t.value || /^(Пн|Вт|Ср|Чт|Пт|Сб|Вс) \d/.test(t.value))) t.value=meetTitle(e.target.value); });
   f.addEventListener("submit",function(e){
     e.preventDefault();
-    r.month=f.querySelector("#rf-month").value; r.title=f.querySelector("#rf-title").value.trim()||r.month;
-    KPIS.forEach(function(k){ var v=f.querySelector("#rf-"+k.id).value; r.vals[k.id]=v===""?"":+v; });
-    ["cont","change","test","stop"].forEach(function(c){ r[c]=f.querySelector("#rf-"+c).value; });
+    if(isMeet){ r.date=f.querySelector("#rf-date").value; r.month=r.date.slice(0,7); r.kind=kindOf(pDate(r.date)); r.title=f.querySelector("#rf-title").value.trim()||meetTitle(r.date); }
+    else { r.month=f.querySelector("#rf-month").value; r.title=f.querySelector("#rf-title").value.trim()||r.month; KPIS.forEach(function(k){ var v=f.querySelector("#rf-"+k.id).value; r.vals[k.id]=v===""?"":+v; }); }
+    REP_FIELDS.forEach(function(c){ r[c[0]]=f.querySelector("#rf-"+c[0]).value; });
     r.note=f.querySelector("#rf-note").value;
     if(isNew) S.reports.push(r);
-    repOpen=r.id; save(); closeModal(); route(); toast("Отчёт сохранён");
+    repMonth=r.month; save(); closeModal(); route(true); toast(isMeet?"Планерка сохранена":"Отчёт сохранён");
   });
+  var cp=document.getElementById("rf-copy"); if(cp) cp.addEventListener("click",function(){ copy(reportText(r),"Текст скопирован"); });
   var del=document.getElementById("rf-del");
   if(del) del.addEventListener("click",function(){
-    if(del.dataset.armed){ S.reports=S.reports.filter(function(x){return x.id!==r.id;}); repOpen=null; save(); closeModal(); route(); toast("Отчёт удалён"); }
+    if(del.dataset.armed){ S.reports=S.reports.filter(function(x){return x.id!==r.id;}); save(); closeModal(); route(true); toast("Удалено"); }
     else { del.dataset.armed="1"; del.textContent="Точно удалить?"; }
   });
 }
-
 
 /* ============================================================
    ПРОВЕРКА ТЕКСТА (правила tone of voice)
@@ -1025,7 +1091,11 @@ document.addEventListener("click",function(e){
   var rp=t.closest("[data-rep]"); if(rp){ repOpen=rp.dataset.rep; route(true); return; }
   var re=t.closest("[data-rep-edit]"); if(re){ openReport(S.reports.filter(function(x){return x.id===re.dataset.repEdit;})[0],false); return; }
   var rc=t.closest("[data-rep-copy]"); if(rc){ copy(reportText(S.reports.filter(function(x){return x.id===rc.dataset.repCopy;})[0]),"Текст отчёта скопирован"); return; }
-  if(t.closest("#rep-new")){ var d=new Date(); openReport({id:uid(),month:iso(d).slice(0,7),title:MONTHS_N[d.getMonth()]+" "+d.getFullYear(),vals:{},cont:"",change:"",test:"",stop:"",note:""},true); return; }
+  if(t.closest("#rep-new")||t.closest("#rep-new-2")){ var ym=repMonth||iso(new Date()).slice(0,7); openReport({id:uid(),kind:"month",month:ym,title:MONTHS_N[+ym.slice(5)-1]+" "+ym.slice(0,4),vals:{},cont:"",change:"",test:"",stop:"",note:""},true); return; }
+  if(t.closest("#meet-new")){ var td=iso(new Date()), dd=(repMonth&&td.slice(0,7)!==repMonth)?repMonth+"-01":td; openReport({id:uid(),kind:kindOf(pDate(dd)),date:dd,month:dd.slice(0,7),title:meetTitle(dd),vals:{},cont:"",change:"",test:"",stop:"",note:""},true); return; }
+  var rm=t.closest("[data-repm]"); if(rm){ repMonth=rm.dataset.repm; route(true); return; }
+  var mt=t.closest("[data-meet]"); if(mt){ var mr=S.reports.filter(function(x){return x.id===mt.dataset.meet;})[0]; if(mr) openReport(mr,false); return; }
+  var rf=t.closest("[data-rep-fill]"); if(rf){ var n=addMeetings(rf.dataset.repFill); save(); route(true); toast("Добавлено планерок: "+n); return; }
   var uc=t.closest("[data-uch]"); if(uc){ U.ch=uc.dataset.uch; document.getElementById("ug-ch").value=U.ch; document.querySelectorAll("[data-uch]").forEach(function(x){ x.style.borderColor=x===uc?"var(--green)":"transparent"; }); utmRender(); return; }
   var ulc=t.closest("[data-ulcopy]"); if(ulc){ var lr=(S.utmLog||[]).filter(function(x){return x.id===ulc.dataset.ulcopy;})[0]; if(lr) copy(lr.link,"Ссылка скопирована"); return; }
   var uld=t.closest("[data-uldel]"); if(uld){ if(uld.dataset.armed){ S.utmLog=S.utmLog.filter(function(x){return x.id!==uld.dataset.uldel;}); save(); route(true); toast("Удалено"); } else { uld.dataset.armed="1"; uld.textContent="Точно?"; } return; }
